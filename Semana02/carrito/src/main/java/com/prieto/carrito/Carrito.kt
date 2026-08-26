@@ -47,7 +47,7 @@ fun main() {
     println(" CARRITO DE COMPRAS - TIENDA TECSUP")
     println("=========================================")
 
-    print("Ingrese el nombre del cliente: ")
+    print("Ingrese su nombre: ")
     val nombreCliente = readln()
 
     println()
