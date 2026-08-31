@@ -1,19 +1,20 @@
 package com.prieto.credito
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 
 fun main() {
     println("========================================")
-    println("       REGISTRO DE COMPRA A CREDITO")
+    println("     REGISTRO DE COMPRA A CREDITO")
     println("========================================")
 
     var nombreProducto = ""
-    while (nombreProducto.isBlank()) {
+    while (nombreProducto.isBlank() || !nombreProducto.any { it.isLetter() }) {
         print("Nombre del producto: ")
         nombreProducto = readln().trim()
         if (nombreProducto.isBlank()) {
             println("El nombre no puede quedar vacio.")
+        } else if (!nombreProducto.any { it.isLetter() }) {
+            println("El nombre del producto no es correcto.")
         }
     }
     var precioProducto = 0.0
@@ -33,7 +34,6 @@ fun main() {
             precioValido = true
         }
     }
-
     var cantidad = 0
     var cantidadValida = false
 
@@ -103,50 +103,31 @@ fun main() {
                 if (saldoPendiente <= 0) {
                     println("La deuda ya fue pagada por completo.")
                 } else {
-                    println("Saldo pendiente: S/ %.2f".format(saldoPendiente))
+                    println("Registro de la cuota $numeroCuota")
+                    println("Monto de la cuota: S/ %.2f".format(valorCuota))
 
-                    var montoPagado = 0.0
-                    var montoValido = false
-
-                    while (!montoValido) {
-                        print("Monto a pagar: S/ ")
-                        val entradaPago = readln().trim().replace(",", ".")
-                        val pagoIngresado = entradaPago.toDoubleOrNull()
-
-                        if (pagoIngresado == null) {
-                            println("Ingresa un monto valido.")
-                        } else if (pagoIngresado <= 0) {
-                            println("El pago debe ser mayor que 0.")
-                        } else if (pagoIngresado > saldoPendiente) {
-                            println("El pago supera el saldo pendiente.")
-                        } else {
-                            montoPagado = pagoIngresado
-                            montoValido = true
-                        }
-                    }
-                    var fechaValida = false
-                    var fechaPago = ""
-
-                    while (!fechaValida) {
-                        print("Fecha del pago (DD-MM-YYYY): ")
-                        fechaPago = readln().trim()
-
-                        try {
-                            val formato = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-                            LocalDate.parse(fechaPago, formato)
-                            fechaValida = true
-                        } catch (e: DateTimeParseException) {
-                            println("Ingresa una fecha valida. Usa DD-MM-YYYY.")
-                        }
-                    }
+                    val formato = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+                    val fechaPago = LocalDate.now().format(formato)
+                    println("Fecha del pago: $fechaPago")
 
                     val saldoAntes = saldoPendiente
+                    var montoPagado = valorCuota
+
+                    if (numeroCuota == cuotas) {
+                        montoPagado = saldoPendiente
+                    }
                     saldoPendiente -= montoPagado
-                    val pago = "Cuota $numeroCuota | " + "Fecha: $fechaPago | " + "Saldo antes: S/ %.2f | ".format(saldoAntes) +
-                            "Pagado: S/ %.2f | ".format(montoPagado) + "Saldo restante: S/ %.2f".format(saldoPendiente)
+
+                    if (saldoPendiente < 0.01) {
+                        saldoPendiente = 0.0
+                    }
+                    val pago =
+                        "Cuota $numeroCuota | " +
+                                "Fecha: $fechaPago | " + "Saldo antes: S/ %.2f | ".format(saldoAntes) +
+                                "Pagado: S/ %.2f | ".format(montoPagado) + "Saldo restante: S/ %.2f".format(saldoPendiente)
 
                     pagos.add(pago)
-                    println("Pago registrado.")
+                    println("Pago registrado correctamente.")
                     numeroCuota++
 
                     if (saldoPendiente == 0.0) {
