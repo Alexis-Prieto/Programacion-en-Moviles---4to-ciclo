@@ -7,6 +7,9 @@ Alexis Stephano Prieto Huiza
 Programa de un carrito de compras hecho en kotlin para TECSUP. Permite agregar productos, mostrar el detalle y calcular el subtotal, IGV y total. También identifica el producto más caro y aplica descuentos según el monto de la compra.
 
 ## Captura de la consola
+<img width="500" height="737" alt="Captura de pantalla 2026-08-26 172544" src="https://github.com/user-attachments/assets/24b15dd9-3e4a-4c8c-8486-186ea56b4a0f" />
+<img width="532" height="580" alt="Captura de pantalla 2026-08-26 172621" src="https://github.com/user-attachments/assets/8c381f4b-0c73-4544-aef3-8feba52fd0cf" />
+
 
 
 
