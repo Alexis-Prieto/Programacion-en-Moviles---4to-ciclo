@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 
 fun main() {
     println("========================================")
-    println("     REGISTRO DE COMPRA A CREDITO")
+          println("REGISTRO DE COMPRA A CREDITO")
     println("========================================")
 
     var nombreProducto = ""
@@ -60,11 +60,8 @@ fun main() {
         }
     }
     val montoInicial = precioProducto * cantidad
-    val porcentajeInteres = when (cuotas) {
-        6 -> 0.20
-        12 -> 0.40
-        24 -> 0.60
-        else -> 0.0
+    val porcentajeInteres = when (cuotas) {6 -> 0.20
+        12 -> 0.40     24 -> 0.60    else -> 0.0
     }
     val interes = montoInicial * porcentajeInteres
     val totalPagar = montoInicial + interes
