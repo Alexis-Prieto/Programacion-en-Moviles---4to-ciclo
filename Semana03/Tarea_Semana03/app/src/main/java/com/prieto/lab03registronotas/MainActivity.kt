@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +68,7 @@ fun RegistroNotasApp() {
 
     var redondear by remember { mutableStateOf(false) }
     var confirmado by remember { mutableStateOf(false) }
+    var mostrarResultado by remember { mutableStateOf(false) }
 
     val moradoPrincipal = Color(0xFF5C4B9B)
     val fondoDegradadoInicio = Color(0xFFECE8F8)
@@ -106,12 +110,14 @@ fun RegistroNotasApp() {
                     color = Color.Gray
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+
                 CursoItem("Fundamentos de Programación", "20%", notaFundamentos) { notaFundamentos = it }
                 CursoItem("Programación Orientada a Objetos", "25%", notaPOO) { notaPOO = it }
                 CursoItem("Programación en Móviles", "30%", notaMoviles) { notaMoviles = it }
                 CursoItem("Base de Datos", "25%", notaBD) { notaBD = it }
 
                 Spacer(modifier = Modifier.height(12.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -125,7 +131,6 @@ fun RegistroNotasApp() {
                     )
                 }
 
-                // Checkbox de confirmación
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -140,7 +145,7 @@ fun RegistroNotasApp() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { },
+                    onClick = { mostrarResultado = true },
                     enabled = confirmado,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -155,11 +160,79 @@ fun RegistroNotasApp() {
                 }
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Text(
-                    text = "Asigna las notas y confirma para calcular",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                if (mostrarResultado) {
+                    val ponderado = (notaFundamentos * 0.20f) + (notaPOO * 0.25f) + (notaMoviles * 0.30f) + (notaBD * 0.25f)
+                    val promFinalDouble = if (redondear) ponderado.roundToInt().toDouble() else ponderado.toDouble()
+
+                    val (observacion, colorChip) = when {
+                        promFinalDouble >= 17.0 -> "EXCELENTE" to Color(0xFF1B5E20)
+                        promFinalDouble >= 13.0 -> "APROBADO" to Color(0xFF2E7D32)
+                        promFinalDouble >= 10.0 -> "EN RECUPERACIÓN" to Color(0xFFE65100)
+                        else -> "DESAPROBADO" to Color(0xFFC62828)
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Promedio ponderado:  " + String.format("%.2f", ponderado),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Promedio final:  ",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = moradoPrincipal
+                                )
+                                Text(
+                                    text = if (redondear) "${promFinalDouble.toInt()}" else String.format("%.2f", promFinalDouble),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = moradoPrincipal
+                                )
+                            }
+                            if (redondear) {
+                                Text("(redondeado)", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Surface(
+                                color = colorChip.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = observacion,
+                                    color = colorChip,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "✓ Promedio calculado correctamente",
+                        color = Color(0xFF2E7D32),
+                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                } else {
+                    Text(
+                        text = "Asigna las notas y confirma para calcular",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
