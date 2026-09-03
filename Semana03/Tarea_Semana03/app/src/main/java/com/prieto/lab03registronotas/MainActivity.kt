@@ -71,8 +71,8 @@ fun RegistroNotasApp() {
     var mostrarResultado by remember { mutableStateOf(false) }
 
     val moradoPrincipal = Color(0xFF5C4B9B)
-    val fondoDegradadoInicio = Color(0xFFECE8F8)
-    val fondoDegradadoFin = Color(0xFFF7F5FC)
+    val fondoDegradadoInicio = Color(0xFFDCD6F7)
+    val fondoDegradadoFin = Color(0xFFF4F0FA)
 
     Scaffold(
         topBar = {
@@ -233,6 +233,13 @@ fun RegistroNotasApp() {
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "Desarrollado por: Alexis Prieto",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }
@@ -266,10 +273,11 @@ fun CursoItem(nombre: String, peso: String, nota: Float, onNotaChange: (Float) -
             value = nota,
             onValueChange = onNotaChange,
             valueRange = 0f..20f,
-            steps = 19,
             colors = SliderDefaults.colors(
                 thumbColor = Color(0xFF5C4B9B),
-                activeTrackColor = Color(0xFF5C4B9B)
+                activeTrackColor = Color(0xFF5C4B9B),
+                inactiveTrackColor = Color(0xFFE0D8F3),
+                inactiveTickColor = Color.Transparent
             )
         )
     }
