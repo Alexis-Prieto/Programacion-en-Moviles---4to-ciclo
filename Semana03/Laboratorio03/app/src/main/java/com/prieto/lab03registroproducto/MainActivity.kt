@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaRegistro() {
@@ -53,6 +55,7 @@ fun PantallaRegistro() {
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     var mostrarResumen by remember { mutableStateOf(false) }
+    var mensajeError by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -80,6 +83,7 @@ fun PantallaRegistro() {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.outline
             )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
@@ -88,6 +92,7 @@ fun PantallaRegistro() {
                 label = { Text("Nombre del producto") },
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -97,6 +102,7 @@ fun PantallaRegistro() {
                     label = { Text("Precio (S/)") },
                     modifier = Modifier.weight(1f)
                 )
+
                 Spacer(modifier = Modifier.width(16.dp))
 
                 OutlinedTextField(
@@ -106,19 +112,60 @@ fun PantallaRegistro() {
                     modifier = Modifier.weight(1f)
                 )
             }
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = { mostrarResumen = true },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4A5A8A)
-                )
-            ) {
-                Text("AGREGAR PRODUCTO", color = Color.White)
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = {
+                        val precioNum = precio.toDoubleOrNull()
+                        val cantidadNum = cantidad.toIntOrNull()
+
+                        if (nombre.isBlank() || precio.isBlank() || cantidad.isBlank()) {
+                            mensajeError = "Por favor, completa todos los campos"
+                            mostrarResumen = false
+                        } else if (precioNum == null || cantidadNum == null) {
+                            mensajeError = "Precio o cantidad no son válidos"
+                            mostrarResumen = false
+                        } else {
+                            mensajeError = ""
+                            mostrarResumen = true
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4A5A8A)
+                    )
+                ) {
+                    Text("AGREGAR", color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        nombre = ""
+                        precio = ""
+                        cantidad = ""
+                        mostrarResumen = false
+                        mensajeError = ""
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("LIMPIAR")
+                }
             }
+
             Spacer(modifier = Modifier.height(24.dp))
-            if (mostrarResumen) {
+
+            if (mensajeError.isNotEmpty()) {
+                Text(
+                    text = mensajeError,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (mostrarResumen) {
                 val precioNum = precio.toDoubleOrNull() ?: 0.0
                 val cantidadNum = cantidad.toIntOrNull() ?: 0
                 val importe = precioNum * cantidadNum
@@ -145,7 +192,9 @@ fun PantallaRegistro() {
                         )
                     }
                 }
+
                 Spacer(modifier = Modifier.height(16.dp))
+
                 Text(
                     text = "✓ Producto registrado correctamente",
                     color = Color(0xFF2E7D32),
@@ -159,7 +208,9 @@ fun PantallaRegistro() {
                     color = Color.Gray
                 )
             }
+
             Spacer(modifier = Modifier.weight(1f))
+
             Text(
                 text = "Desarrollado por: Alexis Prieto",
                 style = MaterialTheme.typography.bodySmall,
