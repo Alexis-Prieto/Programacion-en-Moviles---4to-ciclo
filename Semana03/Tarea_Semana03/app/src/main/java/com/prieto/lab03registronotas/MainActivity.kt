@@ -235,7 +235,7 @@ fun RegistroNotasApp() {
                 }
                 Spacer(modifier = Modifier.height(32.dp))
                 Text(
-                    text = "Desarrollado por: Alexis Prieto",
+                    text = "Desarrollado por: Alexis Stephano Prieto Huiza",
                     fontSize = 12.sp,
                     color = Color.Gray,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
