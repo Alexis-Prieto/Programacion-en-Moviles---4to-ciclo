@@ -192,7 +192,6 @@ fun PantallaRegistro() {
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
@@ -208,9 +207,7 @@ fun PantallaRegistro() {
                     color = Color.Gray
                 )
             }
-
             Spacer(modifier = Modifier.weight(1f))
-
             Text(
                 text = "Desarrollado por: Alexis Prieto",
                 style = MaterialTheme.typography.bodySmall,
