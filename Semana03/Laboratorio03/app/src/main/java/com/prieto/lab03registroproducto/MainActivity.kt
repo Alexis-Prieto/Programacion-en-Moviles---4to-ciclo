@@ -122,7 +122,7 @@ fun PantallaRegistro() {
                         val cantidadNum = cantidad.toIntOrNull()
 
                         if (nombre.isBlank() || precio.isBlank() || cantidad.isBlank()) {
-                            mensajeError = "Por favor, completa todos los campos"
+                            mensajeError = "Error: Todos los campos son obligatorios"
                             mostrarResumen = false
                         } else if (precioNum == null || cantidadNum == null) {
                             mensajeError = "Precio o cantidad no son válidos"
