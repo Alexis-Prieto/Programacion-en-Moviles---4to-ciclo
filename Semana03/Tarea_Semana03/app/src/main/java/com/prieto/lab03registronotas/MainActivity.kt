@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Locale
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroNotasApp() {
@@ -71,8 +73,9 @@ fun RegistroNotasApp() {
     var mostrarResultado by remember { mutableStateOf(false) }
 
     val moradoPrincipal = Color(0xFF5C4B9B)
-    val fondoDegradadoInicio = Color(0xFFDCD6F7)
-    val fondoDegradadoFin = Color(0xFFF4F0FA)
+
+    val fondoDegradadoInicio = Color(0xFFECE7FF)
+    val fondoDegradadoFin = Color(0xFFF9F8FD)
 
     Scaffold(
         topBar = {
@@ -107,7 +110,7 @@ fun RegistroNotasApp() {
                 Text(
                     text = "Desliza para asignar cada nota (0 a 20)",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = Color(0xFF4A4A4A)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -161,13 +164,17 @@ fun RegistroNotasApp() {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (mostrarResultado) {
-                    val ponderado = (notaFundamentos * 0.20f) + (notaPOO * 0.25f) + (notaMoviles * 0.30f) + (notaBD * 0.25f)
-                    val promFinalDouble = if (redondear) ponderado.roundToInt().toDouble() else ponderado.toDouble()
+                    val ponderado = (notaFundamentos.toInt() * 0.20f) +
+                            (notaPOO.toInt() * 0.25f) +
+                            (notaMoviles.toInt() * 0.30f) +
+                            (notaBD.toInt() * 0.25f)
+
+                    val promFinalVal = if (redondear) ponderado.roundToInt().toFloat() else ponderado
 
                     val (observacion, colorChip) = when {
-                        promFinalDouble >= 17.0 -> "EXCELENTE" to Color(0xFF1B5E20)
-                        promFinalDouble >= 13.0 -> "APROBADO" to Color(0xFF2E7D32)
-                        promFinalDouble >= 10.0 -> "EN RECUPERACIÓN" to Color(0xFFE65100)
+                        promFinalVal >= 17.0f -> "EXCELENTE" to Color(0xFF1B5E20)
+                        promFinalVal >= 13.0f -> "APROBADO" to Color(0xFF2E7D32)
+                        promFinalVal >= 10.0f -> "EN RECUPERACIÓN" to Color(0xFFE65100)
                         else -> "DESAPROBADO" to Color(0xFFC62828)
                     }
 
@@ -179,7 +186,7 @@ fun RegistroNotasApp() {
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "Promedio ponderado:  " + String.format("%.2f", ponderado),
+                                text = String.format(Locale.US, "Promedio ponderado:  %.2f", ponderado),
                                 style = MaterialTheme.typography.bodyLarge
                             )
 
@@ -193,7 +200,7 @@ fun RegistroNotasApp() {
                                     color = moradoPrincipal
                                 )
                                 Text(
-                                    text = if (redondear) "${promFinalDouble.toInt()}" else String.format("%.2f", promFinalDouble),
+                                    text = if (redondear) "${promFinalVal.toInt()}" else String.format(Locale.US, "%.2f", promFinalVal),
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = moradoPrincipal
@@ -273,6 +280,7 @@ fun CursoItem(nombre: String, peso: String, nota: Float, onNotaChange: (Float) -
             value = nota,
             onValueChange = onNotaChange,
             valueRange = 0f..20f,
+            steps = 19,
             colors = SliderDefaults.colors(
                 thumbColor = Color(0xFF5C4B9B),
                 activeTrackColor = Color(0xFF5C4B9B),
