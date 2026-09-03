@@ -18,18 +18,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,6 +62,9 @@ fun RegistroNotasApp() {
     var notaPOO by remember { mutableFloatStateOf(0f) }
     var notaMoviles by remember { mutableFloatStateOf(0f) }
     var notaBD by remember { mutableFloatStateOf(0f) }
+
+    var redondear by remember { mutableStateOf(false) }
+    var confirmado by remember { mutableStateOf(false) }
 
     val moradoPrincipal = Color(0xFF5C4B9B)
     val fondoDegradadoInicio = Color(0xFFECE8F8)
@@ -101,6 +110,56 @@ fun RegistroNotasApp() {
                 CursoItem("Programación Orientada a Objetos", "25%", notaPOO) { notaPOO = it }
                 CursoItem("Programación en Móviles", "30%", notaMoviles) { notaMoviles = it }
                 CursoItem("Base de Datos", "25%", notaBD) { notaBD = it }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Redondear promedio final", fontWeight = FontWeight.Medium)
+                    Switch(
+                        checked = redondear,
+                        onCheckedChange = { redondear = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = moradoPrincipal)
+                    )
+                }
+
+                // Checkbox de confirmación
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = confirmado,
+                        onCheckedChange = { confirmado = it }
+                    )
+                    Text("Confirmo que las notas son correctas", style = MaterialTheme.typography.bodyMedium)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { },
+                    enabled = confirmado,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = moradoPrincipal,
+                        disabledContainerColor = Color(0xFFC4BDDC)
+                    )
+                ) {
+                    Text("CALCULAR PROMEDIO", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Asigna las notas y confirma para calcular",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
