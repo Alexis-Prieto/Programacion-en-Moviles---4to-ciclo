@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.prieto.manejoestados"
+    namespace = "com.prieto.contadortemperatura"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.prieto.manejoestados"
+        applicationId = "com.prieto.contadortemperatura"
         minSdk = 24
         targetSdk = 37
         versionCode = 1

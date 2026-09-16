@@ -1,4 +1,4 @@
-package com.prieto.manejoestados
+package com.prieto.contadortemperatura
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,14 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.prieto.manejoestados.ui.theme.ManejoEstadosTheme
+import com.prieto.contadortemperatura.ui.theme.ContadorTemperaturaTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ManejoEstadosTheme {
+            ContadorTemperaturaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     TemperatureDisplay(modifier = Modifier.padding(innerPadding))
                 }
@@ -84,7 +84,7 @@ fun TemperatureDisplay(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun TemperatureDisplayPreview() {
-    ManejoEstadosTheme {
+    ContadorTemperaturaTheme {
         TemperatureDisplay()
     }
 }

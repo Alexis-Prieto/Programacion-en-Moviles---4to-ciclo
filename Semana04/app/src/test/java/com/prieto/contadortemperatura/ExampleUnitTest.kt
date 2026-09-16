@@ -1,4 +1,4 @@
-package com.prieto.manejoestados
+package com.prieto.contadortemperatura
 
 import org.junit.Test
 

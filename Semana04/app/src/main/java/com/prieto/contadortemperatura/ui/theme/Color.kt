@@ -1,4 +1,4 @@
-package com.prieto.manejoestados.ui.theme
+package com.prieto.contadortemperatura.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
