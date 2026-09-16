@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ContadorTemperaturaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TemperatureDisplay(modifier = Modifier.padding(innerPadding))
+                    ListaTareasScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
