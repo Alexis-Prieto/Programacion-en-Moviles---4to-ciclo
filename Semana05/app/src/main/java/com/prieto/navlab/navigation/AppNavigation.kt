@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.prieto.navlab.screens.ListScreen
 import com.prieto.navlab.screens.DetailScreen
 import com.prieto.navlab.screens.HomeScreen
 import com.prieto.navlab.screens.ProfileScreen
