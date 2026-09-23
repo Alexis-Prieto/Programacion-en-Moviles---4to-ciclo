@@ -36,7 +36,7 @@ data class StudentData(
 fun ListScreen(navController: NavController) {
     val students = remember {
         listOf(
-            StudentData(1, "Juan León", "Ingeniería de Sistemas", "20210001", "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"),
+            StudentData(1, "Alexis Prieto", "Ingeniería de Sistemas", "20210001", "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"),
             StudentData(2, "Maria Garcia", "Arquitectura", "20210002", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"),
             StudentData(3, "Carlos Perez", "Medicina", "20210003", "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150"),
             StudentData(4, "Ana Lopez", "Derecho", "20210004", "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150"),
