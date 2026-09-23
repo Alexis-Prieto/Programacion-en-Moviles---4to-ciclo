@@ -6,9 +6,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.prieto.navlab.screens.ListScreen
 import com.prieto.navlab.screens.DetailScreen
 import com.prieto.navlab.screens.HomeScreen
+import com.prieto.navlab.screens.ListScreen
+import com.prieto.navlab.screens.LoginScreen
 import com.prieto.navlab.screens.ProfileScreen
 
 @Composable
@@ -17,8 +18,11 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Login.route
     ) {
+        composable(route = Screen.Login.route) {
+            LoginScreen(navController = navController)
+        }
         composable(route = Screen.Home.route) {
             HomeScreen(navController = navController)
         }
