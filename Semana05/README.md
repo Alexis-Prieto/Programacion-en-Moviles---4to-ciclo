@@ -43,3 +43,16 @@ Proporciona el código Kotlin completo con todas sus importaciones para los sigu
 - Especifica la inclusión de la dependencia io.coil-kt:coil-compose y el permiso INTERNET en el Manifest.
 
 Genera el código fuente en Kotlin estructurado, limpio y listo para integrarse directamente en Android Studio.
+
+
+
+## CAPTURAS DE PANTALLAS DE LA APLICACIÓN EN EJECUCIÓN
+
+<img width="687" height="641" alt="image" src="https://github.com/user-attachments/assets/5e3a0926-7eb7-4c5f-a407-2d1ad0c095a7" />
+
+<img width="705" height="665" alt="image" src="https://github.com/user-attachments/assets/17a57a43-4333-4e3b-b7f4-652c03d471b9" />
+
+<img width="942" height="625" alt="image" src="https://github.com/user-attachments/assets/4326c428-4dfc-4708-9056-1cf7f2b87cd0" />
+
+
+
