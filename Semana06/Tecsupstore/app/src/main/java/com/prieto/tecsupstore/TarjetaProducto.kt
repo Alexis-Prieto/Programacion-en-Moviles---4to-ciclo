@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -17,9 +18,12 @@ fun TarjetaProducto(producto: Producto) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF3EDF7)
+        ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
         Row(
             modifier = Modifier
@@ -38,7 +42,6 @@ fun TarjetaProducto(producto: Producto) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-
             Box {
                 IconButton(onClick = { expanded = true }) {
                     Icon(
