@@ -2,7 +2,10 @@ package com.prieto.tecsupstore
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +38,7 @@ fun TarjetaProducto(producto: Producto) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+
             Box {
                 IconButton(onClick = { expanded = true }) {
                     Icon(
@@ -48,14 +52,19 @@ fun TarjetaProducto(producto: Producto) {
                 ) {
                     DropdownMenuItem(
                         text = { Text("Ver detalle") },
+                        leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
                         onClick = { expanded = false }
                     )
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Agregar al carrito") },
+                        leadingIcon = { Icon(Icons.Default.ShoppingCart, contentDescription = null) },
                         onClick = { expanded = false }
                     )
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Compartir") },
+                        leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
                         onClick = { expanded = false }
                     )
                 }
