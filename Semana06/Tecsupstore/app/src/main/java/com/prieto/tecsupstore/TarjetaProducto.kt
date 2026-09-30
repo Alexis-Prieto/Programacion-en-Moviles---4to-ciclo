@@ -35,11 +35,30 @@ fun TarjetaProducto(producto: Producto) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            IconButton(onClick = { expanded = true }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Opciones"
-                )
+            Box {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "Opciones"
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Ver detalle") },
+                        onClick = { expanded = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Agregar al carrito") },
+                        onClick = { expanded = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Compartir") },
+                        onClick = { expanded = false }
+                    )
+                }
             }
         }
     }
