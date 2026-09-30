@@ -42,7 +42,7 @@ fun AppDrawer(
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = "usuario@tecsup.edu.pe",
+                    text = "alexis.prieto@tecsup.edu.pe",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )
