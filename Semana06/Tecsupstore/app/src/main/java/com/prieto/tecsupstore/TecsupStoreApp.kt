@@ -29,6 +29,7 @@ fun TecsupStoreApp() {
         Producto(2, "Mouse Gamer", 120.0, "Accesorios"),
         Producto(3, "Teclado", 280.0, "Accesorios")
     )
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -105,12 +106,12 @@ fun TecsupStoreApp() {
                             }
                         }
                     }
-                    "Categorías" -> {
+                    "Mis pedidos" -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Sección de Categorías")
+                            Text("Sección: Mis pedidos")
                         }
                     }
                     "Favoritos" -> {
@@ -121,12 +122,12 @@ fun TecsupStoreApp() {
                             Text("Productos Favoritos seleccionados: ${productosFavoritosIds.size}")
                         }
                     }
-                    "Carrito" -> {
+                    "Perfil" -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Tu Carrito de Compras")
+                            Text("Sección: Perfil de usuario")
                         }
                     }
                 }
