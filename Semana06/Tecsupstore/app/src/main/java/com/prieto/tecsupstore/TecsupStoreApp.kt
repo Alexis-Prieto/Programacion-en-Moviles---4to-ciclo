@@ -2,7 +2,6 @@ package com.prieto.tecsupstore
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -10,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -20,10 +21,9 @@ fun TecsupStoreApp() {
     val scope = rememberCoroutineScope()
     var pantallaActual by remember { mutableStateOf("Inicio") }
 
-    // Estado reactivo para almacenar los IDs de los productos favoritos
     var productosFavoritosIds by remember { mutableStateOf(setOf<Int>()) }
 
-    val listaCategorias = listOf("Todas", "Laptops", "Accesorios")
+    // Tus productos actuales
     val listaProductos = listOf(
         Producto(1, "Laptop Gamer", 4500.0, "Laptops"),
         Producto(2, "Mouse Gamer", 120.0, "Accesorios"),
@@ -46,14 +46,35 @@ fun TecsupStoreApp() {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(pantallaActual) },
+                    title = {
+                        Column {
+                            Text(
+                                text = "TECSUP Store",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Mas vendidos",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                        }
+                    },
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch { drawerState.open() }
                         }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Abrir menú")
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Abrir menú",
+                                tint = Color.White
+                            )
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color(0xFF4A148C) // Morado oscuro idéntico a la maqueta
+                    )
                 )
             }
         ) { innerPadding ->
@@ -64,70 +85,40 @@ fun TecsupStoreApp() {
             ) {
                 when (pantallaActual) {
                     "Inicio" -> {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            Text(
-                                text = "Categorías",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 8.dp)
-                            )
-                            LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(listaCategorias) { categoria ->
-                                    FilterChip(
-                                        selected = false,
-                                        onClick = { },
-                                        label = { Text(categoria) }
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Productos destacados",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp)
-                            )
-                            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                items(listaProductos) { producto ->
-                                    val esFav = productosFavoritosIds.contains(producto.id)
-                                    TarjetaProducto(
-                                        producto = producto,
-                                        esFavorito = esFav,
-                                        onToggleFavorito = {
-                                            productosFavoritosIds = if (esFav) {
-                                                productosFavoritosIds - producto.id
-                                            } else {
-                                                productosFavoritosIds + producto.id
-                                            }
+                        // Lista directa de productos sin categorías ni textos adicionales (como en la Foto 2)
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(vertical = 12.dp)
+                        ) {
+                            items(listaProductos) { producto ->
+                                val esFav = productosFavoritosIds.contains(producto.id)
+                                TarjetaProducto(
+                                    producto = producto,
+                                    esFavorito = esFav,
+                                    onToggleFavorito = {
+                                        productosFavoritosIds = if (esFav) {
+                                            productosFavoritosIds - producto.id
+                                        } else {
+                                            productosFavoritosIds + producto.id
                                         }
-                                    )
-                                }
+                                    }
+                                )
                             }
                         }
                     }
                     "Mis pedidos" -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text("Sección: Mis pedidos")
                         }
                     }
                     "Favoritos" -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text("Productos Favoritos seleccionados: ${productosFavoritosIds.size}")
                         }
                     }
                     "Perfil" -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Sección: Perfil de usuario")
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Sección: Perfil")
                         }
                     }
                 }
