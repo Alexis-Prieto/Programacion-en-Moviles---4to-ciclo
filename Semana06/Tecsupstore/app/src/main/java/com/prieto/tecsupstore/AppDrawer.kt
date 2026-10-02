@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AppDrawer(
     opcionSeleccionada: String,
+    cantidadFavoritos: Int = 0,
     onOpcionSeleccionada: (String) -> Unit
 ) {
     ModalDrawerSheet {
@@ -61,6 +63,23 @@ fun AppDrawer(
             label = { Text("Categorías") },
             selected = opcionSeleccionada == "Categorías",
             onClick = { onOpcionSeleccionada("Categorías") },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        NavigationDrawerItem(
+            icon = {
+                BadgedBox(
+                    badge = {
+                        if (cantidadFavoritos > 0) {
+                            Badge { Text("$cantidadFavoritos") }
+                        }
+                    }
+                ) {
+                    Icon(Icons.Default.Favorite, contentDescription = null)
+                }
+            },
+            label = { Text("Favoritos") },
+            selected = opcionSeleccionada == "Favoritos",
+            onClick = { onOpcionSeleccionada("Favoritos") },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
