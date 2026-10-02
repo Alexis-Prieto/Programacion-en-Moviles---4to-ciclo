@@ -23,11 +23,15 @@ fun TecsupStoreApp() {
 
     var productosFavoritosIds by remember { mutableStateOf(setOf<Int>()) }
 
-    // Tus productos actuales
     val listaProductos = listOf(
         Producto(1, "Laptop Gamer", 4500.0, "Laptops"),
         Producto(2, "Mouse Gamer", 120.0, "Accesorios"),
-        Producto(3, "Teclado", 280.0, "Accesorios")
+        Producto(3, "Teclado", 280.0, "Accesorios"),
+        Producto(4, "Audifonos", 89.0, "Audio"),
+        Producto(5, "Smartwatch", 199.0, "Gadgets"),
+        Producto(6, "Funda celular", 25.0, "Accesorios"),
+        Producto(7, "Memoria USB", 45.0, "Accesorios"),
+        Producto(8, "Pad Mouse", 35.0, "Accesorios")
     )
 
     ModalNavigationDrawer(
