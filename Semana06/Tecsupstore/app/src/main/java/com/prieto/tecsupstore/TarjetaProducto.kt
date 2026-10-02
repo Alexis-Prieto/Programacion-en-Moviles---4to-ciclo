@@ -1,18 +1,21 @@
 package com.prieto.tecsupstore
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -29,43 +32,47 @@ fun TarjetaProducto(
             .padding(horizontal = 16.dp, vertical = 6.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+            containerColor = Color(0xFFF6F2FA) // Fondo lavanda/blanco suave
+        ),
+        border = BorderStroke(1.dp, Color(0xFF4A148C).copy(alpha = 0.4f)) // Borde morado definido
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Contenedor del ícono a la izquierda (según el caso propuesto)
+            // Contenedor del ícono a la izquierda
             Surface(
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(52.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = Color(0xFFE8DEF8) // Fondo morado claro
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.ShoppingBag,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = Color(0xFF4A148C), // Ícono morado oscuro
+                        modifier = Modifier.size(28.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             // Información del producto
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = producto.nombre,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1D1B20)
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "S/ ${producto.precio}",
+                    text = "S/ ${String.format("%.2f", producto.precio)}", // Muestra 2 decimales
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color(0xFF49454F)
                 )
             }
 
@@ -74,7 +81,8 @@ fun TarjetaProducto(
                 IconButton(onClick = { expanded = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Opciones"
+                        contentDescription = "Opciones",
+                        tint = Color(0xFF1D1B20)
                     )
                 }
                 DropdownMenu(
@@ -82,14 +90,12 @@ fun TarjetaProducto(
                     onDismissRequest = { expanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = {
-                            Text(if (esFavorito) "Quitar de favoritos" else "Favoritos")
-                        },
+                        text = { Text("Favoritos") },
                         leadingIcon = {
                             Icon(
                                 imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = null,
-                                tint = if (esFavorito) MaterialTheme.colorScheme.error else LocalContentColor.current
+                                tint = if (esFavorito) Color.Red else LocalContentColor.current
                             )
                         },
                         onClick = {
@@ -105,8 +111,8 @@ fun TarjetaProducto(
                     )
                     HorizontalDivider()
                     DropdownMenuItem(
-                        text = { Text("Ver detalle") },
-                        leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+                        text = { Text("Reportar") }, // Mapeado exacto a la Foto 2
+                        leadingIcon = { Icon(Icons.Default.Warning, contentDescription = null) },
                         onClick = { expanded = false }
                     )
                 }
