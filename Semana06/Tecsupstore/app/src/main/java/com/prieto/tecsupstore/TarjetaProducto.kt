@@ -2,6 +2,8 @@ package com.prieto.tecsupstore
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
@@ -13,7 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TarjetaProducto(producto: Producto) {
+fun TarjetaProducto(
+    producto: Producto,
+    esFavorito: Boolean = false,
+    onToggleFavorito: () -> Unit = {}
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(
@@ -54,6 +60,23 @@ fun TarjetaProducto(producto: Producto) {
                         text = { Text("Ver detalle") },
                         leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
                         onClick = { expanded = false }
+                    )
+                    HorizontalDivider()
+                    DropdownMenuItem(
+                        text = {
+                            Text(if (esFavorito) "Quitar de favoritos" else "Agregar a favoritos")
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = null,
+                                tint = if (esFavorito) MaterialTheme.colorScheme.error else LocalContentColor.current
+                            )
+                        },
+                        onClick = {
+                            expanded = false
+                            onToggleFavorito()
+                        }
                     )
                     HorizontalDivider()
                     DropdownMenuItem(
