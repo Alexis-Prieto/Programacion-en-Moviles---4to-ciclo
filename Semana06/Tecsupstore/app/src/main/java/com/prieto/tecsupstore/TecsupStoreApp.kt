@@ -19,18 +19,22 @@ fun TecsupStoreApp() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var pantallaActual by remember { mutableStateOf("Inicio") }
+
+    // Estado reactivo para almacenar los IDs de los productos favoritos
+    var productosFavoritosIds by remember { mutableStateOf(setOf<Int>()) }
+
     val listaCategorias = listOf("Todas", "Laptops", "Accesorios")
     val listaProductos = listOf(
         Producto(1, "Laptop Gamer", 4500.0, "Laptops"),
         Producto(2, "Mouse Gamer", 120.0, "Accesorios"),
         Producto(3, "Teclado", 280.0, "Accesorios")
     )
-
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             AppDrawer(
                 opcionSeleccionada = pantallaActual,
+                cantidadFavoritos = productosFavoritosIds.size,
                 onOpcionSeleccionada = { nuevaPantalla ->
                     pantallaActual = nuevaPantalla
                     scope.launch { drawerState.close() }
@@ -85,7 +89,18 @@ fun TecsupStoreApp() {
                             )
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
                                 items(listaProductos) { producto ->
-                                    TarjetaProducto(producto = producto)
+                                    val esFav = productosFavoritosIds.contains(producto.id)
+                                    TarjetaProducto(
+                                        producto = producto,
+                                        esFavorito = esFav,
+                                        onToggleFavorito = {
+                                            productosFavoritosIds = if (esFav) {
+                                                productosFavoritosIds - producto.id
+                                            } else {
+                                                productosFavoritosIds + producto.id
+                                            }
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -96,6 +111,14 @@ fun TecsupStoreApp() {
                             contentAlignment = Alignment.Center
                         ) {
                             Text("Sección de Categorías")
+                        }
+                    }
+                    "Favoritos" -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Productos Favoritos seleccionados: ${productosFavoritosIds.size}")
                         }
                     }
                     "Carrito" -> {
