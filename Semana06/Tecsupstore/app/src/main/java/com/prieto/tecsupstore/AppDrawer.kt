@@ -69,7 +69,6 @@ fun AppDrawer(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(4.dp))
             HorizontalDivider(color = Color(0xFFECE6F0), thickness = 1.dp)
             Spacer(modifier = Modifier.height(12.dp))
@@ -82,7 +81,6 @@ fun AppDrawer(
                 "Perfil",
                 "Cerrar sesion"
             )
-
             opciones.forEach { opcion ->
                 val esSeleccionado = opcionSeleccionada == opcion
 
@@ -102,6 +100,17 @@ fun AppDrawer(
                             contentDescription = null,
                             tint = if (esSeleccionado) Color(0xFF4A148C) else Color(0xFF49454F)
                         )
+                    },
+                    // Badge con contador para la opción "Favoritos"
+                    badge = {
+                        if (opcion == "Favoritos" && cantidadFavoritos > 0) {
+                            Badge(
+                                containerColor = Color(0xFF4A148C),
+                                contentColor = Color.White
+                            ) {
+                                Text(text = cantidadFavoritos.toString())
+                            }
+                        }
                     },
                     colors = NavigationDrawerItemDefaults.colors(
                         selectedContainerColor = Color(0xFFF3EDF7), // Lavanda suave en selección
