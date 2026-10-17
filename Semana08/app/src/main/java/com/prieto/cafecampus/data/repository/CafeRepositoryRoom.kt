@@ -3,6 +3,8 @@ package com.prieto.cafecampus.data.repository
 import com.prieto.cafecampus.data.local.dao.PedidoDao
 import com.prieto.cafecampus.data.local.dao.PedidosPorHora
 import com.prieto.cafecampus.data.local.dao.ProductoDao
+import com.prieto.cafecampus.data.local.dao.ProductoMasVendido
+import com.prieto.cafecampus.data.local.dao.TotalPorFormaPago
 import com.prieto.cafecampus.data.local.dao.UsuarioDao
 import com.prieto.cafecampus.data.local.entity.DetallePedido
 import com.prieto.cafecampus.data.local.entity.Pedido
@@ -22,11 +24,9 @@ class CafeRepositoryRoom(
     override suspend fun login(correo: String, clave: String): Usuario? {
         return usuarioDao.login(correo = correo, clave = clave)
     }
-
     override fun observarProductos(): Flow<List<Producto>> {
         return productoDao.observarTodos()
     }
-
     override suspend fun guardarProducto(p: Producto) {
         if (p.id == 0) {
             productoDao.insertar(p)
@@ -40,7 +40,6 @@ class CafeRepositoryRoom(
     override suspend fun cambiarDisponibilidad(id: Int, disponible: Boolean) {
         productoDao.cambiarDisponibilidad(id, disponible)
     }
-
     override suspend fun crearPedido(
         clienteId: Int,
         items: List<ItemCarrito>,
@@ -72,36 +71,34 @@ class CafeRepositoryRoom(
         }
         return pedidoDao.crearPedido(nuevoPedido, detalles)
     }
-
     override fun observarPedidosCliente(clienteId: Int): Flow<List<PedidoConDetalle>> {
         return pedidoDao.observarPorCliente(clienteId)
     }
-
     override fun observarPedidosPorEstado(estado: EstadoPedido): Flow<List<PedidoConDetalle>> {
         return pedidoDao.observarPorEstado(estado.name)
     }
-
     override fun observarPedido(id: Int): Flow<PedidoConDetalle?> {
         return pedidoDao.observarUno(id)
     }
-
     override suspend fun cambiarEstado(pedidoId: Int, estado: EstadoPedido) {
         pedidoDao.cambiarEstado(pedidoId, estado.name)
     }
-
     override fun observarVentasHoy(inicioDia: Long): Flow<Double> {
         return pedidoDao.ventasDesde(inicioDia)
     }
-
     override fun observarCantidadPorEstado(estado: EstadoPedido): Flow<Int> {
         return pedidoDao.cantidadPorEstado(estado.name)
     }
-
     override fun observarCantidadPedidosDesde(inicioDia: Long): Flow<Int> {
         return pedidoDao.cantidadPedidosDesde(inicioDia)
     }
-
     override fun getPedidosPorHora(): Flow<List<PedidosPorHora>> {
         return pedidoDao.getPedidosPorHora()
+    }
+    override fun getProductoMasVendidoDelDia(inicioDia: Long): Flow<ProductoMasVendido?> {
+        return pedidoDao.getProductoMasVendidoDelDia(inicioDia)
+    }
+    override fun getTotalPorFormaPagoDelDia(inicioDia: Long): Flow<List<TotalPorFormaPago>> {
+        return pedidoDao.getTotalPorFormaPagoDelDia(inicioDia)
     }
 }
