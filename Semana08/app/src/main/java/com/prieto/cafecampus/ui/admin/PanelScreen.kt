@@ -42,6 +42,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -73,6 +74,9 @@ fun PanelScreen(
     val totalPedidosHoy by panelViewModel.totalPedidosHoy.collectAsState()
     val nuevosPedidos by panelViewModel.nuevosPedidosLista.collectAsState()
     val productosMenu by menuViewModel.productos.collectAsState()
+
+    // Datos reales del gráfico de pedidos por hora
+    val pedidosPorHora by panelViewModel.pedidosPorHora.collectAsState()
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
 
@@ -137,6 +141,7 @@ fun PanelScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Tarjetas superiores de resumen
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -163,7 +168,10 @@ fun PanelScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
+
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Tarjeta Ventas del Día
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -191,37 +199,76 @@ fun PanelScreen(
                     }
                 }
             }
+
             Spacer(modifier = Modifier.height(20.dp))
+
+            // Gráfico de Pedidos por Hora (Rango Fijo: 8h, 9h, 10h, 11h, 12h)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f))
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(18.dp)
+                ) {
                     Text(
                         text = "Pedidos por hora",
-                        fontSize = 15.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+
                     Spacer(modifier = Modifier.height(16.dp))
+
+                    // Mapeo seguro de la hora a la clave "8h", "9h", etc.
+                    val mapaPedidos = remember(pedidosPorHora) {
+                        val mapa = mutableMapOf<String, Int>()
+                        pedidosPorHora.forEach { item ->
+                            val horaNum = item.hora
+                                .replace("h", "")
+                                .split(":")
+                                .firstOrNull()
+                                ?.trim()
+                                ?.toIntOrNull()
+
+                            if (horaNum != null) {
+                                val clave = "${horaNum}h"
+                                mapa[clave] = (mapa[clave] ?: 0) + item.cantidad
+                            }
+                        }
+                        mapa
+                    }
+
+                    val horasFijas = listOf("8h", "9h", "10h", "11h", "12h")
+                    val maxCantidad = horasFijas.maxOf { mapaPedidos[it] ?: 0 }.coerceAtLeast(1)
+
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
-                        horizontalArrangement = Arrangement.SpaceAround,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        GraficoBarraHora(hora = "8h", cantidad = 3, max = 9, color = colorPurpuraAdmin.copy(alpha = 0.3f))
-                        GraficoBarraHora(hora = "9h", cantidad = 6, max = 9, color = colorPurpuraAdmin.copy(alpha = 0.3f))
-                        GraficoBarraHora(hora = "10h", cantidad = 9, max = 9, color = colorPurpuraAdmin)
-                        GraficoBarraHora(hora = "11h", cantidad = 5, max = 9, color = colorPurpuraAdmin.copy(alpha = 0.3f))
-                        GraficoBarraHora(hora = "12h", cantidad = 7, max = 9, color = colorPurpuraAdmin.copy(alpha = 0.3f))
+                        horasFijas.forEach { horaLabel ->
+                            val cantidad = mapaPedidos[horaLabel] ?: 0
+                            val esMaximo = (cantidad == maxCantidad && cantidad > 0)
+
+                            GraficoBarraHora(
+                                horaLabel = horaLabel,
+                                cantidad = cantidad,
+                                maxCantidad = maxCantidad,
+                                esMaximo = esMaximo,
+                                colorPurpura = colorPurpuraAdmin
+                            )
+                        }
                     }
                 }
             }
+
             Spacer(modifier = Modifier.height(20.dp))
+
+            // Lista de Nuevos Pedidos
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -237,6 +284,7 @@ fun PanelScreen(
                     Text("Ver todos", color = colorPurpuraAdmin, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             if (nuevosPedidos.isEmpty()) {
@@ -275,6 +323,7 @@ fun PanelScreen(
         }
     }
 }
+
 @Composable
 private fun TarjetaContador(
     numero: Int,
@@ -310,22 +359,73 @@ private fun TarjetaContador(
         }
     }
 }
+
 @Composable
-private fun GraficoBarraHora(hora: String, cantidad: Int, max: Int, color: Color) {
-    val porcentaje = (cantidad.toFloat() / max.toFloat()).coerceIn(0.1f, 1f)
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("$cantidad", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(modifier = Modifier.height(2.dp))
+private fun GraficoBarraHora(
+    horaLabel: String,
+    cantidad: Int,
+    maxCantidad: Int,
+    esMaximo: Boolean,
+    colorPurpura: Color
+) {
+    val colorBarraNormal = Color(0xFFC7D2FE) // Morado pastel claro
+    val colorBarraMax = colorPurpura         // Morado destacado
+
+    val proporcion = if (maxCantidad > 0 && cantidad > 0) (cantidad.toFloat() / maxCantidad.toFloat()).coerceIn(0.25f, 1f) else 0f
+    val alturaBarra = if (cantidad > 0) (55 * proporcion).dp else 6.dp
+    val colorActual = if (esMaximo) colorBarraMax else colorBarraNormal
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(48.dp)
+    ) {
+        // 1. Número arriba de la barra (Solo si la cantidad es mayor a 0)
+        Box(
+            modifier = Modifier.height(20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (cantidad > 0) {
+                Text(
+                    text = "$cantidad",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 2. Contenedor de la barra con altura fija para evitar que empuje los textos
         Box(
             modifier = Modifier
-                .width(28.dp)
-                .height((70 * porcentaje).dp)
-                .background(color, shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                .width(38.dp)
+                .height(60.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(alturaBarra)
+                    .background(
+                        color = if (cantidad > 0) colorActual else colorBarraNormal.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 3. Hora perfectamente alineada abajo (8h, 9h, 10h, 11h, 12h)
+        Text(
+            text = horaLabel,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(hora, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
+
 @Composable
 private fun TarjetaNuevoPedidoPanel(
     pedConDetalle: PedidoConDetalle,
