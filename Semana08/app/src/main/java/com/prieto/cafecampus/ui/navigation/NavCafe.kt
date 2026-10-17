@@ -1,15 +1,12 @@
 package com.prieto.cafecampus.ui.navigation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +28,7 @@ import com.prieto.cafecampus.ui.cliente.DetalleProductoScreen
 import com.prieto.cafecampus.ui.cliente.LoginScreen
 import com.prieto.cafecampus.ui.cliente.MenuScreen
 import com.prieto.cafecampus.ui.cliente.MisPedidosScreen
+import com.prieto.cafecampus.ui.cliente.PerfilScreen
 import com.prieto.cafecampus.ui.cliente.SeguimientoScreen
 import com.prieto.cafecampus.ui.cliente.SplashScreen
 import com.prieto.cafecampus.ui.theme.CafeCampusTheme
@@ -73,6 +71,7 @@ fun NavCafe(repository: CafeRepository) {
             }
         }
     }
+
     CafeCampusTheme(darkTheme = esModoOscuro) {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -132,18 +131,20 @@ fun NavCafe(repository: CafeRepository) {
                         }
                     )
                 }
+
                 composable(Ruta.Perfil.ruta) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Perfil de usuario (En desarrollo)",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
+                    PerfilScreen(
+                        preferenciasStore = store,
+                        onMenu = { navegarPestana(Ruta.ClienteHome.ruta) },
+                        onPedidos = { navegarPestana(Ruta.MisPedidos.ruta) },
+                        onCerrarSesionExitosa = {
+                            navController.navigate(Ruta.Login.ruta) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    )
                 }
+
                 composable(Ruta.AdminHome.ruta) {
                     PanelScreen(
                         preferenciasStore = store,
@@ -178,6 +179,7 @@ fun NavCafe(repository: CafeRepository) {
                         onNavigateAjustes = { navController.navigate(Ruta.AdminAjustes.ruta) }
                     )
                 }
+
                 composable(Ruta.AdminAjustes.ruta) {
                     AjustesAdminScreen(
                         preferenciasStore = store,
@@ -196,6 +198,7 @@ fun NavCafe(repository: CafeRepository) {
                         onNavigateMenu = { navController.navigate(Ruta.AdminMenu.ruta) }
                     )
                 }
+
                 composable(
                     route = Ruta.AdminFormularioProducto.ruta,
                     arguments = listOf(navArgument("productoId") {
@@ -210,6 +213,7 @@ fun NavCafe(repository: CafeRepository) {
                         onVolver = { navController.popBackStack() }
                     )
                 }
+
                 composable(
                     route = Ruta.AdminDetallePedido.ruta,
                     arguments = listOf(navArgument("pedidoId") { type = NavType.IntType })
@@ -222,6 +226,7 @@ fun NavCafe(repository: CafeRepository) {
                         onVolver = { navController.popBackStack() }
                     )
                 }
+
                 composable(
                     route = Ruta.DetalleProducto.ruta,
                     arguments = listOf(navArgument("productoId") { type = NavType.IntType })
@@ -234,6 +239,7 @@ fun NavCafe(repository: CafeRepository) {
                         onProductoAgregado = { navController.popBackStack() }
                     )
                 }
+
                 composable(Ruta.ConfirmarPedido.ruta) {
                     ConfirmarPedidoScreen(
                         preferenciasStore = store,
@@ -247,6 +253,7 @@ fun NavCafe(repository: CafeRepository) {
                         }
                     )
                 }
+
                 composable(
                     route = Ruta.Seguimiento.ruta,
                     arguments = listOf(navArgument("pedidoId") { type = NavType.IntType })
@@ -262,6 +269,7 @@ fun NavCafe(repository: CafeRepository) {
                         onNavigatePerfil = { navegarPestana(Ruta.Perfil.ruta) }
                     )
                 }
+
                 composable(Ruta.MisPedidos.ruta) {
                     MisPedidosScreen(
                         pedidosViewModel = pedidosViewModel,
