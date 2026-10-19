@@ -44,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.model.ItemCarrito
 import com.prieto.cafecampus.ui.components.AppTopBar
 import com.prieto.cafecampus.ui.components.ProductoIcono
@@ -53,7 +52,6 @@ import com.prieto.cafecampus.viewmodel.PedidosClienteViewModel
 
 @Composable
 fun ConfirmarPedidoScreen(
-    preferenciasStore: PreferenciasStore,
     menuViewModel: MenuViewModel,
     pedidosViewModel: PedidosClienteViewModel,
     onVolver: () -> Unit,
@@ -62,7 +60,7 @@ fun ConfirmarPedidoScreen(
     val carrito by menuViewModel.carrito.collectAsState()
     val totalCalculado = menuViewModel.total()
 
-    val estaRecibiendoPedidos by preferenciasStore.recibirPedidos.collectAsState(initial = true)
+    val estaRecibiendoPedidos by pedidosViewModel.estaRecibiendoPedidos.collectAsState()
 
     var horaRecojo by remember { mutableStateOf("10:30") }
     var formaPago by remember { mutableStateOf("Pagar en caja") }

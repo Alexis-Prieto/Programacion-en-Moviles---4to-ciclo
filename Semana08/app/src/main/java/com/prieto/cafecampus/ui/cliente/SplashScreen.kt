@@ -29,18 +29,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.prieto.cafecampus.data.prefs.PreferenciasStore
+import com.prieto.cafecampus.viewmodel.SesionViewModel
 import kotlinx.coroutines.flow.first
 
 @Composable
 fun SplashScreen(
-    preferenciasStore: PreferenciasStore,
+    viewModel: SesionViewModel,
     onNavigateToLogin: () -> Unit,
     onNavigateToAdmin: () -> Unit,
     onNavigateToCliente: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        val perfil = preferenciasStore.perfilActivo.first()
+        val perfil = viewModel.perfilActivo.first()
         when (perfil.uppercase()) {
             "ADMIN" -> onNavigateToAdmin()
             "CLIENTE" -> onNavigateToCliente()

@@ -38,30 +38,26 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.prieto.cafecampus.data.prefs.PreferenciasStore
-import kotlinx.coroutines.launch
+import com.prieto.cafecampus.viewmodel.AjustesAdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AjustesAdminScreen(
-    preferenciasStore: PreferenciasStore,
+    viewModel: AjustesAdminViewModel,
     onCambiarPerfilCliente: () -> Unit,
     onCerrarSesion: () -> Unit,
     onNavigatePanel: () -> Unit,
     onNavigatePedidos: () -> Unit,
     onNavigateMenu: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
-    val esModoOscuro by preferenciasStore.modoOscuro.collectAsState(initial = false)
-    val estaRecibiendoPedidos by preferenciasStore.recibirPedidos.collectAsState(initial = true)
+    val esModoOscuro by viewModel.modoOscuro.collectAsState()
+    val estaRecibiendoPedidos by viewModel.estaRecibiendoPedidos.collectAsState()
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
     val colorRojoError = MaterialTheme.colorScheme.error
@@ -162,10 +158,7 @@ fun AjustesAdminScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        scope.launch {
-                            preferenciasStore.guardarPerfil("CLIENTE")
-                            onCambiarPerfilCliente()
-                        }
+                        viewModel.cambiarPerfil("CLIENTE", onCambiarPerfilCliente)
                     },
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = colorPurpuraAdmin)
@@ -248,7 +241,7 @@ fun AjustesAdminScreen(
                         Switch(
                             checked = esModoOscuro,
                             onCheckedChange = { nuevoEstado ->
-                                scope.launch { preferenciasStore.guardarModoOscuro(nuevoEstado) }
+                                viewModel.cambiarModoOscuro(nuevoEstado)
                             },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
@@ -278,7 +271,7 @@ fun AjustesAdminScreen(
                         Switch(
                             checked = estaRecibiendoPedidos,
                             onCheckedChange = { nuevoEstado ->
-                                scope.launch { preferenciasStore.guardarRecibirPedidos(nuevoEstado) }
+                                viewModel.cambiarRecibirPedidos(nuevoEstado)
                             },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
@@ -301,10 +294,7 @@ fun AjustesAdminScreen(
 
             OutlinedButton(
                 onClick = {
-                    scope.launch {
-                        preferenciasStore.cerrarSesion()
-                        onCerrarSesion()
-                    }
+                    viewModel.cerrarSesion(onCerrarSesion)
                 },
                 modifier = Modifier
                     .fillMaxWidth()

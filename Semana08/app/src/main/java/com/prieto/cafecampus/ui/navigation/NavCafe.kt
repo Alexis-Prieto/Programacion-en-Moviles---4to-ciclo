@@ -33,12 +33,14 @@ import com.prieto.cafecampus.ui.cliente.RegistroScreen
 import com.prieto.cafecampus.ui.cliente.SeguimientoScreen
 import com.prieto.cafecampus.ui.cliente.SplashScreen
 import com.prieto.cafecampus.ui.theme.CafeCampusTheme
+import com.prieto.cafecampus.viewmodel.AjustesAdminViewModel
 import com.prieto.cafecampus.viewmodel.CafeViewModelFactory
 import com.prieto.cafecampus.viewmodel.MenuAdminViewModel
 import com.prieto.cafecampus.viewmodel.MenuViewModel
 import com.prieto.cafecampus.viewmodel.PanelAdminViewModel
 import com.prieto.cafecampus.viewmodel.PedidosAdminViewModel
 import com.prieto.cafecampus.viewmodel.PedidosClienteViewModel
+import com.prieto.cafecampus.viewmodel.PerfilViewModel
 import com.prieto.cafecampus.viewmodel.RegistroViewModel
 import com.prieto.cafecampus.viewmodel.SesionViewModel
 
@@ -57,8 +59,10 @@ fun NavCafe(repository: CafeRepository) {
     val menuViewModel: MenuViewModel = viewModel(factory = factory)
     val pedidosViewModel: PedidosClienteViewModel = viewModel(factory = factory)
     val panelAdminViewModel: PanelAdminViewModel = viewModel(factory = factory)
+    val ajustesAdminViewModel: AjustesAdminViewModel = viewModel(factory = factory)
     val pedidosAdminViewModel: PedidosAdminViewModel = viewModel(factory = factory)
     val menuAdminViewModel: MenuAdminViewModel = viewModel(factory = factory)
+    val perfilViewModel: PerfilViewModel = viewModel(factory = factory)
 
     fun navegarPestana(ruta: String) {
         if (ruta == Ruta.ClienteHome.ruta) {
@@ -86,7 +90,7 @@ fun NavCafe(repository: CafeRepository) {
             ) {
                 composable(Ruta.Splash.ruta) {
                     SplashScreen(
-                        preferenciasStore = store,
+                        viewModel = sesionViewModel,
                         onNavigateToLogin = {
                             navController.navigate(Ruta.Login.ruta) {
                                 popUpTo(Ruta.Splash.ruta) { inclusive = true }
@@ -132,7 +136,7 @@ fun NavCafe(repository: CafeRepository) {
                     )
                 }
 
-                composable(Ruta.ClienteHome.ruta) {
+                composable(route = Ruta.ClienteHome.ruta) {
                     MenuScreen(
                         vm = menuViewModel,
                         onProducto = { productoId ->
@@ -152,7 +156,8 @@ fun NavCafe(repository: CafeRepository) {
 
                 composable(Ruta.Perfil.ruta) {
                     PerfilScreen(
-                        preferenciasStore = store,
+                        perfilViewModel = perfilViewModel,
+                        menuViewModel = menuViewModel,
                         onMenu = { navegarPestana(Ruta.ClienteHome.ruta) },
                         onPedidos = { navegarPestana(Ruta.MisPedidos.ruta) },
                         onCerrarSesionExitosa = {
@@ -165,7 +170,6 @@ fun NavCafe(repository: CafeRepository) {
 
                 composable(Ruta.AdminHome.ruta) {
                     PanelScreen(
-                        preferenciasStore = store,
                         panelViewModel = panelAdminViewModel,
                         menuViewModel = menuViewModel,
                         onNavigatePedidos = { navController.navigate(Ruta.AdminPedidos.ruta) },
@@ -200,13 +204,14 @@ fun NavCafe(repository: CafeRepository) {
 
                 composable(Ruta.AdminAjustes.ruta) {
                     AjustesAdminScreen(
-                        preferenciasStore = store,
+                        viewModel = ajustesAdminViewModel,
                         onCambiarPerfilCliente = {
                             navController.navigate(Ruta.ClienteHome.ruta) {
                                 popUpTo(0) { inclusive = true }
                             }
                         },
                         onCerrarSesion = {
+                            menuViewModel.vaciar()
                             navController.navigate(Ruta.Login.ruta) {
                                 popUpTo(0) { inclusive = true }
                             }
@@ -260,7 +265,6 @@ fun NavCafe(repository: CafeRepository) {
 
                 composable(Ruta.ConfirmarPedido.ruta) {
                     ConfirmarPedidoScreen(
-                        preferenciasStore = store,
                         menuViewModel = menuViewModel,
                         pedidosViewModel = pedidosViewModel,
                         onVolver = { navController.popBackStack() },

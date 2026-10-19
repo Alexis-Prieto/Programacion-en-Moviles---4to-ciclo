@@ -63,6 +63,11 @@ fun MenuScreen(
     val carrito by vm.carrito.collectAsState()
     val totalItemsCarrito = carrito.sumOf { it.cantidad }
 
+    val nombreUsuario by vm.nombreUsuario.collectAsState()
+    val primerNombre = remember(nombreUsuario) {
+        nombreUsuario.trim().split(" ").firstOrNull()?.ifBlank { "Cliente" } ?: "Cliente"
+    }
+
     var busqueda by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf("Todo") }
 
@@ -129,7 +134,7 @@ fun MenuScreen(
             ) {
                 Column {
                     Text(
-                        text = "¡Hola, Alexis!",
+                        text = "¡Hola, $primerNombre!",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground

@@ -56,7 +56,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,31 +64,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.prieto.cafecampus.data.prefs.PreferenciasStore
-import kotlinx.coroutines.launch
+import com.prieto.cafecampus.R
+import com.prieto.cafecampus.viewmodel.MenuViewModel
+import com.prieto.cafecampus.viewmodel.PerfilViewModel
 
 private val ColorNaranjaPrimario = Color(0xFFEA580C)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(
-    preferenciasStore: PreferenciasStore,
+    perfilViewModel: PerfilViewModel,
+    menuViewModel: MenuViewModel,
     onMenu: () -> Unit = {},
     onPedidos: () -> Unit = {},
     onCerrarSesionExitosa: () -> Unit
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
-    // Observamos el ID único del usuario activo
-    val usuarioId by preferenciasStore.usuarioId.collectAsState(initial = 0)
-    val nombreUsuario by preferenciasStore.nombreUsuario.collectAsState(initial = "")
-    val correoUsuario by preferenciasStore.correoUsuario.collectAsState(initial = "")
-    val fotoPerfilUriString by preferenciasStore.fotoPerfilUri.collectAsState(initial = null)
-    val perfilActivo by preferenciasStore.perfilActivo.collectAsState(initial = "Estudiante")
+    val usuarioId by perfilViewModel.usuarioId.collectAsState()
+    val nombreUsuario by perfilViewModel.nombreUsuario.collectAsState()
+    val correoUsuario by perfilViewModel.correoUsuario.collectAsState()
+    val fotoPerfilUriString by perfilViewModel.fotoPerfilUri.collectAsState()
+    val perfilActivo by perfilViewModel.perfilActivo.collectAsState()
 
     var fotoBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var mostrarDialogoEditar by remember { mutableStateOf(false) }
@@ -98,11 +98,8 @@ fun PerfilScreen(
     val galeriaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        if (uri != null && usuarioId != 0) {
-            coroutineScope.launch {
-                // Guardamos la foto asociada al ID del usuario activo
-                preferenciasStore.guardarFotoPerfilUri(uri.toString(), usuarioId)
-            }
+        if (uri != null) {
+            perfilViewModel.guardarFotoPerfil(uri.toString())
         }
     }
 
@@ -190,7 +187,6 @@ fun PerfilScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Avatar de Perfil
             Box(
                 contentAlignment = Alignment.BottomEnd,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -210,8 +206,14 @@ fun PerfilScreen(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
+                    } else if (usuarioId == 1) {
+                        Image(
+                            painter = painterResource(id = R.drawable.foto_perfil),
+                            contentDescription = "Foto de perfil",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     } else {
-                        // Silueta neutra para usuarios sin foto
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Sin foto de perfil",
@@ -376,9 +378,7 @@ fun PerfilScreen(
                         val nuevoNombre = tempNombre.ifBlank { nombreUsuario }
                         val nuevoCorreo = tempCorreo.ifBlank { correoUsuario }
 
-                        coroutineScope.launch {
-                            preferenciasStore.guardarDatosUsuario(nuevoNombre, nuevoCorreo)
-                        }
+                        perfilViewModel.actualizarDatosPersonales(nuevoNombre, nuevoCorreo)
                         mostrarDialogoEditar = false
                     }
                 ) {
@@ -402,8 +402,7 @@ fun PerfilScreen(
                 TextButton(
                     onClick = {
                         mostrarDialogoCerrarSesion = false
-                        coroutineScope.launch {
-                            preferenciasStore.cerrarSesion()
+                        perfilViewModel.cerrarSesion(menuViewModel) {
                             onCerrarSesionExitosa()
                         }
                     }

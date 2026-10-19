@@ -57,21 +57,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prieto.cafecampus.data.local.entity.Producto
 import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
-import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.viewmodel.MenuViewModel
 import com.prieto.cafecampus.viewmodel.PanelAdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PanelScreen(
-    preferenciasStore: PreferenciasStore,
     panelViewModel: PanelAdminViewModel,
     menuViewModel: MenuViewModel,
     onNavigatePedidos: () -> Unit,
     onNavigateMenu: () -> Unit,
     onNavigateAjustes: () -> Unit
 ) {
-    val esModoOscuro by preferenciasStore.modoOscuro.collectAsState(initial = false)
+    val esModoOscuro by panelViewModel.modoOscuro.collectAsState()
 
     val nuevos by panelViewModel.nuevos.collectAsState()
     val preparando by panelViewModel.preparando.collectAsState()
@@ -217,7 +215,6 @@ fun PanelScreen(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -471,6 +468,7 @@ fun PanelScreen(
         }
     }
 }
+
 @Composable
 private fun TarjetaContador(
     numero: Int,
@@ -506,6 +504,7 @@ private fun TarjetaContador(
         }
     }
 }
+
 @Composable
 private fun GraficoBarraHora(
     horaLabel: String,
@@ -568,6 +567,7 @@ private fun GraficoBarraHora(
         )
     }
 }
+
 @Composable
 private fun TarjetaNuevoPedidoPanel(
     pedConDetalle: PedidoConDetalle,
@@ -623,6 +623,7 @@ private fun TarjetaNuevoPedidoPanel(
         }
     }
 }
+
 @Composable
 fun BarraNavegacionAdmin(
     pestanaActual: String,
