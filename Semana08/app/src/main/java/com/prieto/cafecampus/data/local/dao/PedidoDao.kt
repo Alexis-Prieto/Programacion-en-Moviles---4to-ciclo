@@ -2,7 +2,6 @@ package com.prieto.cafecampus.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.prieto.cafecampus.data.local.entity.DetallePedido
@@ -27,10 +26,10 @@ data class TotalPorFormaPago(
 
 @Dao
 interface PedidoDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     suspend fun insertarPedido(p: Pedido): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     suspend fun insertarDetalles(lista: List<DetallePedido>)
 
     @Query("UPDATE pedidos SET estado = :estado WHERE id = :id")

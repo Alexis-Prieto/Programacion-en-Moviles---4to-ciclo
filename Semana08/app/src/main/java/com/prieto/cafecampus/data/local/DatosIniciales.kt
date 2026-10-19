@@ -1,5 +1,6 @@
 package com.prieto.cafecampus.data.local
 
+import com.prieto.cafecampus.R
 import com.prieto.cafecampus.data.local.entity.Producto
 import com.prieto.cafecampus.data.local.entity.Usuario
 
@@ -11,7 +12,8 @@ object DatosIniciales {
                     nombre = "Alexis Prieto",
                     correo = "alexis@campus.test",
                     clave = "1234",
-                    rol = "CLIENTE"
+                    rol = "CLIENTE",
+                    fotoRes = R.drawable.foto_perfil
                 )
             )
             db.usuarioDao().insertar(
@@ -29,7 +31,8 @@ object DatosIniciales {
                     categoria = "Bebidas",
                     precio = 4.00,
                     disponible = true,
-                    icono = "cafe"
+                    icono = "☕",
+                    imagenRes = R.drawable.cafe_americano
                 ),
                 Producto(
                     nombre = "Sándwich de pollo",
@@ -37,7 +40,8 @@ object DatosIniciales {
                     categoria = "Desayunos",
                     precio = 9.00,
                     disponible = true,
-                    icono = "pan"
+                    icono = "🥪",
+                    imagenRes = R.drawable.sandwich_de_pollo
                 ),
                 Producto(
                     nombre = "Menú del día",
@@ -45,7 +49,8 @@ object DatosIniciales {
                     categoria = "Almuerzos",
                     precio = 12.00,
                     disponible = true,
-                    icono = "plato"
+                    icono = "🍲",
+                    imagenRes = R.drawable.plato_menu
                 ),
                 Producto(
                     nombre = "Jugo de naranja",
@@ -53,7 +58,8 @@ object DatosIniciales {
                     categoria = "Bebidas",
                     precio = 5.00,
                     disponible = true,
-                    icono = "jugo"
+                    icono = "🍊",
+                    imagenRes = R.drawable.jugo_naranja
                 ),
                 Producto(
                     nombre = "Empanada",
@@ -61,7 +67,8 @@ object DatosIniciales {
                     categoria = "Desayunos",
                     precio = 4.50,
                     disponible = true,
-                    icono = "pan"
+                    icono = "🥐",
+                    imagenRes = R.drawable.empanada_peruana
                 ),
                 Producto(
                     nombre = "Chicha morada",
@@ -69,7 +76,8 @@ object DatosIniciales {
                     categoria = "Bebidas",
                     precio = 3.50,
                     disponible = true,
-                    icono = "botella"
+                    icono = "🥤",
+                    imagenRes = R.drawable.chicha_morada
                 )
             )
             for (p in productos) {

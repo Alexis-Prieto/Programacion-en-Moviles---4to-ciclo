@@ -41,7 +41,6 @@ class PreferenciasStore(private val context: Context) {
         prefs[CORREO_USUARIO] ?: ""
     }
 
-    // Lee la foto correspondiente al ID del usuario que tiene la sesión activa
     val fotoPerfilUri: Flow<String?> = context.dataStore.data.map { prefs ->
         val id = prefs[USUARIO_ID] ?: 0
         if (id != 0) {
@@ -65,6 +64,7 @@ class PreferenciasStore(private val context: Context) {
             prefs[PERFIL_ACTIVO] = rol
         }
     }
+
     suspend fun guardarFotoPerfilUri(uriString: String, idUsuario: Int) {
         context.dataStore.edit { prefs ->
             if (idUsuario != 0) {
@@ -91,10 +91,12 @@ class PreferenciasStore(private val context: Context) {
             prefs[CORREO_USUARIO] = correo
         }
     }
-
     suspend fun cerrarSesion() {
         context.dataStore.edit { prefs ->
-            prefs.clear()
+            prefs.remove(USUARIO_ID)
+            prefs.remove(NOMBRE_USUARIO)
+            prefs.remove(CORREO_USUARIO)
+            prefs.remove(PERFIL_ACTIVO)
         }
     }
 }

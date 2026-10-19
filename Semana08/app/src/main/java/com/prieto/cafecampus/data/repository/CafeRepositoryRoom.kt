@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.Flow
 class CafeRepositoryRoom(
     private val usuarioDao: UsuarioDao,
     private val productoDao: ProductoDao,
-    private val pedidoDao: PedidoDao)
-    : CafeRepository {
+    private val pedidoDao: PedidoDao
+) : CafeRepository {
 
     override suspend fun login(correo: String, clave: String): Usuario? {
         return usuarioDao.login(correo = correo, clave = clave)
@@ -112,5 +112,12 @@ class CafeRepositoryRoom(
             rol = "ESTUDIANTE"
         )
         return usuarioDao.insertar(nuevoUsuario)
+    }
+    override fun observarUsuarioPorId(id: Int): Flow<Usuario?> {
+        return usuarioDao.observarPorId(id)
+    }
+
+    override suspend fun actualizarDatosUsuario(id: Int, nombre: String, correo: String) {
+        usuarioDao.actualizarDatos(id, nombre, correo)
     }
 }

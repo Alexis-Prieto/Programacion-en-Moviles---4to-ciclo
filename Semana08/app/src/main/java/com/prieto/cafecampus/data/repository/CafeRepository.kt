@@ -40,4 +40,7 @@ interface CafeRepository {
 
     suspend fun existeCorreo(correo: String): Boolean
     suspend fun registrarEstudiante(nombre: String, correo: String, clave: String): Long
+
+    fun observarUsuarioPorId(id: Int): Flow<Usuario?>
+    suspend fun actualizarDatosUsuario(id: Int, nombre: String, correo: String)
 }
