@@ -11,17 +11,20 @@ import kotlinx.coroutines.launch
 
 class CafeApp : Application() {
 
-    lateinit var repository: CafeRepository
-        private set
+    val database by lazy { CafeDatabase.obtener(this) }
+
+    val repository: CafeRepository by lazy {
+        CafeRepositoryRoom(
+            usuarioDao = database.usuarioDao(),
+            productoDao = database.productoDao(),
+            pedidoDao = database.pedidoDao()
+        )
+    }
 
     override fun onCreate() {
         super.onCreate()
-
-        val db = CafeDatabase.obtener(this)
-        repository = CafeRepositoryRoom(db)
-
         CoroutineScope(Dispatchers.IO).launch {
-            DatosIniciales.sembrar(db)
+            DatosIniciales.sembrar(database)
         }
     }
 }

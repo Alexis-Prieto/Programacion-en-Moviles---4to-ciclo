@@ -40,6 +40,10 @@ interface PedidoDao {
     @Query("SELECT * FROM pedidos WHERE id = :id LIMIT 1")
     fun observarUno(id: Int): Flow<PedidoConDetalle?>
 
+    @Transaction
+    @Query("SELECT * FROM pedidos ORDER BY fecha DESC")
+    fun observarTodos(): Flow<List<PedidoConDetalle>>
+
     @Query("SELECT COALESCE(SUM(total), 0.0) FROM pedidos WHERE fecha >= :inicio AND estado != 'CANCELADO'")
     fun ventasDesde(inicio: Long): Flow<Double>
 
