@@ -27,4 +27,10 @@ interface ProductoDao {
 
     @Query("UPDATE productos SET disponible = :d WHERE id = :id")
     suspend fun cambiarDisponibilidad(id: Int, d: Boolean)
+
+    @Query("SELECT * FROM productos WHERE id = :id LIMIT 1")
+    suspend fun obtenerPorId(id: Int): Producto?
+
+    @Query("SELECT * FROM productos WHERE categoria = :categoria ORDER BY nombre")
+    fun observarPorCategoria(categoria: String): Flow<List<Producto>>
 }

@@ -10,12 +10,14 @@ data class PedidoConDetalle(
     @Embedded val pedido: Pedido,
 
     @Relation(
+        entity = Usuario::class,
         parentColumn = "clienteId",
         entityColumn = "id"
     )
     val cliente: Usuario,
 
     @Relation(
+        entity = DetallePedido::class,
         parentColumn = "id",
         entityColumn = "pedidoId"
     )
