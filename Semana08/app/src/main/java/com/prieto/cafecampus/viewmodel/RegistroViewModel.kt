@@ -1,7 +1,9 @@
 package com.prieto.cafecampus.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.data.repository.CafeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,8 +17,9 @@ sealed interface RegistroState {
 }
 
 class RegistroViewModel(
-    private val repository: CafeRepository)
-    : ViewModel() {
+    private val repository: CafeRepository,
+    private val prefsStore: PreferenciasStore
+) : ViewModel() {
 
     var nombre = MutableStateFlow("")
     var correo = MutableStateFlow("")
@@ -50,6 +53,7 @@ class RegistroViewModel(
             _state.value = RegistroState.Error("La contraseña debe tener al menos 6 caracteres")
             return
         }
+
         viewModelScope.launch {
             _state.value = RegistroState.Loading
             try {
@@ -58,6 +62,12 @@ class RegistroViewModel(
                 } else {
                     val result = repository.registrarEstudiante(nom, email, pass)
                     if (result > 0) {
+                        prefsStore.guardarSesionUsuario(
+                            id = result.toInt(),
+                            nombre = nom,
+                            correo = email,
+                            rol = "ESTUDIANTE"
+                        )
                         _state.value = RegistroState.Success
                     } else {
                         _state.value = RegistroState.Error("Error al registrar el estudiante")
@@ -68,7 +78,21 @@ class RegistroViewModel(
             }
         }
     }
+
     fun resetState() {
         _state.value = RegistroState.Idle
+    }
+
+    class Factory(
+        private val repository: CafeRepository,
+        private val prefsStore: PreferenciasStore
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(RegistroViewModel::class.java)) {
+                return RegistroViewModel(repository, prefsStore) as T
+            }
+            throw IllegalArgumentException("ViewModel desconocido")
+        }
     }
 }

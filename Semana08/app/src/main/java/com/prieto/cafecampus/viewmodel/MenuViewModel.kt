@@ -3,6 +3,7 @@ package com.prieto.cafecampus.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prieto.cafecampus.data.local.entity.Producto
+import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.data.repository.CafeRepository
 import com.prieto.cafecampus.model.ItemCarrito
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,13 +13,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
-class MenuViewModel(private val repo: CafeRepository) : ViewModel() {
+class MenuViewModel(
+    private val repo: CafeRepository,
+    private val prefsStore: PreferenciasStore
+) : ViewModel() {
+
     val productos: StateFlow<List<Producto>> = repo.observarProductos()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    val nombreUsuario: StateFlow<String> = prefsStore.nombreUsuario
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ""
+        )
+
     private val _carrito = MutableStateFlow<List<ItemCarrito>>(emptyList())
     val carrito: StateFlow<List<ItemCarrito>> = _carrito.asStateFlow()
 

@@ -6,6 +6,7 @@ import com.prieto.cafecampus.data.local.dao.PedidosPorHora
 import com.prieto.cafecampus.data.local.dao.ProductoMasVendido
 import com.prieto.cafecampus.data.local.dao.TotalPorFormaPago
 import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
+import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.data.repository.CafeRepository
 import com.prieto.cafecampus.model.EstadoPedido
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,8 +16,16 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class PanelAdminViewModel(
-    private val repository: CafeRepository
+    private val repository: CafeRepository,
+    private val store: PreferenciasStore
 ) : ViewModel() {
+
+    val modoOscuro: StateFlow<Boolean> = store.modoOscuro
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     private val inicioHoy: Long
         get() {
