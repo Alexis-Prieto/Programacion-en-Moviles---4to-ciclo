@@ -29,6 +29,7 @@ import com.prieto.cafecampus.ui.cliente.LoginScreen
 import com.prieto.cafecampus.ui.cliente.MenuScreen
 import com.prieto.cafecampus.ui.cliente.MisPedidosScreen
 import com.prieto.cafecampus.ui.cliente.PerfilScreen
+import com.prieto.cafecampus.ui.cliente.RegistroScreen
 import com.prieto.cafecampus.ui.cliente.SeguimientoScreen
 import com.prieto.cafecampus.ui.cliente.SplashScreen
 import com.prieto.cafecampus.ui.theme.CafeCampusTheme
@@ -38,6 +39,7 @@ import com.prieto.cafecampus.viewmodel.MenuViewModel
 import com.prieto.cafecampus.viewmodel.PanelAdminViewModel
 import com.prieto.cafecampus.viewmodel.PedidosAdminViewModel
 import com.prieto.cafecampus.viewmodel.PedidosClienteViewModel
+import com.prieto.cafecampus.viewmodel.RegistroViewModel
 import com.prieto.cafecampus.viewmodel.SesionViewModel
 
 @Composable
@@ -51,6 +53,7 @@ fun NavCafe(repository: CafeRepository) {
     val esModoOscuro by store.modoOscuro.collectAsState(initial = false)
 
     val sesionViewModel: SesionViewModel = viewModel(factory = factory)
+    val registroViewModel: RegistroViewModel = viewModel(factory = factory)
     val menuViewModel: MenuViewModel = viewModel(factory = factory)
     val pedidosViewModel: PedidosClienteViewModel = viewModel(factory = factory)
     val panelAdminViewModel: PanelAdminViewModel = viewModel(factory = factory)
@@ -110,6 +113,21 @@ fun NavCafe(repository: CafeRepository) {
                             navController.navigate(destino) {
                                 popUpTo(Ruta.Login.ruta) { inclusive = true }
                             }
+                        },
+                        onNavigateToRegistro = {
+                            navController.navigate(Ruta.Registro.ruta)
+                        }
+                    )
+                }
+
+                composable(Ruta.Registro.ruta) {
+                    RegistroScreen(
+                        viewModel = registroViewModel,
+                        onRegistroExitoso = {
+                            navController.popBackStack()
+                        },
+                        onVolverALogin = {
+                            navController.popBackStack()
                         }
                     )
                 }

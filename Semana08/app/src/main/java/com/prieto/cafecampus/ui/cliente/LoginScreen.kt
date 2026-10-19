@@ -47,7 +47,8 @@ private val ColorIndigoPrimario = Color(0xFF4F46E5)
 @Composable
 fun LoginScreen(
     viewModel: SesionViewModel,
-    onLoginSuccess: (String) -> Unit
+    onLoginSuccess: (String) -> Unit,
+    onNavigateToRegistro: () -> Unit
 ) {
     var rolSeleccionado by remember { mutableStateOf("Estudiante") }
     var correo by remember { mutableStateOf("") }
@@ -255,7 +256,8 @@ fun LoginScreen(
                     text = "Regístrate",
                     color = ColorNaranjaPrimario,
                     fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onNavigateToRegistro() }
                 )
             }
         } else {

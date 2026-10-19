@@ -3,6 +3,8 @@ package com.prieto.cafecampus.ui.navigation
 sealed class Ruta(val ruta: String) {
     object Splash : Ruta("splash")
     object Login : Ruta("login")
+
+    object Registro : Ruta("registro")
     object ClienteHome : Ruta("cliente_home")
     object MisPedidos : Ruta("mis_pedidos")
     object Perfil : Ruta("perfil")

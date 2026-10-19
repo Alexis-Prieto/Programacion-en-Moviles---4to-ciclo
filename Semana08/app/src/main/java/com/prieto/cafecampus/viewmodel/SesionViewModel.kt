@@ -15,24 +15,27 @@ import kotlinx.coroutines.launch
 
 class SesionViewModel(
     private val repository: CafeRepository,
-    private val prefsStore: PreferenciasStore)
-    : ViewModel() {
+    private val prefsStore: PreferenciasStore
+) : ViewModel() {
 
     private val _usuarioActual = MutableStateFlow<Usuario?>(null)
     val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
     val modoOscuro: StateFlow<Boolean> = prefsStore.modoOscuro.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = false
     )
+
     val perfilActivo: StateFlow<String> = prefsStore.perfilActivo.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ""
     )
+
     fun login(correo: String, clave: String, rolSeleccionado: String, onSuccess: (String) -> Unit) {
         val correoTrim = correo.trim()
         val claveTrim = clave.trim()
@@ -41,18 +44,29 @@ class SesionViewModel(
             _error.value = "Por favor, ingresa correo y contraseña"
             return
         }
+
         viewModelScope.launch {
             val usuario = repository.login(correoTrim, claveTrim)
             if (usuario == null) {
                 _error.value = "Correo o contraseña incorrectos"
             } else {
-                val rolEsperado = if (rolSeleccionado == "Estudiante") "CLIENTE" else "ADMIN"
-                if (usuario.rol.uppercase() != rolEsperado) {
+                val rolDb = usuario.rol.uppercase().trim()
+
+                val esEstudianteValido = rolSeleccionado == "Estudiante" && (rolDb == "ESTUDIANTE" || rolDb == "CLIENTE")
+                val esAdminValido = rolSeleccionado == "Administrador" && (rolDb == "ADMIN" || rolDb == "ADMINISTRADOR")
+
+                if (!esEstudianteValido && !esAdminValido) {
                     _error.value = "El usuario no coincide con el rol de $rolSeleccionado"
                 } else {
                     _usuarioActual.value = usuario
                     _error.value = null
-                    prefsStore.guardarPerfil(usuario.rol)
+                    prefsStore.guardarSesionUsuario(
+                        id = usuario.id,
+                        nombre = usuario.nombre,
+                        correo = usuario.correo,
+                        rol = usuario.rol
+                    )
+
                     onSuccess(usuario.rol)
                 }
             }
@@ -61,6 +75,7 @@ class SesionViewModel(
     fun limpiarError() {
         _error.value = null
     }
+
     fun cerrarSesion() {
         viewModelScope.launch {
             prefsStore.cerrarSesion()

@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.Flow
 class CafeRepositoryRoom(
     private val usuarioDao: UsuarioDao,
     private val productoDao: ProductoDao,
-    private val pedidoDao: PedidoDao
-) : CafeRepository {
+    private val pedidoDao: PedidoDao)
+    : CafeRepository {
 
     override suspend fun login(correo: String, clave: String): Usuario? {
         return usuarioDao.login(correo = correo, clave = clave)
@@ -100,5 +100,17 @@ class CafeRepositoryRoom(
     }
     override fun getTotalPorFormaPagoDelDia(inicioDia: Long): Flow<List<TotalPorFormaPago>> {
         return pedidoDao.getTotalPorFormaPagoDelDia(inicioDia)
+    }
+    override suspend fun existeCorreo(correo: String): Boolean {
+        return usuarioDao.existeCorreo(correo) > 0
+    }
+    override suspend fun registrarEstudiante(nombre: String, correo: String, clave: String): Long {
+        val nuevoUsuario = Usuario(
+            nombre = nombre,
+            correo = correo,
+            clave = clave,
+            rol = "ESTUDIANTE"
+        )
+        return usuarioDao.insertar(nuevoUsuario)
     }
 }
