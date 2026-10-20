@@ -129,19 +129,19 @@ com.prieto.cafecampus
 
 ### Perfil Estudiante / Cliente
 
-|      1. Menú de Productos      |         2. Detalle del producto          |      3. Confirmar pedido y seguimiento       |
+|      1. Menú de Productos      |         2. Detalle del producto          |      3. Confirmar pedido      |
 |:------------------------------:|:----------------------------------------:|:--------------------------------------------:|
 | ![Menú](capturas/cliente_menu.png) | ![Detalle](capturas/cliente_detalle.png) | ![Confirmar](capturas/cliente_confirmar.png) |
 
 ### Perfil Administrador
-![cliente_detalle.png](../../../Users/alexi/OneDrive/Desktop/cliente_detalle.png)
+
 |        1. Panel de Control         |         2. Gestión de Pedidos          |        3. Ajustes y Modo Oscuro        |
 |:----------------------------------:|:--------------------------------------:|:--------------------------------------:|
 | ![Panel](capturas/admin_panel.png) | ![Pedidos](capturas/admin_pedidos.png) | ![Ajustes](capturas/admin_ajustes.png) |
 
 ---
 
-## 🧠 Para Pensar
+## Para Pensar
 
 ### 1. ¿Por qué el Repository es una interface?
 
