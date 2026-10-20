@@ -20,27 +20,37 @@ import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.prieto.cafecampus.data.prefs.PreferenciasStore
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun SplashScreen(
-    onNavigateToLogin: () -> Unit
+    preferenciasStore: PreferenciasStore,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToAdmin: () -> Unit,
+    onNavigateToCliente: () -> Unit
 ) {
-    val colorNaranjaPrimario = Color(0xFFEA580C)
-    val colorNaranjaContenedor = Color(0xFFFFEDD5)
-    val colorNaranjaFondo = Color(0xFFFFF2E5)
+    LaunchedEffect(Unit) {
+        val perfil = preferenciasStore.perfilActivo.first()
+        when (perfil.uppercase()) {
+            "ADMIN" -> onNavigateToAdmin()
+            "CLIENTE" -> onNavigateToCliente()
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorNaranjaFondo)
+            .background(MaterialTheme.colorScheme.background)
             .padding(start = 24.dp, end = 24.dp, bottom = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
@@ -53,13 +63,16 @@ fun SplashScreen(
             Box(
                 modifier = Modifier
                     .size(100.dp)
-                    .background(colorNaranjaPrimario, shape = RoundedCornerShape(24.dp)),
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(24.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Coffee,
                     contentDescription = "Logo CafeCampus",
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(56.dp)
                 )
             }
@@ -69,12 +82,13 @@ fun SplashScreen(
                 text = "CafeCampus",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F2937)
+                color = MaterialTheme.colorScheme.onBackground
             )
+
             Text(
                 text = "Pide sin hacer cola",
                 fontSize = 14.sp,
-                color = Color(0xFF6B7280)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -85,13 +99,16 @@ fun SplashScreen(
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .background(colorNaranjaContenedor, shape = RoundedCornerShape(16.dp)),
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(16.dp)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Coffee,
                         contentDescription = null,
-                        tint = colorNaranjaPrimario,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(36.dp)
                     )
                 }
@@ -99,26 +116,32 @@ fun SplashScreen(
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .background(colorNaranjaContenedor, shape = RoundedCornerShape(16.dp)),
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(16.dp)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Fastfood,
                         contentDescription = null,
-                        tint = colorNaranjaPrimario,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(36.dp)
                     )
                 }
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .background(colorNaranjaContenedor, shape = RoundedCornerShape(16.dp)),
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(16.dp)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocalBar,
                         contentDescription = null,
-                        tint = colorNaranjaPrimario,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(36.dp)
                     )
                 }
@@ -134,20 +157,22 @@ fun SplashScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorNaranjaPrimario)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
                 Text(
                     text = "Comenzar",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    fontWeight = FontWeight.Bold
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "Ya tengo una cuenta",
-                color = colorNaranjaPrimario,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable { onNavigateToLogin() }
