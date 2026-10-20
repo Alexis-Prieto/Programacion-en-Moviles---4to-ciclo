@@ -18,19 +18,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -38,7 +36,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.prieto.cafecampus.ui.components.AppTopBar
 import com.prieto.cafecampus.viewmodel.MenuAdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +72,6 @@ fun FormularioProductoScreen(
     val listaCategorias = listOf("Desayunos", "Almuerzos", "Bebidas")
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
-    val colorFondoPantalla = Color(0xFFF8FAFC)
 
     LaunchedEffect(productoId) {
         if (productoId > 0) {
@@ -91,28 +88,12 @@ fun FormularioProductoScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = if (productoId == 0) "Nuevo producto" else "Editar producto",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F2937)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onVolver) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color(0xFF1F2937)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colorFondoPantalla)
+            AppTopBar(
+                titulo = if (productoId == 0) "Nuevo producto" else "Editar producto",
+                onBack = onVolver
             )
         },
-        containerColor = colorFondoPantalla
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -126,8 +107,8 @@ fun FormularioProductoScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEDD5)),
-                border = BorderStroke(1.dp, Color(0xFFFED7AA))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -136,19 +117,31 @@ fun FormularioProductoScreen(
                     Box(
                         modifier = Modifier
                             .size(48.dp)
-                            .background(Color.White, shape = RoundedCornerShape(12.dp)),
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Fastfood,
                             contentDescription = null,
-                            tint = Color(0xFFEA580C)
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text("Imagen del producto", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFFC2410C))
-                        Text("Toca para elegir color", fontSize = 12.sp, color = Color(0xFFEA580C))
+                        Text(
+                            text = "Imagen del producto",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "Toca para elegir color",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        )
                     }
                 }
             }
@@ -162,14 +155,17 @@ fun FormularioProductoScreen(
                 },
                 label = { Text("Nombre del producto") },
                 isError = errorNombre,
-                supportingText = { if (errorNombre) Text("El nombre es obligatorio", color = Color.Red) },
+                supportingText = { if (errorNombre) Text("El nombre es obligatorio", color = MaterialTheme.colorScheme.error) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colorPurpuraAdmin,
                     focusedLabelColor = colorPurpuraAdmin,
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -184,22 +180,28 @@ fun FormularioProductoScreen(
                     readOnly = true,
                     label = { Text("Categoría") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenu) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colorPurpuraAdmin,
                         focusedLabelColor = colorPurpuraAdmin,
-                        unfocusedContainerColor = Color.White,
-                        focusedContainerColor = Color.White
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface
                     )
                 )
                 ExposedDropdownMenu(
                     expanded = expandedMenu,
-                    onDismissRequest = { expandedMenu = false }
+                    onDismissRequest = { expandedMenu = false },
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                 ) {
                     listaCategorias.forEach { item ->
                         DropdownMenuItem(
-                            text = { Text(item) },
+                            text = { Text(item, color = MaterialTheme.colorScheme.onSurface) },
                             onClick = {
                                 categoria = item
                                 expandedMenu = false
@@ -219,14 +221,17 @@ fun FormularioProductoScreen(
                 label = { Text("Precio (S/)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 isError = errorPrecio,
-                supportingText = { if (errorPrecio) Text("Ingrese un precio válido mayor que 0", color = Color.Red) },
+                supportingText = { if (errorPrecio) Text("Ingrese un precio válido mayor que 0", color = MaterialTheme.colorScheme.error) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colorPurpuraAdmin,
                     focusedLabelColor = colorPurpuraAdmin,
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -242,8 +247,11 @@ fun FormularioProductoScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colorPurpuraAdmin,
                     focusedLabelColor = colorPurpuraAdmin,
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -251,17 +259,28 @@ fun FormularioProductoScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Color(0xFFF1F5F9))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Disponible en el menú", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1F2937))
-                        Text("Los estudiantes podrán pedirlo", fontSize = 12.sp, color = Color(0xFF6B7280))
+                        Text(
+                            text = "Disponible en el menú",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Los estudiantes podrán pedirlo",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     Switch(
                         checked = disponible,
@@ -296,7 +315,9 @@ fun FormularioProductoScreen(
                         )
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = colorPurpuraAdmin)
             ) {
@@ -310,10 +331,12 @@ fun FormularioProductoScreen(
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedButton(
                 onClick = onVolver,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6B7280)),
-                border = BorderStroke(1.dp, Color(0xFFD1D5DB))
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
             ) {
                 Text("Cancelar", fontSize = 15.sp, fontWeight = FontWeight.Bold)
             }

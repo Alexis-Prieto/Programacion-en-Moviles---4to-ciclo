@@ -30,6 +30,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -49,18 +50,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prieto.cafecampus.data.local.entity.Producto
 import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
+import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.viewmodel.MenuViewModel
 import com.prieto.cafecampus.viewmodel.PanelAdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PanelScreen(
+    preferenciasStore: PreferenciasStore,
     panelViewModel: PanelAdminViewModel,
     menuViewModel: MenuViewModel,
     onNavigatePedidos: () -> Unit,
     onNavigateMenu: () -> Unit,
     onNavigateAjustes: () -> Unit
 ) {
+    val esModoOscuro by preferenciasStore.modoOscuro.collectAsState(initial = false)
+
     val nuevos by panelViewModel.nuevos.collectAsState()
     val preparando by panelViewModel.preparando.collectAsState()
     val listos by panelViewModel.listos.collectAsState()
@@ -70,7 +75,6 @@ fun PanelScreen(
     val productosMenu by menuViewModel.productos.collectAsState()
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
-    val colorFondoPantalla = Color(0xFFF8FAFC)
 
     Scaffold(
         topBar = {
@@ -81,12 +85,12 @@ fun PanelScreen(
                             text = "Panel de control",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1F2937)
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "Cafetería · Hoy",
                             fontSize = 12.sp,
-                            color = Color(0xFF6B7280)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -95,19 +99,22 @@ fun PanelScreen(
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
-                                .background(Color(0xFFF1F5F9), shape = CircleShape),
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = CircleShape
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notificaciones",
-                                tint = Color(0xFF1F2937),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorFondoPantalla)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
         bottomBar = {
@@ -119,7 +126,7 @@ fun PanelScreen(
                 onNavigateAjustes = onNavigateAjustes
             )
         },
-        containerColor = colorFondoPantalla
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -129,6 +136,7 @@ fun PanelScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -136,22 +144,22 @@ fun PanelScreen(
                 TarjetaContador(
                     numero = nuevos,
                     etiqueta = "Nuevos",
-                    colorFondo = Color(0xFFE0F2FE),
-                    colorTexto = Color(0xFF0284C7),
+                    colorFondo = if (esModoOscuro) Color(0xFF0C4A6E) else Color(0xFFE0F2FE),
+                    colorTexto = if (esModoOscuro) Color(0xFF38BDF8) else Color(0xFF0284C7),
                     modifier = Modifier.weight(1f)
                 )
                 TarjetaContador(
                     numero = preparando,
                     etiqueta = "Preparando",
-                    colorFondo = Color(0xFFFEF3C7),
-                    colorTexto = Color(0xFFD97706),
+                    colorFondo = if (esModoOscuro) Color(0xFF78350F) else Color(0xFFFEF3C7),
+                    colorTexto = if (esModoOscuro) Color(0xFFFBBF24) else Color(0xFFD97706),
                     modifier = Modifier.weight(1f)
                 )
                 TarjetaContador(
                     numero = listos,
                     etiqueta = "Listos",
-                    colorFondo = Color(0xFFDCFCE7),
-                    colorTexto = Color(0xFF15803D),
+                    colorFondo = if (esModoOscuro) Color(0xFF14532D) else Color(0xFFDCFCE7),
+                    colorTexto = if (esModoOscuro) Color(0xFF4ADE80) else Color(0xFF15803D),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -187,15 +195,15 @@ fun PanelScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Color(0xFFF1F5F9))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "Pedidos por hora",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F2937)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
@@ -205,11 +213,11 @@ fun PanelScreen(
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        GraficoBarraHora(hora = "8h", cantidad = 3, max = 9, color = Color(0xFFC7D2FE))
-                        GraficoBarraHora(hora = "9h", cantidad = 6, max = 9, color = Color(0xFFC7D2FE))
+                        GraficoBarraHora(hora = "8h", cantidad = 3, max = 9, color = colorPurpuraAdmin.copy(alpha = 0.3f))
+                        GraficoBarraHora(hora = "9h", cantidad = 6, max = 9, color = colorPurpuraAdmin.copy(alpha = 0.3f))
                         GraficoBarraHora(hora = "10h", cantidad = 9, max = 9, color = colorPurpuraAdmin)
-                        GraficoBarraHora(hora = "11h", cantidad = 5, max = 9, color = Color(0xFFC7D2FE))
-                        GraficoBarraHora(hora = "12h", cantidad = 7, max = 9, color = Color(0xFFC7D2FE))
+                        GraficoBarraHora(hora = "11h", cantidad = 5, max = 9, color = colorPurpuraAdmin.copy(alpha = 0.3f))
+                        GraficoBarraHora(hora = "12h", cantidad = 7, max = 9, color = colorPurpuraAdmin.copy(alpha = 0.3f))
                     }
                 }
             }
@@ -223,7 +231,7 @@ fun PanelScreen(
                     text = "Nuevos pedidos",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 TextButton(onClick = onNavigatePedidos) {
                     Text("Ver todos", color = colorPurpuraAdmin, fontSize = 13.sp, fontWeight = FontWeight.Bold)
@@ -235,8 +243,8 @@ fun PanelScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    border = BorderStroke(1.dp, Color(0xFFF1F5F9))
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
                 ) {
                     Box(
                         modifier = Modifier
@@ -244,7 +252,11 @@ fun PanelScreen(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No hay nuevos pedidos pendientes", color = Color.Gray, fontSize = 13.sp)
+                        Text(
+                            text = "No hay nuevos pedidos pendientes",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp
+                        )
                     }
                 }
             } else {
@@ -302,7 +314,7 @@ private fun TarjetaContador(
 private fun GraficoBarraHora(hora: String, cantidad: Int, max: Int, color: Color) {
     val porcentaje = (cantidad.toFloat() / max.toFloat()).coerceIn(0.1f, 1f)
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("$cantidad", fontSize = 10.sp, color = Color.Gray)
+        Text("$cantidad", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(modifier = Modifier.height(2.dp))
         Box(
             modifier = Modifier
@@ -311,7 +323,7 @@ private fun GraficoBarraHora(hora: String, cantidad: Int, max: Int, color: Color
                 .background(color, shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(hora, fontSize = 11.sp, color = Color.Gray)
+        Text(hora, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 @Composable
@@ -327,8 +339,8 @@ private fun TarjetaNuevoPedidoPanel(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFFF1F5F9))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
     ) {
         Row(
             modifier = Modifier
@@ -342,7 +354,7 @@ private fun TarjetaNuevoPedidoPanel(
                     text = "#%04d %s".format(ped.id, nombreCliente),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 val resumen = pedConDetalle.detalles.joinToString(", ") { d ->
@@ -352,7 +364,7 @@ private fun TarjetaNuevoPedidoPanel(
                 Text(
                     text = "$resumen · ${ped.horaRecojo}",
                     fontSize = 12.sp,
-                    color = Color(0xFF6B7280)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -377,9 +389,11 @@ fun BarraNavegacionAdmin(
     onNavigateAjustes: () -> Unit
 ) {
     val colorPurpuraAdmin = Color(0xFF4F46E5)
-    val colorPurpuraContenedor = Color(0xFFEEF2FF)
 
-    NavigationBar(containerColor = Color.White) {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    ) {
         NavigationBarItem(
             selected = pestanaActual == "Panel",
             onClick = onNavigatePanel,
@@ -388,9 +402,9 @@ fun BarraNavegacionAdmin(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = colorPurpuraAdmin,
                 selectedTextColor = colorPurpuraAdmin,
-                indicatorColor = colorPurpuraContenedor,
-                unselectedIconColor = Color.Gray,
-                unselectedTextColor = Color.Gray
+                indicatorColor = colorPurpuraAdmin.copy(alpha = 0.15f),
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
         NavigationBarItem(
@@ -401,9 +415,9 @@ fun BarraNavegacionAdmin(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = colorPurpuraAdmin,
                 selectedTextColor = colorPurpuraAdmin,
-                indicatorColor = colorPurpuraContenedor,
-                unselectedIconColor = Color.Gray,
-                unselectedTextColor = Color.Gray
+                indicatorColor = colorPurpuraAdmin.copy(alpha = 0.15f),
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
         NavigationBarItem(
@@ -414,9 +428,9 @@ fun BarraNavegacionAdmin(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = colorPurpuraAdmin,
                 selectedTextColor = colorPurpuraAdmin,
-                indicatorColor = colorPurpuraContenedor,
-                unselectedIconColor = Color.Gray,
-                unselectedTextColor = Color.Gray
+                indicatorColor = colorPurpuraAdmin.copy(alpha = 0.15f),
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
         NavigationBarItem(
@@ -427,9 +441,9 @@ fun BarraNavegacionAdmin(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = colorPurpuraAdmin,
                 selectedTextColor = colorPurpuraAdmin,
-                indicatorColor = colorPurpuraContenedor,
-                unselectedIconColor = Color.Gray,
-                unselectedTextColor = Color.Gray
+                indicatorColor = colorPurpuraAdmin.copy(alpha = 0.15f),
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
     }

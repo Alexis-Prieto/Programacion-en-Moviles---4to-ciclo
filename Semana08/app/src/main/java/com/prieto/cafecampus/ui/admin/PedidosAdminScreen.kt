@@ -20,22 +20,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,10 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prieto.cafecampus.data.local.entity.Producto
 import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
+import com.prieto.cafecampus.ui.components.AppTopBar
+import com.prieto.cafecampus.ui.components.EstadoChip
 import com.prieto.cafecampus.viewmodel.MenuViewModel
 import com.prieto.cafecampus.viewmodel.PedidosAdminViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PedidosAdminScreen(
     pedidosAdminViewModel: PedidosAdminViewModel,
@@ -66,7 +63,6 @@ fun PedidosAdminScreen(
     val productosMenu by menuViewModel.productos.collectAsState()
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
-    val colorFondoPantalla = Color(0xFFF8FAFC)
 
     val filtros = listOf(
         Pair("RECIBIDO", "Nuevos"),
@@ -77,25 +73,9 @@ fun PedidosAdminScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Pedidos",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F2937)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onVolver) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color(0xFF1F2937)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colorFondoPantalla)
+            AppTopBar(
+                titulo = "Pedidos",
+                onBack = onVolver
             )
         },
         bottomBar = {
@@ -107,7 +87,7 @@ fun PedidosAdminScreen(
                 onNavigateAjustes = onNavigateAjustes
             )
         },
-        containerColor = colorFondoPantalla
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -131,8 +111,8 @@ fun PedidosAdminScreen(
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = colorPurpuraAdmin,
                             selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = Color(0xFF4B5563)
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                         ),
                         border = null
                     )
@@ -145,7 +125,11 @@ fun PedidosAdminScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No hay pedidos en este estado", color = Color.Gray, fontSize = 14.sp)
+                    Text(
+                        text = "No hay pedidos en este estado",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp
+                    )
                 }
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -184,8 +168,8 @@ private fun TarjetaPedidoAdmin(
             .fillMaxWidth()
             .clickable { onClickCard() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFFF1F5F9))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -197,7 +181,10 @@ private fun TarjetaPedidoAdmin(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .background(Color(0xFFEEF2FF), shape = CircleShape),
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = CircleShape
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -212,10 +199,10 @@ private fun TarjetaPedidoAdmin(
                         text = "#%04d %s".format(ped.id, nombreCliente),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F2937)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                EstadoBadgeChipAdmin(estado = ped.estado.toString())
+                EstadoChip(estado = ped.estado.toString())
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -227,14 +214,14 @@ private fun TarjetaPedidoAdmin(
             Text(
                 text = resumenProductos,
                 fontSize = 13.sp,
-                color = Color(0xFF4B5563)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Recojo ${ped.horaRecojo}  ·  S/ %.2f".format(ped.total) +
                         if (ped.nota.isNotEmpty()) "  ·  Nota: ${ped.nota}" else "",
                 fontSize = 12.sp,
-                color = Color(0xFF9CA3AF)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
             val estadoUpper = ped.estado.toString().uppercase()
             if (estadoUpper != "ENTREGADO" && estadoUpper != "CANCELADO") {
@@ -270,33 +257,5 @@ private fun TarjetaPedidoAdmin(
                 }
             }
         }
-    }
-}
-@Composable
-fun EstadoBadgeChipAdmin(
-    estado: String,
-    modifier: Modifier = Modifier
-) {
-    val estadoUpper = estado.uppercase()
-    val (fondo, colorTexto, textoMostrar) = when (estadoUpper) {
-        "RECIBIDO" -> Triple(Color(0xFFE0F2FE), Color(0xFF0369A1), "Recibido")
-        "PREPARANDO" -> Triple(Color(0xFFFEF3C7), Color(0xFFB45309), "Preparando")
-        "LISTO" -> Triple(Color(0xFFDCFCE7), Color(0xFF15803D), "Listo")
-        "ENTREGADO" -> Triple(Color(0xFFF1F5F9), Color(0xFF475569), "Entregado")
-        "CANCELADO" -> Triple(Color(0xFFFEE2E2), Color(0xFFB91C1C), "Cancelado")
-        else -> Triple(Color(0xFFF1F5F9), Color(0xFF475569), estado)
-    }
-    Box(
-        modifier = modifier
-            .background(color = fondo, shape = RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = textoMostrar,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorTexto
-        )
     }
 }
