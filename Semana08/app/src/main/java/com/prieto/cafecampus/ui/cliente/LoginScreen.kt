@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -41,12 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.prieto.cafecampus.viewmodel.SesionViewModel
 
 private val ColorNaranjaPrimario = Color(0xFFEA580C)
-private val ColorNaranjaContenedor = Color(0xFFFFEDD5)
-private val ColorNaranjaFondo = Color.White
-
 private val ColorIndigoPrimario = Color(0xFF4F46E5)
-private val ColorIndigoContenedor = Color(0xFFE0E7FF)
-private val ColorIndigoFondo = Color.White
 
 @Composable
 fun LoginScreen(
@@ -63,14 +59,11 @@ fun LoginScreen(
         targetValue = if (rolSeleccionado == "Estudiante") ColorNaranjaPrimario else ColorIndigoPrimario,
         label = "colorPrimario"
     )
-    val colorFondo by animateColorAsState(
-        targetValue = if (rolSeleccionado == "Estudiante") ColorNaranjaFondo else ColorIndigoFondo,
-        label = "colorFondo"
-    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorFondo)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -80,14 +73,14 @@ fun LoginScreen(
             text = "Bienvenido",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1F2937),
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.fillMaxWidth()
         )
 
         Text(
             text = "Ingresa para continuar",
             fontSize = 14.sp,
-            color = Color(0xFF6B7280),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -96,7 +89,10 @@ fun LoginScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFE5E7EB), shape = RoundedCornerShape(12.dp))
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(12.dp)
+                )
                 .padding(4.dp)
         ) {
             Box(
@@ -116,7 +112,7 @@ fun LoginScreen(
                 Text(
                     text = "Estudiante",
                     fontWeight = FontWeight.Bold,
-                    color = if (rolSeleccionado == "Estudiante") Color.White else Color(0xFF4B5563)
+                    color = if (rolSeleccionado == "Estudiante") Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -137,7 +133,7 @@ fun LoginScreen(
                 Text(
                     text = "Administrador",
                     fontWeight = FontWeight.Bold,
-                    color = if (rolSeleccionado == "Administrador") Color.White else Color(0xFF4B5563)
+                    color = if (rolSeleccionado == "Administrador") Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -163,7 +159,11 @@ fun LoginScreen(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = colorPrimario,
                 focusedLabelColor = colorPrimario,
-                unfocusedBorderColor = Color(0xFFD1D5DB)
+                unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface
             ),
             singleLine = true
         )
@@ -191,7 +191,11 @@ fun LoginScreen(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = colorPrimario,
                 focusedLabelColor = colorPrimario,
-                unfocusedBorderColor = Color(0xFFD1D5DB)
+                unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface
             ),
             singleLine = true
         )
@@ -242,7 +246,11 @@ fun LoginScreen(
 
         if (rolSeleccionado == "Estudiante") {
             Row {
-                Text(text = "¿No tienes cuenta? ", color = Color(0xFF6B7280), fontSize = 13.sp)
+                Text(
+                    text = "¿No tienes cuenta? ",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp
+                )
                 Text(
                     text = "Regístrate",
                     color = ColorNaranjaPrimario,
@@ -254,7 +262,7 @@ fun LoginScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = ColorIndigoContenedor)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -266,7 +274,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Puedes cambiar de perfil desde Ajustes para probar ambos roles.",
-                        color = Color(0xFF374151),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp
                     )
                 }
