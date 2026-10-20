@@ -16,6 +16,8 @@ import androidx.navigation.navArgument
 import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.data.repository.CafeRepository
 import com.prieto.cafecampus.ui.admin.DetallePedidoAdminScreen
+import com.prieto.cafecampus.ui.admin.FormularioProductoScreen
+import com.prieto.cafecampus.ui.admin.MenuAdminScreen
 import com.prieto.cafecampus.ui.admin.PanelScreen
 import com.prieto.cafecampus.ui.admin.PedidosAdminScreen
 import com.prieto.cafecampus.ui.cliente.ConfirmarPedidoScreen
@@ -25,6 +27,7 @@ import com.prieto.cafecampus.ui.cliente.MenuScreen
 import com.prieto.cafecampus.ui.cliente.MisPedidosScreen
 import com.prieto.cafecampus.ui.cliente.SeguimientoScreen
 import com.prieto.cafecampus.ui.cliente.SplashScreen
+import com.prieto.cafecampus.viewmodel.MenuAdminViewModel
 import com.prieto.cafecampus.viewmodel.MenuViewModel
 import com.prieto.cafecampus.viewmodel.PanelAdminViewModel
 import com.prieto.cafecampus.viewmodel.PedidosAdminViewModel
@@ -43,6 +46,7 @@ fun NavCafe(repository: CafeRepository) {
     val pedidosViewModel = remember { PedidosClienteViewModel(repository, clienteId) }
     val panelAdminViewModel = remember { PanelAdminViewModel(repository) }
     val pedidosAdminViewModel = remember { PedidosAdminViewModel(repository) }
+    val menuAdminViewModel = remember { MenuAdminViewModel(repository) }
 
     fun navegarPestana(ruta: String) {
         if (ruta == "cliente_home") {
@@ -104,7 +108,7 @@ fun NavCafe(repository: CafeRepository) {
                 panelViewModel = panelAdminViewModel,
                 menuViewModel = menuViewModel,
                 onNavigatePedidos = { navController.navigate("admin_pedidos") },
-                onNavigateMenu = { navController.navigate("cliente_home") },
+                onNavigateMenu = { navController.navigate("admin_menu") },
                 onNavigateAjustes = { }
             )
         }
@@ -115,8 +119,33 @@ fun NavCafe(repository: CafeRepository) {
                 onVolver = { navController.popBackStack() },
                 onPedidoClick = { id -> navController.navigate("admin_detalle_pedido/$id") },
                 onNavigatePanel = { navController.popBackStack("admin_home", inclusive = false) },
-                onNavigateMenu = { navController.navigate("cliente_home") },
+                onNavigateMenu = { navController.navigate("admin_menu") },
                 onNavigateAjustes = { }
+            )
+        }
+        composable("admin_menu") {
+            MenuAdminScreen(
+                menuAdminViewModel = menuAdminViewModel,
+                onVolver = { navController.popBackStack() },
+                onNuevoProducto = { navController.navigate("admin_formulario_producto/0") },
+                onEditarProducto = { productoId -> navController.navigate("admin_formulario_producto/$productoId") },
+                onNavigatePanel = { navController.popBackStack("admin_home", inclusive = false) },
+                onNavigatePedidos = { navController.navigate("admin_pedidos") },
+                onNavigateAjustes = { }
+            )
+        }
+        composable(
+            route = "admin_formulario_producto/{productoId}",
+            arguments = listOf(navArgument("productoId") {
+                type = NavType.IntType
+                defaultValue = 0
+            })
+        ) { backStackEntry ->
+            val productoId = backStackEntry.arguments?.getInt("productoId") ?: 0
+            FormularioProductoScreen(
+                productoId = productoId,
+                menuAdminViewModel = menuAdminViewModel,
+                onVolver = { navController.popBackStack() }
             )
         }
         composable(
