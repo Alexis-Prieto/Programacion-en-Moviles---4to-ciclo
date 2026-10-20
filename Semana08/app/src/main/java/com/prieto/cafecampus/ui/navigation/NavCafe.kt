@@ -15,6 +15,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.data.repository.CafeRepository
+import com.prieto.cafecampus.ui.admin.DetallePedidoAdminScreen
+import com.prieto.cafecampus.ui.admin.PanelScreen
+import com.prieto.cafecampus.ui.admin.PedidosAdminScreen
 import com.prieto.cafecampus.ui.cliente.ConfirmarPedidoScreen
 import com.prieto.cafecampus.ui.cliente.DetalleProductoScreen
 import com.prieto.cafecampus.ui.cliente.LoginScreen
@@ -23,6 +26,8 @@ import com.prieto.cafecampus.ui.cliente.MisPedidosScreen
 import com.prieto.cafecampus.ui.cliente.SeguimientoScreen
 import com.prieto.cafecampus.ui.cliente.SplashScreen
 import com.prieto.cafecampus.viewmodel.MenuViewModel
+import com.prieto.cafecampus.viewmodel.PanelAdminViewModel
+import com.prieto.cafecampus.viewmodel.PedidosAdminViewModel
 import com.prieto.cafecampus.viewmodel.PedidosClienteViewModel
 import com.prieto.cafecampus.viewmodel.SesionViewModel
 
@@ -36,14 +41,14 @@ fun NavCafe(repository: CafeRepository) {
 
     val clienteId = 1
     val pedidosViewModel = remember { PedidosClienteViewModel(repository, clienteId) }
+    val panelAdminViewModel = remember { PanelAdminViewModel(repository) }
+    val pedidosAdminViewModel = remember { PedidosAdminViewModel(repository) }
 
     fun navegarPestana(ruta: String) {
         if (ruta == "cliente_home") {
             val regresado = navController.popBackStack("cliente_home", inclusive = false)
             if (!regresado) {
-                navController.navigate("cliente_home") {
-                    launchSingleTop = true
-                }
+                navController.navigate("cliente_home") { launchSingleTop = true }
             }
         } else {
             navController.navigate(ruta) {
@@ -95,12 +100,36 @@ fun NavCafe(repository: CafeRepository) {
             )
         }
         composable("admin_home") {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Panel Administrador (En desarrollo)")
-            }
+            PanelScreen(
+                panelViewModel = panelAdminViewModel,
+                menuViewModel = menuViewModel,
+                onNavigatePedidos = { navController.navigate("admin_pedidos") },
+                onNavigateMenu = { navController.navigate("cliente_home") },
+                onNavigateAjustes = { }
+            )
+        }
+        composable("admin_pedidos") {
+            PedidosAdminScreen(
+                pedidosAdminViewModel = pedidosAdminViewModel,
+                menuViewModel = menuViewModel,
+                onVolver = { navController.popBackStack() },
+                onPedidoClick = { id -> navController.navigate("admin_detalle_pedido/$id") },
+                onNavigatePanel = { navController.popBackStack("admin_home", inclusive = false) },
+                onNavigateMenu = { navController.navigate("cliente_home") },
+                onNavigateAjustes = { }
+            )
+        }
+        composable(
+            route = "admin_detalle_pedido/{pedidoId}",
+            arguments = listOf(navArgument("pedidoId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val pedidoId = backStackEntry.arguments?.getInt("pedidoId") ?: 0
+            DetallePedidoAdminScreen(
+                pedidoId = pedidoId,
+                pedidosAdminViewModel = pedidosAdminViewModel,
+                menuViewModel = menuViewModel,
+                onVolver = { navController.popBackStack() }
+            )
         }
         composable(
             route = "detalle_producto/{productoId}",
