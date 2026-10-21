@@ -146,7 +146,7 @@ fun AjustesAdminScreen(
                                 text = "Perfil activo",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = colorPurpuraAdmin
+                                color = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }
@@ -286,7 +286,7 @@ fun AjustesAdminScreen(
             Text(
                 text = "Se guardan en el dispositivo con DataStore",
                 fontSize = 11.sp,
-                color = colorPurpuraAdmin,
+                color = MaterialTheme.colorScheme.secondary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(start = 4.dp)
             )

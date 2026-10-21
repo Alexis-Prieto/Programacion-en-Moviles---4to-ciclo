@@ -266,7 +266,7 @@ fun PanelScreen(
                             Text(
                                 text = "${productoMasVendido!!.cantidadTotal} unidades vendidas hoy",
                                 fontSize = 12.sp,
-                                color = colorPurpuraAdmin,
+                                color = MaterialTheme.colorScheme.secondary,
                                 fontWeight = FontWeight.Medium
                             )
                         } else {
