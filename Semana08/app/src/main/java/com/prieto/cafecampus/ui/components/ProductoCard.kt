@@ -22,13 +22,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prieto.cafecampus.data.local.entity.Producto
@@ -38,6 +41,23 @@ fun ProductoCard(
     producto: Producto,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    // Resolver ID de recurso de imagen (directo o dinámico por nombre en drawable)
+    val imageResId = remember(producto.imagenRes, producto.icono) {
+        if (producto.imagenRes != 0) {
+            producto.imagenRes
+        } else {
+            val nombreLimpio = producto.icono.substringBeforeLast(".")
+            val id = context.resources.getIdentifier(
+                nombreLimpio,
+                "drawable",
+                context.packageName
+            )
+            if (id != 0) id else 0
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,9 +71,9 @@ fun ProductoCard(
         Column(
             modifier = Modifier.padding(12.dp)
         ) {
-            if (producto.imagenRes != 0) {
+            if (imageResId != 0) {
                 Image(
-                    painter = painterResource(id = producto.imagenRes),
+                    painter = painterResource(id = imageResId),
                     contentDescription = producto.nombre,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -79,17 +99,21 @@ fun ProductoCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = producto.nombre,
-                fontSize = 15.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
+                maxLines = 2,
+                minLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 18.sp,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
