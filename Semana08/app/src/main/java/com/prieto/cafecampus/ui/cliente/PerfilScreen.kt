@@ -49,7 +49,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,13 +65,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.prieto.cafecampus.R
 import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import kotlinx.coroutines.launch
+
+private val ColorNaranjaPrimario = Color(0xFFEA580C)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,12 +83,13 @@ fun PerfilScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val colorMarron = Color(0xFF6F4E37)
 
-    // Lectura persistente de datos desde PreferenciasStore
-    val nombreUsuario by preferenciasStore.nombreUsuario.collectAsState(initial = "Alexis Prieto")
-    val correoUsuario by preferenciasStore.correoUsuario.collectAsState(initial = "alexis@cafecampus.com")
+    // Observamos el ID único del usuario activo
+    val usuarioId by preferenciasStore.usuarioId.collectAsState(initial = 0)
+    val nombreUsuario by preferenciasStore.nombreUsuario.collectAsState(initial = "")
+    val correoUsuario by preferenciasStore.correoUsuario.collectAsState(initial = "")
     val fotoPerfilUriString by preferenciasStore.fotoPerfilUri.collectAsState(initial = null)
+    val perfilActivo by preferenciasStore.perfilActivo.collectAsState(initial = "Estudiante")
 
     var fotoBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var mostrarDialogoEditar by remember { mutableStateOf(false) }
@@ -98,17 +98,20 @@ fun PerfilScreen(
     val galeriaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        if (uri != null) {
+        if (uri != null && usuarioId != 0) {
             coroutineScope.launch {
-                preferenciasStore.guardarFotoPerfilUri(uri.toString())
+                // Guardamos la foto asociada al ID del usuario activo
+                preferenciasStore.guardarFotoPerfilUri(uri.toString(), usuarioId)
             }
         }
     }
 
     LaunchedEffect(fotoPerfilUriString) {
-        fotoPerfilUriString?.let { uriStr ->
+        if (fotoPerfilUriString.isNullOrEmpty()) {
+            fotoBitmap = null
+        } else {
             try {
-                val uri = Uri.parse(uriStr)
+                val uri = Uri.parse(fotoPerfilUriString)
                 val loadedBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
                 } else {
@@ -118,6 +121,7 @@ fun PerfilScreen(
                 fotoBitmap = loadedBitmap
             } catch (e: Exception) {
                 e.printStackTrace()
+                fotoBitmap = null
             }
         }
     }
@@ -166,9 +170,9 @@ fun PerfilScreen(
                     icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
                     label = { Text("Perfil") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIconColor = ColorNaranjaPrimario,
+                        selectedTextColor = ColorNaranjaPrimario,
+                        indicatorColor = ColorNaranjaPrimario.copy(alpha = 0.15f),
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -186,7 +190,7 @@ fun PerfilScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Círculo de Perfil con Foto de Galería o Imagen por Defecto
+            // Avatar de Perfil
             Box(
                 contentAlignment = Alignment.BottomEnd,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -195,7 +199,7 @@ fun PerfilScreen(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .background(colorMarron.copy(alpha = 0.15f))
+                        .background(ColorNaranjaPrimario.copy(alpha = 0.15f))
                         .clickable { galeriaLauncher.launch("image/*") },
                     contentAlignment = Alignment.Center
                 ) {
@@ -207,11 +211,12 @@ fun PerfilScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        Image(
-                            painter = painterResource(id = R.drawable.foto_perfil),
-                            contentDescription = "Foto por defecto",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
+                        // Silueta neutra para usuarios sin foto
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Sin foto de perfil",
+                            tint = ColorNaranjaPrimario,
+                            modifier = Modifier.size(56.dp)
                         )
                     }
                 }
@@ -220,7 +225,7 @@ fun PerfilScreen(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(colorMarron)
+                        .background(ColorNaranjaPrimario)
                         .clickable { galeriaLauncher.launch("image/*") },
                     contentAlignment = Alignment.Center
                 ) {
@@ -236,14 +241,14 @@ fun PerfilScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = nombreUsuario,
+                text = nombreUsuario.ifBlank { "Estudiante" },
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
-                text = correoUsuario,
+                text = correoUsuario.ifBlank { "sin.correo@cafecampus.com" },
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -258,12 +263,12 @@ fun PerfilScreen(
                     imageVector = Icons.Default.Edit,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
-                    tint = colorMarron
+                    tint = ColorNaranjaPrimario
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Editar datos personales",
-                    color = colorMarron,
+                    color = ColorNaranjaPrimario,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -290,7 +295,11 @@ fun PerfilScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Tipo de usuario:", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Estudiante / Cliente", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Text(
+                            text = if (perfilActivo.isNotBlank()) perfilActivo else "Estudiante",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -373,7 +382,7 @@ fun PerfilScreen(
                         mostrarDialogoEditar = false
                     }
                 ) {
-                    Text("Guardar", color = colorMarron, fontWeight = FontWeight.Bold)
+                    Text("Guardar", color = ColorNaranjaPrimario, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {

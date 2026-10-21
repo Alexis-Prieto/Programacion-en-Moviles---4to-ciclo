@@ -17,6 +17,9 @@ class CafeViewModelFactory(
             modelClass.isAssignableFrom(SesionViewModel::class.java) -> {
                 SesionViewModel(repository, store) as T
             }
+            modelClass.isAssignableFrom(RegistroViewModel::class.java) -> {
+                RegistroViewModel(repository) as T
+            }
             modelClass.isAssignableFrom(MenuViewModel::class.java) -> {
                 MenuViewModel(repository) as T
             }

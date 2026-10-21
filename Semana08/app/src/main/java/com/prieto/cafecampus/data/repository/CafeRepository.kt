@@ -37,4 +37,7 @@ interface CafeRepository {
 
     fun getProductoMasVendidoDelDia(inicioDia: Long): Flow<ProductoMasVendido?>
     fun getTotalPorFormaPagoDelDia(inicioDia: Long): Flow<List<TotalPorFormaPago>>
+
+    suspend fun existeCorreo(correo: String): Boolean
+    suspend fun registrarEstudiante(nombre: String, correo: String, clave: String): Long
 }

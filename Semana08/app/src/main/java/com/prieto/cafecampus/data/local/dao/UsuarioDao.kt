@@ -16,6 +16,13 @@ interface UsuarioDao {
 
     @Query("SELECT COUNT(*) FROM usuarios")
     suspend fun contar(): Int
+
     @Query("SELECT * FROM usuarios WHERE id = :id LIMIT 1")
     suspend fun obtenerPorId(id: Int): Usuario?
+
+    @Query("SELECT COUNT(*) FROM usuarios WHERE LOWER(correo) = LOWER(:correo)")
+    suspend fun existeCorreo(correo: String): Int
+
+    @Query("SELECT * FROM usuarios WHERE LOWER(correo) = LOWER(:correo) LIMIT 1")
+    suspend fun obtenerPorCorreo(correo: String): Usuario?
 }
