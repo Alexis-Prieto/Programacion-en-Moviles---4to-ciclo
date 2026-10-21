@@ -1,7 +1,9 @@
 package com.prieto.cafecampus.ui.cliente
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,11 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
@@ -58,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prieto.cafecampus.viewmodel.RegistroState
@@ -109,31 +110,28 @@ fun RegistroScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp),
-            contentAlignment = Alignment.TopCenter
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Badge con degradado llamativo
+                // Badge compacto
                 Box(
                     modifier = Modifier
-                        .size(76.dp)
+                        .size(64.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
@@ -146,46 +144,49 @@ fun RegistroScreen(
                         imageVector = Icons.Default.School,
                         contentDescription = "Estudiante",
                         tint = Color.White,
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(34.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = "Registro de Estudiante",
-                    fontSize = 26.sp,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
                     text = "Crea tu cuenta para realizar pedidos en CafeCampus",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // Tarjeta de Formulario
+                // Tarjeta de Formulario reducida
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         OutlinedTextField(
                             value = nombre,
                             onValueChange = { viewModel.nombre.value = it },
-                            label = { Text("Nombre completo") },
+                            label = { Text("Nombre completo", fontSize = 13.sp) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.Person,
@@ -203,12 +204,12 @@ fun RegistroScreen(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         OutlinedTextField(
                             value = correo,
                             onValueChange = { viewModel.correo.value = it },
-                            label = { Text("Correo institucional / personal") },
+                            label = { Text("Correo institucional / personal", fontSize = 13.sp) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.Email,
@@ -227,12 +228,12 @@ fun RegistroScreen(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         OutlinedTextField(
                             value = clave,
                             onValueChange = { viewModel.clave.value = it },
-                            label = { Text("Contraseña") },
+                            label = { Text("Contraseña", fontSize = 13.sp) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.Lock,
@@ -261,12 +262,12 @@ fun RegistroScreen(
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         OutlinedTextField(
                             value = confirmarClave,
                             onValueChange = { viewModel.confirmarClave.value = it },
-                            label = { Text("Confirmar contraseña") },
+                            label = { Text("Confirmar contraseña", fontSize = 13.sp) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.Lock,
@@ -296,36 +297,36 @@ fun RegistroScreen(
                         )
 
                         if (estado is RegistroState.Error) {
-                            Spacer(modifier = Modifier.height(14.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = (estado as RegistroState.Error).mensaje,
                                 color = Color(0xFFDC2626),
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
                             onClick = { viewModel.registrar() },
                             enabled = estado !is RegistroState.Loading,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(52.dp),
+                                .height(48.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = ColorNaranjaPrimario)
                         ) {
                             if (estado is RegistroState.Loading) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(22.dp),
                                     color = Color.White,
                                     strokeWidth = 2.dp
                                 )
                             } else {
                                 Text(
                                     text = "Crear Cuenta",
-                                    fontSize = 16.sp,
+                                    fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
@@ -333,29 +334,27 @@ fun RegistroScreen(
                         }
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.padding(bottom = 24.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            Row(
+                modifier = Modifier.padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "¿Ya tienes cuenta? ",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp
+                )
+                TextButton(
+                    onClick = onVolverALogin,
+                    contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(
-                        text = "¿Ya tienes cuenta? ",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp
+                        text = "Inicia sesión",
+                        color = ColorNaranjaPrimario,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                    TextButton(
-                        onClick = onVolverALogin,
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Text(
-                            text = "Inicia sesión",
-                            color = ColorNaranjaPrimario,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
                 }
             }
         }
