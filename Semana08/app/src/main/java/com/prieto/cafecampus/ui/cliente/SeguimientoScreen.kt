@@ -120,7 +120,6 @@ fun SeguimientoScreen(
         val ped = pedidoConDetalle!!.pedido
         val detalles = pedidoConDetalle!!.detalles
 
-        // Calcula la numeracion personal del pedido dentro de la lista de ese cliente
         val posicionEnLista = misPedidos.indexOfFirst { it.pedido.id == ped.id }
         val numeroPersonal = if (posicionEnLista != -1) misPedidos.size - posicionEnLista else 1
         val numeroFormateado = "Pedido #%04d".format(numeroPersonal)

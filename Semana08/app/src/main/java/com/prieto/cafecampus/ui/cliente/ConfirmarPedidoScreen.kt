@@ -283,7 +283,7 @@ fun ConfirmarPedidoScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Resumen del pedido (${carrito.sumOf { it.cantidad }})",
+                            text = "Resumen de tu orden (${carrito.sumOf { it.cantidad }})",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -314,7 +314,7 @@ fun ConfirmarPedidoScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "El pedido está vacío",
+                                text = "Aún no has agregado nada a tu orden",
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
