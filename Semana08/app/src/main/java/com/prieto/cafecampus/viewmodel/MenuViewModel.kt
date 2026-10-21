@@ -78,12 +78,10 @@ class MenuViewModel(
     fun onBusquedaChange(nuevaBusqueda: String) {
         _busqueda.value = nuevaBusqueda
     }
-
     fun onCategoriaChange(nuevaCategoria: String) {
         _categoriaSeleccionada.value = nuevaCategoria
     }
-
-    fun agregar(producto: Producto, cantidad: Int, nota: String = "") {
+    fun agregar(producto: Producto, cantidad: Int = 1, nota: String = "") {
         viewModelScope.launch {
             val id = prefsStore.usuarioId.first()
             if (id != 0) {
@@ -91,7 +89,6 @@ class MenuViewModel(
             }
         }
     }
-
     fun quitar(productoId: Int) {
         viewModelScope.launch {
             val id = prefsStore.usuarioId.first()
@@ -100,7 +97,6 @@ class MenuViewModel(
             }
         }
     }
-
     fun vaciar() {
         viewModelScope.launch {
             val id = prefsStore.usuarioId.first()
@@ -109,11 +105,9 @@ class MenuViewModel(
             }
         }
     }
-
     fun total(): Double {
         return carrito.value.sumOf { it.producto.precio * it.cantidad }
     }
-
     fun obtenerProductoPorId(id: Int): Producto? {
         return productos.value.find { it.id == id }
     }

@@ -39,11 +39,10 @@ import com.prieto.cafecampus.data.local.entity.Producto
 @Composable
 fun ProductoCard(
     producto: Producto,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAgregarClick: () -> Unit
 ) {
     val context = LocalContext.current
-
-    // Resolver ID de recurso de imagen (directo o dinámico por nombre en drawable)
     val imageResId = remember(producto.imagenRes, producto.icono) {
         if (producto.imagenRes != 0) {
             producto.imagenRes
@@ -128,7 +127,7 @@ fun ProductoCard(
                 )
 
                 IconButton(
-                    onClick = onClick,
+                    onClick = onAgregarClick,
                     enabled = producto.disponible,
                     modifier = Modifier
                         .size(32.dp)
@@ -140,7 +139,7 @@ fun ProductoCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Agregar",
+                        contentDescription = "Agregar al pedido",
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)
                     )
