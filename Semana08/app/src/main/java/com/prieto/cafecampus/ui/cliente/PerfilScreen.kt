@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.RestaurantMenu
@@ -144,7 +145,7 @@ fun PerfilScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onMenu,
-                    icon = { Icon(Icons.Default.RestaurantMenu, contentDescription = "Menú") },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Menú") },
                     label = { Text("Menú") },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,

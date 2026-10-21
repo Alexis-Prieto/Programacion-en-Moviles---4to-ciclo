@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.RestaurantMenu
@@ -57,7 +58,6 @@ fun MenuScreen(
     onPedidos: () -> Unit = {},
     onPerfil: () -> Unit = {}
 ) {
-    // La vista únicamente observa estados y delega acciones al ViewModel
     val productosFiltrados by vm.productosFiltrados.collectAsState()
     val busqueda by vm.busqueda.collectAsState()
     val categoriaSeleccionada by vm.categoriaSeleccionada.collectAsState()
@@ -78,7 +78,7 @@ fun MenuScreen(
                 NavigationBarItem(
                     selected = true,
                     onClick = { },
-                    icon = { Icon(Icons.Default.RestaurantMenu, contentDescription = "Menú") },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Menú") },
                     label = { Text("Menú") },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -210,7 +210,8 @@ fun MenuScreen(
                 items(productosFiltrados) { p ->
                     ProductoCard(
                         producto = p,
-                        onClick = { onProducto(p.id) }
+                        onClick = { onProducto(p.id) },
+                        onAgregarClick = { vm.agregar(p) }
                     )
                 }
             }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalDining
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
@@ -43,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
 import com.prieto.cafecampus.ui.components.AppTopBar
-import com.prieto.cafecampus.ui.components.EstadoChip
 import com.prieto.cafecampus.viewmodel.MenuViewModel
 import com.prieto.cafecampus.viewmodel.PedidosClienteViewModel
 
@@ -80,7 +80,7 @@ fun MisPedidosScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onNavigateMenu,
-                    icon = { Icon(Icons.Default.LocalDining, contentDescription = "Menú") },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Menú") },
                     label = { Text("Menú") },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -170,7 +170,6 @@ fun MisPedidosScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(pedidosFiltrados) { index, pedConDetalle ->
-                        // Calcula el número correlativo personal basado en el total de pedidos del cliente
                         val numeroPersonal = misPedidos.size - misPedidos.indexOf(pedConDetalle)
                         val numeroFormateado = "Pedido #%04d".format(numeroPersonal)
 
@@ -250,7 +249,7 @@ private fun TarjetaPedido(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                EstadoChip(estado = ped.estado.toString())
+                EstadoPedidoBadge(estado = ped.estado.toString())
 
                 Text(
                     text = "S/ %.2f".format(ped.total),
@@ -260,5 +259,53 @@ private fun TarjetaPedido(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun EstadoPedidoBadge(
+    estado: String,
+    modifier: Modifier = Modifier
+) {
+    val (fondoColor, textoColor, textoFormateado) = when (estado.uppercase()) {
+        "RECIBIDO", "PREPARANDO" -> Triple(
+            Color(0xFFFEF3C7),
+            Color(0xFFD97706),
+            "Preparando"
+        )
+        "LISTO" -> Triple(
+            Color(0xFFDCFCE7),
+            Color(0xFF15803D),
+            "Listo"
+        )
+        "ENTREGADO" -> Triple(
+            Color(0xFFE5E7EB),
+            Color(0xFF6B7280),
+            "Entregado"
+        )
+        "CANCELADO" -> Triple(
+            Color(0xFFFEE2E2),
+            Color(0xFFDC2626),
+            "Cancelado"
+        )
+        else -> Triple(
+            Color(0xFFE5E7EB),
+            Color(0xFF6B7280),
+            estado.lowercase().replaceFirstChar { it.uppercase() }
+        )
+    }
+
+    Box(
+        modifier = modifier
+            .background(color = fondoColor, shape = RoundedCornerShape(16.dp))
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = textoFormateado,
+            color = textoColor,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
