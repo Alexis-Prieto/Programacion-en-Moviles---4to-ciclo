@@ -1,6 +1,7 @@
 package com.prieto.cafecampus.ui.cliente
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,11 +17,14 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -28,10 +32,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,7 +47,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,8 +76,90 @@ fun ConfirmarPedidoScreen(
     var horaRecojo by remember { mutableStateOf("10:30") }
     var formaPago by remember { mutableStateOf("Pagar en caja") }
 
+    // Estados para alertas de confirmación
+    var mostrarDialogoVaciar by remember { mutableStateOf(false) }
+    var itemAEliminar by remember { mutableStateOf<ItemCarrito?>(null) }
+
     val horasDisponibles = listOf("Ahora", "10:30", "11:00", "11:30")
     val formasPagoDisponibles = listOf("Pagar en caja", "Yape / Plin")
+
+    // Diálogo para vaciar todo el pedido
+    if (mostrarDialogoVaciar) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoVaciar = false },
+            title = {
+                Text(
+                    text = "Vaciar pedido",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            },
+            text = {
+                Text(
+                    text = "¿Estás seguro de que deseas vaciar todo tu pedido?",
+                    fontSize = 14.sp
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        menuViewModel.vaciar()
+                        mostrarDialogoVaciar = false
+                    }
+                ) {
+                    Text(
+                        text = "Vaciar todo",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoVaciar = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo para eliminar un ítem específico del pedido
+    itemAEliminar?.let { item ->
+        AlertDialog(
+            onDismissRequest = { itemAEliminar = null },
+            title = {
+                Text(
+                    text = "Quitar del pedido",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            },
+            text = {
+                Text(
+                    text = "¿Deseas quitar \"${item.producto.nombre}\" de tu pedido?",
+                    fontSize = 14.sp
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        menuViewModel.quitar(item.producto.id)
+                        itemAEliminar = null
+                    }
+                ) {
+                    Text(
+                        text = "Quitar",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { itemAEliminar = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -75,15 +168,64 @@ fun ConfirmarPedidoScreen(
                 onBack = onVolver
             )
         },
+        bottomBar = {
+            Surface(
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            val notaResumen = carrito.mapNotNull { it.nota.ifEmpty { null } }.joinToString("; ")
+                            pedidosViewModel.confirmar(
+                                items = carrito,
+                                horaRecojo = horaRecojo,
+                                pago = formaPago,
+                                nota = notaResumen
+                            ) { nuevoPedidoId ->
+                                menuViewModel.vaciar()
+                                onPedidoConfirmado(nuevoPedidoId)
+                            }
+                        },
+                        enabled = carrito.isNotEmpty() && estaRecibiendoPedidos,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Text("Confirmar pedido", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+
+                    OutlinedButton(
+                        onClick = onVolver,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+                        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Seguir pidiendo", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .navigationBarsPadding()
                 .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -124,31 +266,85 @@ fun ConfirmarPedidoScreen(
                 }
             }
 
+            // Lista con Scroll de Pedido + Opción de vaciar todo
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    carrito.forEachIndexed { index, item ->
-                        ItemResumenRow(item = item)
-                        if (index < carrito.size - 1) {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(1.dp)
-                                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
+                Column(modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Resumen del pedido (${carrito.sumOf { it.cantidad }})",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        if (carrito.isNotEmpty()) {
+                            IconButton(
+                                onClick = { mostrarDialogoVaciar = true },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.DeleteSweep,
+                                    contentDescription = "Vaciar pedido",
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    if (carrito.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "El pedido está vacío",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+                    } else {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            itemsIndexed(carrito) { index, item ->
+                                ItemResumenRow(
+                                    item = item,
+                                    onEliminar = { itemAEliminar = item }
+                                )
+                                if (index < carrito.size - 1) {
+                                    Spacer(
+                                        modifier = Modifier
+                                            .padding(top = 12.dp)
+                                            .fillMaxWidth()
+                                            .height(1.dp)
+                                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Hora de recojo
             Text(
                 text = "Hora de recojo",
                 fontSize = 15.sp,
@@ -180,8 +376,9 @@ fun ConfirmarPedidoScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // Forma de pago
             Text(
                 text = "Forma de pago",
                 fontSize = 15.sp,
@@ -223,8 +420,9 @@ fun ConfirmarPedidoScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // Resumen Total
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -260,54 +458,33 @@ fun ConfirmarPedidoScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = {
-                    val notaResumen = carrito.mapNotNull { it.nota.ifEmpty { null } }.joinToString("; ")
-                    pedidosViewModel.confirmar(
-                        items = carrito,
-                        horaRecojo = horaRecojo,
-                        pago = formaPago,
-                        nota = notaResumen
-                    ) { nuevoPedidoId ->
-                        menuViewModel.vaciar()
-                        onPedidoConfirmado(nuevoPedidoId)
-                    }
-                },
-                enabled = carrito.isNotEmpty() && estaRecibiendoPedidos,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                )
-            ) {
-                Text("Confirmar pedido", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            }
-
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
-                onClick = onVolver,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-            ) {
-                Text("Seguir pidiendo", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-private fun ItemResumenRow(item: ItemCarrito) {
+private fun ItemResumenRow(
+    item: ItemCarrito,
+    onEliminar: () -> Unit
+) {
+    val context = LocalContext.current
+    val producto = item.producto
+
+    val imageResId = remember(producto.imagenRes, producto.icono) {
+        if (producto.imagenRes != 0) {
+            producto.imagenRes
+        } else {
+            val nombreLimpio = producto.icono.substringBeforeLast(".")
+            val id = context.resources.getIdentifier(
+                nombreLimpio,
+                "drawable",
+                context.packageName
+            )
+            if (id != 0) id else 0
+        }
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -315,20 +492,30 @@ private fun ItemResumenRow(item: ItemCarrito) {
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(12.dp)
-                ),
+                .clip(RoundedCornerShape(12.dp))
+                .background(color = MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
-            ProductoIcono(iconoNombre = item.producto.icono, modifier = Modifier.size(28.dp))
+            if (imageResId != 0) {
+                Image(
+                    painter = painterResource(id = imageResId),
+                    contentDescription = producto.nombre,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                ProductoIcono(
+                    iconoNombre = producto.icono,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = item.producto.nombre,
+                text = producto.nombre,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -342,10 +529,24 @@ private fun ItemResumenRow(item: ItemCarrito) {
         }
 
         Text(
-            text = "S/ %.2f".format(item.producto.precio * item.cantidad),
-            fontSize = 15.sp,
+            text = "S/ %.2f".format(producto.precio * item.cantidad),
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
+
+        IconButton(
+            onClick = onEliminar,
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .size(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = "Quitar del pedido",
+                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
