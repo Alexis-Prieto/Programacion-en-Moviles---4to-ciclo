@@ -75,15 +75,13 @@ fun ConfirmarPedidoScreen(
 
     var horaRecojo by remember { mutableStateOf("10:30") }
     var formaPago by remember { mutableStateOf("Pagar en caja") }
-
-    // Estados para alertas de confirmación
     var mostrarDialogoVaciar by remember { mutableStateOf(false) }
     var itemAEliminar by remember { mutableStateOf<ItemCarrito?>(null) }
 
     val horasDisponibles = listOf("Ahora", "10:30", "11:00", "11:30")
     val formasPagoDisponibles = listOf("Pagar en caja", "Yape / Plin")
 
-    // Diálogo para vaciar todo el pedido
+
     if (mostrarDialogoVaciar) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoVaciar = false },
@@ -121,8 +119,6 @@ fun ConfirmarPedidoScreen(
             }
         )
     }
-
-    // Diálogo para eliminar un ítem específico del pedido
     itemAEliminar?.let { item ->
         AlertDialog(
             onDismissRequest = { itemAEliminar = null },
@@ -229,6 +225,7 @@ fun ConfirmarPedidoScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Tarjeta de Cafetería cerrada con alineación corregida
             if (!estaRecibiendoPedidos) {
                 Card(
                     modifier = Modifier
@@ -236,17 +233,19 @@ fun ConfirmarPedidoScreen(
                         .padding(bottom = 12.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFEE2E2)),
-                    border = BorderStroke(1.dp, Color(0xFFEF4444))
+                    border = BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.5f))
                 ) {
                     Row(
-                        modifier = Modifier.padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.Top
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = null,
                             tint = Color(0xFFDC2626),
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier
+                                .padding(top = 1.dp)
+                                .size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
@@ -256,10 +255,12 @@ fun ConfirmarPedidoScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF991B1B)
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "En este momento no se están recibiendo nuevos pedidos.",
                                 fontSize = 12.sp,
-                                color = Color(0xFFB91C1C)
+                                color = Color(0xFFB91C1C),
+                                lineHeight = 16.sp
                             )
                         }
                     }
@@ -518,7 +519,8 @@ private fun ItemResumenRow(
                 text = producto.nombre,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
