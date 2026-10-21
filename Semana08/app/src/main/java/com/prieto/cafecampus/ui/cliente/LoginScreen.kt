@@ -201,16 +201,6 @@ fun LoginScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "¿Olvidaste tu contraseña?",
-            color = colorPrimario,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.End)
-        )
-
         if (errorState != null) {
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -264,13 +254,13 @@ fun LoginScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "Modo práctica",
                         fontWeight = FontWeight.Bold,
-                        color = ColorIndigoPrimario,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         fontSize = 13.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))

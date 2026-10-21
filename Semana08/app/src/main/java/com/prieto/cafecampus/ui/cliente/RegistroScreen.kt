@@ -128,7 +128,6 @@ fun RegistroScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Badge compacto
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -169,7 +168,6 @@ fun RegistroScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Tarjeta de Formulario reducida
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
