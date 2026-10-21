@@ -3,6 +3,8 @@ package com.prieto.cafecampus.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prieto.cafecampus.data.local.dao.PedidosPorHora
+import com.prieto.cafecampus.data.local.dao.ProductoMasVendido
+import com.prieto.cafecampus.data.local.dao.TotalPorFormaPago
 import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
 import com.prieto.cafecampus.data.repository.CafeRepository
 import com.prieto.cafecampus.model.EstadoPedido
@@ -45,6 +47,12 @@ class PanelAdminViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val pedidosPorHora: StateFlow<List<PedidosPorHora>> = repository.getPedidosPorHora()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val productoMasVendido: StateFlow<ProductoMasVendido?> = repository.getProductoMasVendidoDelDia(inicioHoy)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val totalesPorFormaPago: StateFlow<List<TotalPorFormaPago>> = repository.getTotalPorFormaPagoDelDia(inicioHoy)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun prepararPedido(pedidoId: Int) {

@@ -15,6 +15,16 @@ data class PedidosPorHora(
     val cantidad: Int
 )
 
+data class ProductoMasVendido(
+    val nombreProducto: String,
+    val cantidadTotal: Int
+)
+
+data class TotalPorFormaPago(
+    val formaPago: String,
+    val totalAcumulado: Double
+)
+
 @Dao
 interface PedidoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -58,6 +68,7 @@ interface PedidoDao {
 
     @Query("SELECT COUNT(*) FROM pedidos WHERE fecha >= :inicio AND estado != 'CANCELADO'")
     fun cantidadPedidosDesde(inicio: Long): Flow<Int>
+
     @Query("""
         SELECT horaRecojo as hora, COUNT(*) as cantidad 
         FROM pedidos 
@@ -65,4 +76,23 @@ interface PedidoDao {
         GROUP BY horaRecojo
     """)
     fun getPedidosPorHora(): Flow<List<PedidosPorHora>>
+
+    @Query("""
+        SELECT d.nombreProducto AS nombreProducto, SUM(d.cantidad) AS cantidadTotal 
+        FROM detalle_pedido d 
+        INNER JOIN pedidos pe ON d.pedidoId = pe.id 
+        WHERE pe.fecha >= :inicio AND pe.estado != 'CANCELADO' 
+        GROUP BY d.nombreProducto 
+        ORDER BY cantidadTotal DESC 
+        LIMIT 1
+    """)
+    fun getProductoMasVendidoDelDia(inicio: Long): Flow<ProductoMasVendido?>
+
+    @Query("""
+        SELECT pago AS formaPago, COALESCE(SUM(total), 0.0) AS totalAcumulado 
+        FROM pedidos 
+        WHERE fecha >= :inicio AND estado != 'CANCELADO' 
+        GROUP BY pago
+    """)
+    fun getTotalPorFormaPagoDelDia(inicio: Long): Flow<List<TotalPorFormaPago>>
 }
