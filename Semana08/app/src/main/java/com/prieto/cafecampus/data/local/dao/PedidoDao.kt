@@ -10,6 +10,11 @@ import com.prieto.cafecampus.data.local.entity.Pedido
 import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
 import kotlinx.coroutines.flow.Flow
 
+data class PedidosPorHora(
+    val hora: String,
+    val cantidad: Int
+)
+
 @Dao
 interface PedidoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -28,6 +33,7 @@ interface PedidoDao {
         insertarDetalles(detallesConId)
         return pedidoId.toLong()
     }
+
     @Transaction
     @Query("SELECT * FROM pedidos WHERE clienteId = :clienteId ORDER BY fecha DESC")
     fun observarPorCliente(clienteId: Int): Flow<List<PedidoConDetalle>>
@@ -49,4 +55,14 @@ interface PedidoDao {
 
     @Query("SELECT COUNT(*) FROM pedidos WHERE estado = :estado")
     fun cantidadPorEstado(estado: String): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM pedidos WHERE fecha >= :inicio AND estado != 'CANCELADO'")
+    fun cantidadPedidosDesde(inicio: Long): Flow<Int>
+    @Query("""
+        SELECT horaRecojo as hora, COUNT(*) as cantidad 
+        FROM pedidos 
+        WHERE estado != 'CANCELADO' 
+        GROUP BY horaRecojo
+    """)
+    fun getPedidosPorHora(): Flow<List<PedidosPorHora>>
 }

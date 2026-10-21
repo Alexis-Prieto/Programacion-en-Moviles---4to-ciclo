@@ -1,5 +1,6 @@
 package com.prieto.cafecampus.data.repository
 
+import com.prieto.cafecampus.data.local.dao.PedidosPorHora
 import com.prieto.cafecampus.data.local.entity.Producto
 import com.prieto.cafecampus.data.local.entity.Usuario
 import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
@@ -28,4 +29,7 @@ interface CafeRepository {
 
     fun observarVentasHoy(inicioDia: Long): Flow<Double>
     fun observarCantidadPorEstado(estado: EstadoPedido): Flow<Int>
+    fun observarCantidadPedidosDesde(inicioDia: Long): Flow<Int>
+
+    fun getPedidosPorHora(): Flow<List<PedidosPorHora>>
 }
