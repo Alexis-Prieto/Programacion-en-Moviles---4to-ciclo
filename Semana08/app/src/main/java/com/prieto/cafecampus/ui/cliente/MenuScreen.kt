@@ -37,9 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,7 +57,10 @@ fun MenuScreen(
     onPedidos: () -> Unit = {},
     onPerfil: () -> Unit = {}
 ) {
-    val productos by vm.productos.collectAsState()
+    // La vista únicamente observa estados y delega acciones al ViewModel
+    val productosFiltrados by vm.productosFiltrados.collectAsState()
+    val busqueda by vm.busqueda.collectAsState()
+    val categoriaSeleccionada by vm.categoriaSeleccionada.collectAsState()
     val carrito by vm.carrito.collectAsState()
     val totalItemsCarrito = carrito.sumOf { it.cantidad }
 
@@ -68,17 +69,7 @@ fun MenuScreen(
         nombreUsuario.trim().split(" ").firstOrNull()?.ifBlank { "Cliente" } ?: "Cliente"
     }
 
-    var busqueda by remember { mutableStateOf("") }
-    var categoriaSeleccionada by remember { mutableStateOf("Todo") }
-
     val categorias = listOf("Todo", "Desayunos", "Almuerzos", "Bebidas")
-
-    val productosFiltrados = productos.filter { p ->
-        val coincideBusqueda = p.nombre.contains(busqueda, ignoreCase = true)
-        val coincideCategoria = if (categoriaSeleccionada == "Todo") true
-        else p.categoria.equals(categoriaSeleccionada, ignoreCase = true)
-        coincideBusqueda && coincideCategoria
-    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -171,7 +162,7 @@ fun MenuScreen(
 
             CafeTextField(
                 valor = busqueda,
-                onValorChange = { busqueda = it },
+                onValorChange = { vm.onBusquedaChange(it) },
                 placeholder = "Buscar en el menú...",
                 icono = Icons.Default.Search
             )
@@ -185,7 +176,7 @@ fun MenuScreen(
                 items(categorias) { cat ->
                     FilterChip(
                         selected = categoriaSeleccionada == cat,
-                        onClick = { categoriaSeleccionada = cat },
+                        onClick = { vm.onCategoriaChange(cat) },
                         label = { Text(cat, fontSize = 13.sp) },
                         shape = RoundedCornerShape(20.dp),
                         colors = FilterChipDefaults.filterChipColors(
