@@ -77,7 +77,6 @@ fun PedidosAdminScreen(
         topBar = {
             AppTopBar(
                 titulo = "Pedidos",
-                onBack = onVolver
             )
         },
         bottomBar = {
