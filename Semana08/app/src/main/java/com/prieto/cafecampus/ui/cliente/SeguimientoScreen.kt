@@ -57,6 +57,7 @@ fun SeguimientoScreen(
     onNavigatePerfil: () -> Unit
 ) {
     val pedidoConDetalle by pedidosViewModel.pedido(pedidoId).collectAsState()
+    val misPedidos by pedidosViewModel.misPedidos.collectAsState()
 
     Scaffold(
         topBar = {
@@ -119,6 +120,11 @@ fun SeguimientoScreen(
         val ped = pedidoConDetalle!!.pedido
         val detalles = pedidoConDetalle!!.detalles
 
+        // Calcula la numeracion personal del pedido dentro de la lista de ese cliente
+        val posicionEnLista = misPedidos.indexOfFirst { it.pedido.id == ped.id }
+        val numeroPersonal = if (posicionEnLista != -1) misPedidos.size - posicionEnLista else 1
+        val numeroFormateado = "Pedido #%04d".format(numeroPersonal)
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -142,7 +148,7 @@ fun SeguimientoScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Pedido #%04d".format(ped.id),
+                            text = numeroFormateado,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -211,6 +217,7 @@ fun SeguimientoScreen(
         }
     }
 }
+
 @Composable
 private fun StepperEstadoSeguimiento(
     estadoActual: String
