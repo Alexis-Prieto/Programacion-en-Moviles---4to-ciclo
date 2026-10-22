@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -61,6 +63,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.prieto.cafecampus.R
 import com.prieto.cafecampus.ui.components.AppTopBar
 import com.prieto.cafecampus.viewmodel.MenuAdminViewModel
 import java.io.File
@@ -92,6 +95,49 @@ fun FormularioProductoScreen(
     val listaCategorias = listOf("Desayunos", "Almuerzos", "Bebidas")
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
+
+    // Detector de imágenes de la galería / almacenamiento interno
+    val esUriGaleria = remember(imagenUri, icono) {
+        val ruta = imagenUri?.toString() ?: icono
+        ruta.startsWith("content://") ||
+                ruta.startsWith("file://") ||
+                ruta.startsWith("/") ||
+                ruta.contains("/")
+    }
+
+    // Resolución segura de drawable por nombre de producto y fallback a icono
+    val safeImageResId = remember(nombre, icono, esUriGaleria) {
+        if (esUriGaleria) return@remember 0
+
+        var resId = 0
+
+        // Prioridad por nombre del producto
+        resId = when (nombre.lowercase().trim()) {
+            "café americano", "cafe americano" -> R.drawable.cafe_americano
+            "sándwich de pollo", "sandwich de pollo" -> R.drawable.sandwich_de_pollo
+            "menú del día", "menu del dia" -> R.drawable.plato_menu
+            "jugo de naranja" -> R.drawable.jugo_naranja
+            "empanada" -> R.drawable.empanada_peruana
+            "chicha morada" -> R.drawable.chicha_morada
+            else -> 0
+        }
+
+        // Búsqueda dinámica en drawable por nombre de producto
+        if (resId == 0 && nombre.isNotBlank()) {
+            val nombreLimpio = nombre.lowercase()
+                .replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
+                .replace(" ", "_")
+            resId = context.resources.getIdentifier(nombreLimpio, "drawable", context.packageName)
+        }
+
+        // Fallback por nombre guardado en icono
+        if (resId == 0 && icono.isNotBlank() && icono != "fastfood") {
+            val nombreIcono = icono.substringBeforeLast(".")
+            resId = context.resources.getIdentifier(nombreIcono, "drawable", context.packageName)
+        }
+
+        resId
+    }
 
     // Selector de galería que copia la foto al almacenamiento interno
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -130,16 +176,18 @@ fun FormularioProductoScreen(
                 onBack = onVolver
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0) // <-- Evita margen inferior duplicado sobre el teclado
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Card(
                 modifier = Modifier
@@ -149,22 +197,22 @@ fun FormularioProductoScreen(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
                     },
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(48.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.surface,
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(10.dp)
                             )
-                            .clip(RoundedCornerShape(12.dp)),
+                            .clip(RoundedCornerShape(10.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         when {
@@ -176,9 +224,9 @@ fun FormularioProductoScreen(
                                     contentScale = ContentScale.Crop
                                 )
                             }
-                            imagenRes != 0 -> {
+                            safeImageResId != 0 -> {
                                 Image(
-                                    painter = painterResource(id = imagenRes),
+                                    painter = painterResource(id = safeImageResId),
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
@@ -193,23 +241,23 @@ fun FormularioProductoScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = if (imagenUri != null || imagenRes != 0) "Imagen seleccionada" else "Imagen del producto",
-                            fontSize = 14.sp,
+                            text = if (imagenUri != null || safeImageResId != 0) "Imagen seleccionada" else "Imagen del producto",
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
                             text = "Toca para elegir desde la galería",
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedTextField(
                 value = nombre,
@@ -232,7 +280,7 @@ fun FormularioProductoScreen(
                     focusedContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             ExposedDropdownMenuBox(
                 expanded = expandedMenu,
@@ -274,7 +322,7 @@ fun FormularioProductoScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = precioTexto,
@@ -298,14 +346,14 @@ fun FormularioProductoScreen(
                     focusedContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             OutlinedTextField(
                 value = descripcion,
                 onValueChange = { descripcion = it },
                 label = { Text("Descripción") },
-                minLines = 3,
-                maxLines = 4,
+                minLines = 2,
+                maxLines = 3,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -318,7 +366,7 @@ fun FormularioProductoScreen(
                     focusedContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -328,7 +376,7 @@ fun FormularioProductoScreen(
             ) {
                 Row(
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(12.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -336,13 +384,13 @@ fun FormularioProductoScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "Disponible en el menú",
-                            fontSize = 14.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "Los estudiantes podrán pedirlo",
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -356,7 +404,7 @@ fun FormularioProductoScreen(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
@@ -383,33 +431,36 @@ fun FormularioProductoScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .height(44.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = colorPurpuraAdmin)
             ) {
                 Text(
                     text = if (productoId == 0) "Guardar producto" else "Actualizar producto",
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
             OutlinedButton(
                 onClick = onVolver,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .height(44.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
             ) {
-                Text("Cancelar", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text("Cancelar", fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
-            Spacer(modifier = Modifier.height(24.dp))
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
+
 private fun guardarImagenEnInterno(context: Context, uri: Uri): String {
     return try {
         val inputStream = context.contentResolver.openInputStream(uri) ?: return uri.toString()
