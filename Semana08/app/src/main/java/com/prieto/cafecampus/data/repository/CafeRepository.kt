@@ -11,6 +11,12 @@ import com.prieto.cafecampus.model.ItemCarrito
 import kotlinx.coroutines.flow.Flow
 
 interface CafeRepository {
+
+    fun observarCarrito(usuarioId: Int): Flow<List<ItemCarrito>>
+    suspend fun agregarAlCarrito(usuarioId: Int, producto: Producto, cantidad: Int, nota: String = "")
+    suspend fun quitarDelCarrito(usuarioId: Int, productoId: Int)
+    suspend fun vaciarCarrito(usuarioId: Int)
+
     suspend fun login(correo: String, clave: String): Usuario?
     fun observarProductos(): Flow<List<Producto>>
     suspend fun guardarProducto(p: Producto)
