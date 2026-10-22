@@ -80,7 +80,6 @@ fun MenuAdminScreen(
         topBar = {
             AppTopBar(
                 titulo = "Gestión del menú",
-                onBack = onVolver
             )
         },
         floatingActionButton = {
@@ -196,7 +195,6 @@ fun MenuAdminScreen(
         )
     }
 }
-
 @Composable
 private fun TarjetaProductoAdmin(
     producto: Producto,
@@ -208,20 +206,17 @@ private fun TarjetaProductoAdmin(
     val context = LocalContext.current
     val esOscuro = isSystemInDarkTheme()
 
-    // 1. Detecta si icono contiene una URI seleccionada desde la galería
     val esUriGaleria = remember(producto.icono) {
         producto.icono.startsWith("content://") ||
                 producto.icono.startsWith("file://") ||
                 producto.icono.contains("/")
     }
 
-    // 2. Resuelve la imagen real por el nombre del producto en lugar de IDs desactualizados de BD
     val imagenDrawableRes = remember(producto.id, producto.nombre, producto.icono) {
         if (esUriGaleria) return@remember 0
 
         var resId = 0
 
-        // Prioridad A: Mapeo directo por nombre del producto
         resId = when (producto.nombre.lowercase().trim()) {
             "café americano", "cafe americano" -> R.drawable.cafe_americano
             "sándwich de pollo", "sandwich de pollo" -> R.drawable.sandwich_de_pollo
@@ -232,7 +227,6 @@ private fun TarjetaProductoAdmin(
             else -> 0
         }
 
-        // Prioridad B: Búsqueda dinámica por el nombre sanitizado en res/drawable
         if (resId == 0) {
             val nombreLimpio = producto.nombre.lowercase()
                 .replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
@@ -240,13 +234,11 @@ private fun TarjetaProductoAdmin(
             resId = context.resources.getIdentifier(nombreLimpio, "drawable", context.packageName)
         }
 
-        // Prioridad C: Intento por el nombre del archivo guardado en el campo icono
         if (resId == 0 && producto.icono.isNotBlank() && producto.icono != "fastfood") {
             val nombreIcono = producto.icono.substringBeforeLast(".")
             resId = context.resources.getIdentifier(nombreIcono, "drawable", context.packageName)
         }
 
-        // Fallback
         if (resId == 0) R.drawable.plato_menu else resId
     }
 
