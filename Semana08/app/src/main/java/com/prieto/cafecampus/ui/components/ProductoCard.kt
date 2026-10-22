@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,67 +35,109 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.prieto.cafecampus.R
 import com.prieto.cafecampus.data.local.entity.Producto
+import java.io.File
 
 @Composable
 fun ProductoCard(
     producto: Producto,
     onClick: () -> Unit,
-    onAgregarClick: () -> Unit
+    onAgregarClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val imageResId = remember(producto.imagenRes, producto.icono) {
-        if (producto.imagenRes != 0) {
-            producto.imagenRes
+
+    val esUriGaleria = remember(producto.icono) {
+        producto.icono.startsWith("content://") ||
+                producto.icono.startsWith("file://") ||
+                producto.icono.startsWith("/") ||
+                producto.icono.contains("/")
+    }
+
+    val modeloImagen = remember(producto.icono) {
+        if (producto.icono.startsWith("/")) {
+            File(producto.icono)
         } else {
-            val nombreLimpio = producto.icono.substringBeforeLast(".")
-            val id = context.resources.getIdentifier(
-                nombreLimpio,
-                "drawable",
-                context.packageName
-            )
-            if (id != 0) id else 0
+            producto.icono
         }
     }
 
+    val imageResId = remember(producto.id, producto.nombre, producto.icono) {
+        if (esUriGaleria) return@remember 0
+
+        var resId = 0
+
+        resId = when (producto.nombre.lowercase().trim()) {
+            "café americano", "cafe americano" -> R.drawable.cafe_americano
+            "sándwich de pollo", "sandwich de pollo" -> R.drawable.sandwich_de_pollo
+            "menú del día", "menu del dia" -> R.drawable.plato_menu
+            "jugo de naranja" -> R.drawable.jugo_naranja
+            "empanada" -> R.drawable.empanada_peruana
+            "chicha morada" -> R.drawable.chicha_morada
+            else -> 0
+        }
+
+        if (resId == 0) {
+            val nombreLimpio = producto.nombre.lowercase()
+                .replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
+                .replace(" ", "_")
+            resId = context.resources.getIdentifier(nombreLimpio, "drawable", context.packageName)
+        }
+
+        if (resId == 0 && producto.icono.isNotBlank() && producto.icono != "fastfood") {
+            val nombreIcono = producto.icono.substringBeforeLast(".")
+            resId = context.resources.getIdentifier(nombreIcono, "drawable", context.packageName)
+        }
+
+        if (resId == 0) R.drawable.plato_menu else resId
+    }
+
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
         ) {
-            if (imageResId != 0) {
-                Image(
-                    painter = painterResource(id = imageResId),
-                    contentDescription = producto.nombre,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(12.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = producto.icono.ifEmpty { "☕" },
-                        fontSize = 32.sp
-                    )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    esUriGaleria -> {
+                        AsyncImage(
+                            model = modeloImagen,
+                            contentDescription = producto.nombre,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    imageResId != 0 -> {
+                        Image(
+                            painter = painterResource(id = imageResId),
+                            contentDescription = producto.nombre,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    else -> {
+                        Text(
+                            text = "☕",
+                            fontSize = 32.sp
+                        )
+                    }
                 }
             }
 
