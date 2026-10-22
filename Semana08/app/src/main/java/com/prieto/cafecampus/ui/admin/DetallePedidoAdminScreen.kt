@@ -138,7 +138,7 @@ fun DetallePedidoAdminScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = nombreCliente,
+                        text = "$nombreCliente · Estudiante",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
