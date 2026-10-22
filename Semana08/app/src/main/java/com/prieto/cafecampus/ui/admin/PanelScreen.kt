@@ -19,8 +19,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.LocalAtm
+import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.ReceiptLong
@@ -672,7 +674,7 @@ fun BarraNavegacionAdmin(
         NavigationBarItem(
             selected = pestanaActual == "Menú",
             onClick = onNavigateMenu,
-            icon = { Icon(Icons.Default.Restaurant, contentDescription = "Menú") },
+            icon = { Icon(Icons.Default.LocalCafe, contentDescription = "Menú") },
             label = { Text("Menú") },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = colorPurpuraAdmin,
