@@ -107,27 +107,6 @@ fun PanelScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = { }) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notificaciones",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
         bottomBar = {
@@ -475,7 +454,6 @@ fun PanelScreen(
         }
     }
 }
-
 @Composable
 private fun TarjetaContador(
     numero: Int,
