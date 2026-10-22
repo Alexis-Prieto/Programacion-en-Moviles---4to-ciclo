@@ -47,6 +47,8 @@ fun DetallePedidoAdminScreen(
 ) {
     val todosPedidos by pedidosAdminViewModel.pedidos.collectAsState()
     val productosMenu by menuViewModel.productos.collectAsState()
+    val nombresClientes by pedidosAdminViewModel.nombresClientes.collectAsState()
+
     val pedConDetalle = todosPedidos.find { it.pedido.id == pedidoId }
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
@@ -127,7 +129,8 @@ fun DetallePedidoAdminScreen(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    val nombreCliente = if (ped.clienteId == 1) "Alexis Prieto · Estudiante" else "Cliente #${ped.clienteId}"
+                    // Consulta dinámica del nombre del cliente desde el ViewModel
+                    val nombreCliente = nombresClientes[ped.clienteId] ?: "Cliente #${ped.clienteId}"
 
                     Text(
                         text = "Cliente",

@@ -55,11 +55,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.prieto.cafecampus.R
 import com.prieto.cafecampus.model.ItemCarrito
 import com.prieto.cafecampus.ui.components.AppTopBar
 import com.prieto.cafecampus.ui.components.ProductoIcono
 import com.prieto.cafecampus.viewmodel.MenuViewModel
 import com.prieto.cafecampus.viewmodel.PedidosClienteViewModel
+import java.io.File
 
 @Composable
 fun ConfirmarPedidoScreen(
@@ -472,18 +475,54 @@ private fun ItemResumenRow(
     val context = LocalContext.current
     val producto = item.producto
 
-    val imageResId = remember(producto.imagenRes, producto.icono) {
-        if (producto.imagenRes != 0) {
-            producto.imagenRes
+    // 1. Detecta si la ruta guardada en icono es una URI o archivo local permanente
+    val esUriGaleria = remember(producto.icono) {
+        producto.icono.startsWith("content://") ||
+                producto.icono.startsWith("file://") ||
+                producto.icono.startsWith("/") ||
+                producto.icono.contains("/")
+    }
+
+    val modeloImagen = remember(producto.icono) {
+        if (producto.icono.startsWith("/")) {
+            File(producto.icono)
         } else {
-            val nombreLimpio = producto.icono.substringBeforeLast(".")
-            val id = context.resources.getIdentifier(
-                nombreLimpio,
-                "drawable",
-                context.packageName
-            )
-            if (id != 0) id else 0
+            producto.icono
         }
+    }
+
+    // 2. Resuelve el drawable seguro priorizando el nombre del producto
+    val imageResId = remember(producto.id, producto.nombre, producto.icono) {
+        if (esUriGaleria) return@remember 0
+
+        var resId = 0
+
+        // Prioridad por nombre exacto del producto
+        resId = when (producto.nombre.lowercase().trim()) {
+            "café americano", "cafe americano" -> R.drawable.cafe_americano
+            "sándwich de pollo", "sandwich de pollo" -> R.drawable.sandwich_de_pollo
+            "menú del día", "menu del dia" -> R.drawable.plato_menu
+            "jugo de naranja" -> R.drawable.jugo_naranja
+            "empanada" -> R.drawable.empanada_peruana
+            "chicha morada" -> R.drawable.chicha_morada
+            else -> 0
+        }
+
+        // Búsqueda dinámica en res/drawable
+        if (resId == 0) {
+            val nombreLimpio = producto.nombre.lowercase()
+                .replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
+                .replace(" ", "_")
+            resId = context.resources.getIdentifier(nombreLimpio, "drawable", context.packageName)
+        }
+
+        // Fallback al nombre de archivo en icono
+        if (resId == 0 && producto.icono.isNotBlank() && producto.icono != "fastfood") {
+            val nombreIcono = producto.icono.substringBeforeLast(".")
+            resId = context.resources.getIdentifier(nombreIcono, "drawable", context.packageName)
+        }
+
+        if (resId == 0) R.drawable.plato_menu else resId
     }
 
     Row(
@@ -497,18 +536,29 @@ private fun ItemResumenRow(
                 .background(color = MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
-            if (imageResId != 0) {
-                Image(
-                    painter = painterResource(id = imageResId),
-                    contentDescription = producto.nombre,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                ProductoIcono(
-                    iconoNombre = producto.icono,
-                    modifier = Modifier.size(28.dp)
-                )
+            when {
+                esUriGaleria -> {
+                    AsyncImage(
+                        model = modeloImagen,
+                        contentDescription = producto.nombre,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                imageResId != 0 -> {
+                    Image(
+                        painter = painterResource(id = imageResId),
+                        contentDescription = producto.nombre,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                else -> {
+                    ProductoIcono(
+                        iconoNombre = producto.icono,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         }
 
