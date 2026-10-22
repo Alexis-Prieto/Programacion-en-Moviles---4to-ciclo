@@ -11,12 +11,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PedidosAdminViewModel(private val repository: CafeRepository) : ViewModel() {
+
     val estadoSeleccionado = MutableStateFlow("RECIBIDO")
+
     val pedidos: StateFlow<List<PedidoConDetalle>> = estadoSeleccionado.flatMapLatest { estadoStr ->
         if (estadoStr.uppercase() == "HISTORIAL") {
             combine(
@@ -39,9 +42,32 @@ class PedidosAdminViewModel(private val repository: CafeRepository) : ViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    // Mapa de clienteId -> Nombre real del Usuario
+    val nombresClientes: StateFlow<Map<Int, String>> = pedidos.flatMapLatest { pedidosList ->
+        val clienteIds = pedidosList.map { it.pedido.clienteId }.distinct()
+        if (clienteIds.isEmpty()) {
+            flowOf(emptyMap())
+        } else {
+            val usuarioFlows = clienteIds.map { id ->
+                repository.observarUsuarioPorId(id)
+            }
+            combine(usuarioFlows) { usuarios ->
+                usuarios.filterNotNull().associate { u ->
+                    u.id to u.nombre.ifBlank { "Cliente #${u.id}" }
+                }
+            }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyMap()
+    )
+
     fun cambiarFiltro(nuevoEstado: String) {
         estadoSeleccionado.value = nuevoEstado
     }
+
     fun obtenerSiguienteEstado(estadoActualStr: String): EstadoPedido? {
         val estado = try {
             EstadoPedido.valueOf(estadoActualStr.uppercase())
@@ -55,6 +81,7 @@ class PedidosAdminViewModel(private val repository: CafeRepository) : ViewModel(
             else -> null
         }
     }
+
     fun obtenerTextoBotonAvanzar(estadoActualStr: String): String {
         val estado = try {
             EstadoPedido.valueOf(estadoActualStr.uppercase())
@@ -68,6 +95,7 @@ class PedidosAdminViewModel(private val repository: CafeRepository) : ViewModel(
             else -> "Pasar a..."
         }
     }
+
     fun avanzar(pedidoConDetalle: PedidoConDetalle) {
         val estadoActualStr = pedidoConDetalle.pedido.estado.toString()
         val siguiente = obtenerSiguienteEstado(estadoActualStr) ?: return
@@ -75,6 +103,7 @@ class PedidosAdminViewModel(private val repository: CafeRepository) : ViewModel(
             repository.cambiarEstado(pedidoConDetalle.pedido.id, siguiente)
         }
     }
+
     fun cambiarEstadoPorId(pedidoId: Int, nuevoEstadoStr: String) {
         val estadoEnum = try {
             EstadoPedido.valueOf(nuevoEstadoStr.uppercase())
@@ -85,11 +114,13 @@ class PedidosAdminViewModel(private val repository: CafeRepository) : ViewModel(
             repository.cambiarEstado(pedidoId, estadoEnum)
         }
     }
+
     fun cancelar(pedidoConDetalle: PedidoConDetalle) {
         viewModelScope.launch {
             repository.cambiarEstado(pedidoConDetalle.pedido.id, EstadoPedido.CANCELADO)
         }
     }
+
     fun cancelarPorId(pedidoId: Int) {
         viewModelScope.launch {
             repository.cambiarEstado(pedidoId, EstadoPedido.CANCELADO)

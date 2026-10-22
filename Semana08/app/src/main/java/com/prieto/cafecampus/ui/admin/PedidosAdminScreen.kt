@@ -60,6 +60,7 @@ fun PedidosAdminScreen(
 ) {
     val estadoSeleccionado by pedidosAdminViewModel.estadoSeleccionado.collectAsState()
     val pedidosList by pedidosAdminViewModel.pedidos.collectAsState()
+    val nombresClientes by pedidosAdminViewModel.nombresClientes.collectAsState()
     val productosMenu by menuViewModel.productos.collectAsState()
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
@@ -134,8 +135,12 @@ fun PedidosAdminScreen(
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(pedidosList) { pedConDetalle ->
+                        val nombreReal = nombresClientes[pedConDetalle.pedido.clienteId]
+                            ?: "Cliente #${pedConDetalle.pedido.clienteId}"
+
                         TarjetaPedidoAdmin(
                             pedConDetalle = pedConDetalle,
+                            nombreCliente = nombreReal,
                             productosMenu = productosMenu,
                             colorPurpuraAdmin = colorPurpuraAdmin,
                             siguienteTexto = pedidosAdminViewModel.obtenerTextoBotonAvanzar(pedConDetalle.pedido.estado.toString()),
@@ -149,9 +154,11 @@ fun PedidosAdminScreen(
         }
     }
 }
+
 @Composable
 private fun TarjetaPedidoAdmin(
     pedConDetalle: PedidoConDetalle,
+    nombreCliente: String,
     productosMenu: List<Producto>,
     colorPurpuraAdmin: Color,
     siguienteTexto: String,
@@ -161,7 +168,6 @@ private fun TarjetaPedidoAdmin(
 ) {
     val ped = pedConDetalle.pedido
     val detalles = pedConDetalle.detalles
-    val nombreCliente = if (ped.clienteId == 1) "Alexis Prieto" else "Cliente #${ped.clienteId}"
 
     Card(
         modifier = Modifier
