@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class MenuAdminViewModel(
-    private val repository: CafeRepository)
-    : ViewModel() {
+    private val repository: CafeRepository
+) : ViewModel() {
     private val _categoriaSeleccionada = MutableStateFlow("Todo")
     val categoriaSeleccionada: StateFlow<String> = _categoriaSeleccionada.asStateFlow()
     val productosFiltrados = combine(
@@ -26,9 +26,11 @@ class MenuAdminViewModel(
             lista.filter { it.categoria.equals(categoria, ignoreCase = true) }
         }
     }
+
     fun cambiarCategoria(categoria: String) {
         _categoriaSeleccionada.value = categoria
     }
+
     fun guardarProducto(
         id: Int = 0,
         nombre: String,
@@ -37,6 +39,7 @@ class MenuAdminViewModel(
         descripcion: String,
         disponible: Boolean,
         icono: String = "fastfood",
+        imagenRes: Int = 0,
         onExito: () -> Unit
     ) {
         viewModelScope.launch {
@@ -47,22 +50,26 @@ class MenuAdminViewModel(
                 categoria = categoria.trim(),
                 precio = precio,
                 disponible = disponible,
-                icono = icono
+                icono = icono,
+                imagenRes = imagenRes
             )
             repository.guardarProducto(producto)
             onExito()
         }
     }
+
     fun alternarDisponibilidad(producto: Producto) {
         viewModelScope.launch {
             repository.cambiarDisponibilidad(producto.id, !producto.disponible)
         }
     }
+
     fun eliminarProducto(producto: Producto) {
         viewModelScope.launch {
             repository.eliminarProducto(producto)
         }
     }
+
     suspend fun obtenerProductoPorId(id: Int): Producto? {
         return repository.observarProductos().first().find { it.id == id }
     }

@@ -1,7 +1,14 @@
 package com.prieto.cafecampus.ui.admin
 
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,13 +51,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.prieto.cafecampus.ui.components.AppTopBar
 import com.prieto.cafecampus.viewmodel.MenuAdminViewModel
+import java.io.File
+import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,11 +73,17 @@ fun FormularioProductoScreen(
     menuAdminViewModel: MenuAdminViewModel,
     onVolver: () -> Unit
 ) {
+    val context = LocalContext.current
+
     var nombre by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("Desayunos") }
     var precioTexto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var disponible by remember { mutableStateOf(true) }
+
+    var icono by remember { mutableStateOf("fastfood") }
+    var imagenRes by remember { mutableStateOf(0) }
+    var imagenUri by remember { mutableStateOf<Uri?>(null) }
 
     var errorNombre by remember { mutableStateOf(false) }
     var errorPrecio by remember { mutableStateOf(false) }
@@ -72,6 +92,17 @@ fun FormularioProductoScreen(
     val listaCategorias = listOf("Desayunos", "Almuerzos", "Bebidas")
 
     val colorPurpuraAdmin = Color(0xFF4F46E5)
+
+    // Selector de galería que copia la foto al almacenamiento interno
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val rutaPermanente = guardarImagenEnInterno(context, uri)
+            imagenUri = Uri.parse(rutaPermanente)
+            icono = rutaPermanente
+        }
+    }
 
     LaunchedEffect(productoId) {
         if (productoId > 0) {
@@ -82,6 +113,12 @@ fun FormularioProductoScreen(
                 precioTexto = it.precio.toString()
                 descripcion = it.descripcion
                 disponible = it.disponible
+                icono = it.icono
+                imagenRes = it.imagenRes
+
+                if (it.icono.startsWith("content://") || it.icono.startsWith("file://") || it.icono.startsWith("/")) {
+                    imagenUri = Uri.parse(if (it.icono.startsWith("/")) "file://${it.icono}" else it.icono)
+                }
             }
         }
     }
@@ -105,7 +142,13 @@ fun FormularioProductoScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
@@ -116,29 +159,50 @@ fun FormularioProductoScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(56.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.surface,
                                 shape = RoundedCornerShape(12.dp)
-                            ),
+                            )
+                            .clip(RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Fastfood,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                        when {
+                            imagenUri != null -> {
+                                AsyncImage(
+                                    model = imagenUri,
+                                    contentDescription = "Vista previa",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                            imagenRes != 0 -> {
+                                Image(
+                                    painter = painterResource(id = imagenRes),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                            else -> {
+                                Icon(
+                                    imageVector = Icons.Default.Fastfood,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(
-                            text = "Imagen del producto",
+                            text = if (imagenUri != null || imagenRes != 0) "Imagen seleccionada" else "Imagen del producto",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            text = "Toca para elegir color",
+                            text = "Toca para elegir desde la galería",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
@@ -311,6 +375,8 @@ fun FormularioProductoScreen(
                             precio = precioNum!!,
                             descripcion = descripcion,
                             disponible = disponible,
+                            icono = icono,
+                            imagenRes = imagenRes,
                             onExito = onVolver
                         )
                     }
@@ -342,5 +408,21 @@ fun FormularioProductoScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+}
+private fun guardarImagenEnInterno(context: Context, uri: Uri): String {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return uri.toString()
+        val archivo = File(context.filesDir, "prod_${System.currentTimeMillis()}.jpg")
+        val outputStream = FileOutputStream(archivo)
+        inputStream.use { input ->
+            outputStream.use { output ->
+                input.copyTo(output)
+            }
+        }
+        archivo.absolutePath
+    } catch (e: Exception) {
+        e.printStackTrace()
+        uri.toString()
     }
 }
