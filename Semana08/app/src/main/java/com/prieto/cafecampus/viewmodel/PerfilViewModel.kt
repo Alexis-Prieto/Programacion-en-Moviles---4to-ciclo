@@ -49,7 +49,6 @@ class PerfilViewModel(
     fun cerrarSesion(menuViewModel: MenuViewModel, onExito: () -> Unit) {
         viewModelScope.launch {
             preferenciasStore.cerrarSesion()
-            menuViewModel.vaciar()
             onExito()
         }
     }

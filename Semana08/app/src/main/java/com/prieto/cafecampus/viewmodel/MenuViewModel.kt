@@ -6,14 +6,18 @@ import com.prieto.cafecampus.data.local.entity.Producto
 import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.data.repository.CafeRepository
 import com.prieto.cafecampus.model.ItemCarrito
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MenuViewModel(
     private val repo: CafeRepository,
     private val prefsStore: PreferenciasStore
@@ -56,8 +60,20 @@ class MenuViewModel(
             initialValue = ""
         )
 
-    private val _carrito = MutableStateFlow<List<ItemCarrito>>(emptyList())
-    val carrito: StateFlow<List<ItemCarrito>> = _carrito.asStateFlow()
+    val usuarioId: StateFlow<Int> = prefsStore.usuarioId
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = 0
+        )
+
+    val carrito: StateFlow<List<ItemCarrito>> = prefsStore.usuarioId
+        .flatMapLatest { id -> repo.observarCarrito(id) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun onBusquedaChange(nuevaBusqueda: String) {
         _busqueda.value = nuevaBusqueda
@@ -66,37 +82,38 @@ class MenuViewModel(
     fun onCategoriaChange(nuevaCategoria: String) {
         _categoriaSeleccionada.value = nuevaCategoria
     }
+
     fun agregar(producto: Producto, cantidad: Int, nota: String = "") {
-        _carrito.update { listaActual ->
-            val existe = listaActual.find { it.producto.id == producto.id }
-            if (existe != null) {
-                listaActual.map { item ->
-                    if (item.producto.id == producto.id) {
-                        val notaFinal = if (nota.isNotBlank()) nota else item.nota
-                        item.copy(
-                            cantidad = item.cantidad + cantidad,
-                            nota = notaFinal
-                        )
-                    } else {
-                        item
-                    }
-                }
-            } else {
-                listaActual + ItemCarrito(producto = producto, cantidad = cantidad, nota = nota)
+        viewModelScope.launch {
+            val id = prefsStore.usuarioId.first()
+            if (id != 0) {
+                repo.agregarAlCarrito(id, producto, cantidad, nota)
             }
         }
     }
+
     fun quitar(productoId: Int) {
-        _carrito.update { lista ->
-            lista.filterNot { it.producto.id == productoId }
+        viewModelScope.launch {
+            val id = prefsStore.usuarioId.first()
+            if (id != 0) {
+                repo.quitarDelCarrito(id, productoId)
+            }
         }
     }
+
     fun vaciar() {
-        _carrito.value = emptyList()
+        viewModelScope.launch {
+            val id = prefsStore.usuarioId.first()
+            if (id != 0) {
+                repo.vaciarCarrito(id)
+            }
+        }
     }
+
     fun total(): Double {
-        return _carrito.value.sumOf { it.producto.precio * it.cantidad }
+        return carrito.value.sumOf { it.producto.precio * it.cantidad }
     }
+
     fun obtenerProductoPorId(id: Int): Producto? {
         return productos.value.find { it.id == id }
     }

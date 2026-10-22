@@ -78,7 +78,6 @@ fun NavCafe(repository: CafeRepository) {
             }
         }
     }
-
     CafeCampusTheme(darkTheme = esModoOscuro) {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -108,7 +107,6 @@ fun NavCafe(repository: CafeRepository) {
                         }
                     )
                 }
-
                 composable(Ruta.Login.ruta) {
                     LoginScreen(
                         viewModel = sesionViewModel,
@@ -123,7 +121,6 @@ fun NavCafe(repository: CafeRepository) {
                         }
                     )
                 }
-
                 composable(Ruta.Registro.ruta) {
                     RegistroScreen(
                         viewModel = registroViewModel,
@@ -135,7 +132,6 @@ fun NavCafe(repository: CafeRepository) {
                         }
                     )
                 }
-
                 composable(route = Ruta.ClienteHome.ruta) {
                     MenuScreen(
                         vm = menuViewModel,
@@ -153,7 +149,6 @@ fun NavCafe(repository: CafeRepository) {
                         }
                     )
                 }
-
                 composable(Ruta.Perfil.ruta) {
                     PerfilScreen(
                         perfilViewModel = perfilViewModel,
@@ -167,7 +162,6 @@ fun NavCafe(repository: CafeRepository) {
                         }
                     )
                 }
-
                 composable(Ruta.AdminHome.ruta) {
                     PanelScreen(
                         panelViewModel = panelAdminViewModel,
@@ -177,7 +171,6 @@ fun NavCafe(repository: CafeRepository) {
                         onNavigateAjustes = { navController.navigate(Ruta.AdminAjustes.ruta) }
                     )
                 }
-
                 composable(Ruta.AdminPedidos.ruta) {
                     PedidosAdminScreen(
                         pedidosAdminViewModel = pedidosAdminViewModel,
@@ -189,7 +182,6 @@ fun NavCafe(repository: CafeRepository) {
                         onNavigateAjustes = { navController.navigate(Ruta.AdminAjustes.ruta) }
                     )
                 }
-
                 composable(Ruta.AdminMenu.ruta) {
                     MenuAdminScreen(
                         menuAdminViewModel = menuAdminViewModel,
@@ -201,7 +193,6 @@ fun NavCafe(repository: CafeRepository) {
                         onNavigateAjustes = { navController.navigate(Ruta.AdminAjustes.ruta) }
                     )
                 }
-
                 composable(Ruta.AdminAjustes.ruta) {
                     AjustesAdminScreen(
                         viewModel = ajustesAdminViewModel,
@@ -221,7 +212,6 @@ fun NavCafe(repository: CafeRepository) {
                         onNavigateMenu = { navController.navigate(Ruta.AdminMenu.ruta) }
                     )
                 }
-
                 composable(
                     route = Ruta.AdminFormularioProducto.ruta,
                     arguments = listOf(navArgument("productoId") {
@@ -236,7 +226,6 @@ fun NavCafe(repository: CafeRepository) {
                         onVolver = { navController.popBackStack() }
                     )
                 }
-
                 composable(
                     route = Ruta.AdminDetallePedido.ruta,
                     arguments = listOf(navArgument("pedidoId") { type = NavType.IntType })
@@ -249,7 +238,6 @@ fun NavCafe(repository: CafeRepository) {
                         onVolver = { navController.popBackStack() }
                     )
                 }
-
                 composable(
                     route = Ruta.DetalleProducto.ruta,
                     arguments = listOf(navArgument("productoId") { type = NavType.IntType })
@@ -262,7 +250,6 @@ fun NavCafe(repository: CafeRepository) {
                         onProductoAgregado = { navController.popBackStack() }
                     )
                 }
-
                 composable(Ruta.ConfirmarPedido.ruta) {
                     ConfirmarPedidoScreen(
                         menuViewModel = menuViewModel,
@@ -275,7 +262,6 @@ fun NavCafe(repository: CafeRepository) {
                         }
                     )
                 }
-
                 composable(
                     route = Ruta.Seguimiento.ruta,
                     arguments = listOf(navArgument("pedidoId") { type = NavType.IntType })
@@ -291,7 +277,6 @@ fun NavCafe(repository: CafeRepository) {
                         onNavigatePerfil = { navegarPestana(Ruta.Perfil.ruta) }
                     )
                 }
-
                 composable(Ruta.MisPedidos.ruta) {
                     MisPedidosScreen(
                         pedidosViewModel = pedidosViewModel,
