@@ -77,6 +77,7 @@ fun PanelScreen(
     val ventasHoy by panelViewModel.ventasHoy.collectAsState()
     val totalPedidosHoy by panelViewModel.totalPedidosHoy.collectAsState()
     val nuevosPedidos by panelViewModel.nuevosPedidosLista.collectAsState()
+    val nombresClientes by panelViewModel.nombresClientes.collectAsState()
     val productosMenu by menuViewModel.productos.collectAsState()
 
     val pedidosPorHora by panelViewModel.pedidosPorHora.collectAsState()
@@ -455,8 +456,12 @@ fun PanelScreen(
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     nuevosPedidos.take(3).forEach { pedConDetalle ->
+                        val nombreReal = nombresClientes[pedConDetalle.pedido.clienteId]
+                            ?: "Cliente #${pedConDetalle.pedido.clienteId}"
+
                         TarjetaNuevoPedidoPanel(
                             pedConDetalle = pedConDetalle,
+                            nombreCliente = nombreReal,
                             productosMenu = productosMenu,
                             colorPurpuraAdmin = colorPurpuraAdmin,
                             onPreparar = { panelViewModel.prepararPedido(pedConDetalle.pedido.id) }
@@ -571,12 +576,12 @@ private fun GraficoBarraHora(
 @Composable
 private fun TarjetaNuevoPedidoPanel(
     pedConDetalle: PedidoConDetalle,
+    nombreCliente: String,
     productosMenu: List<Producto>,
     colorPurpuraAdmin: Color,
     onPreparar: () -> Unit
 ) {
     val ped = pedConDetalle.pedido
-    val nombreCliente = if (ped.clienteId == 1) "Alexis Prieto" else "Cliente #${ped.clienteId}"
 
     Card(
         modifier = Modifier.fillMaxWidth(),

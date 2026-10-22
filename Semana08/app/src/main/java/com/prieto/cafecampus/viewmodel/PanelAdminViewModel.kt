@@ -9,12 +9,17 @@ import com.prieto.cafecampus.data.local.relation.PedidoConDetalle
 import com.prieto.cafecampus.data.prefs.PreferenciasStore
 import com.prieto.cafecampus.data.repository.CafeRepository
 import com.prieto.cafecampus.model.EstadoPedido
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PanelAdminViewModel(
     private val repository: CafeRepository,
     private val store: PreferenciasStore
@@ -54,6 +59,24 @@ class PanelAdminViewModel(
 
     val nuevosPedidosLista: StateFlow<List<PedidoConDetalle>> = repository.observarPedidosPorEstado(EstadoPedido.RECIBIDO)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val nombresClientes: StateFlow<Map<Int, String>> = repository.observarPedidosPorEstado(EstadoPedido.RECIBIDO)
+        .flatMapLatest { pedidos ->
+            val clienteIds = pedidos.map { it.pedido.clienteId }.distinct()
+            if (clienteIds.isEmpty()) {
+                flowOf(emptyMap())
+            } else {
+                val usuarioFlows = clienteIds.map { id ->
+                    repository.observarUsuarioPorId(id)
+                }
+                combine(usuarioFlows) { usuarios ->
+                    usuarios.filterNotNull().associate { u ->
+                        u.id to u.nombre.ifBlank { "Cliente #${u.id}" }
+                    }
+                }
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     val pedidosPorHora: StateFlow<List<PedidosPorHora>> = repository.getPedidosPorHora()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
