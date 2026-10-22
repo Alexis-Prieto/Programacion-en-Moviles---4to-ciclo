@@ -30,6 +30,7 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +55,11 @@ fun DetalleProductoScreen(
     onVolver: () -> Unit,
     onProductoAgregado: () -> Unit
 ) {
-    val producto = menuViewModel.obtenerProductoPorId(productoId)
+    // Observamos reactivamente la lista de productos
+    val productos by menuViewModel.productos.collectAsState()
+    val producto = remember(productos, productoId) {
+        productos.find { it.id == productoId }
+    }
 
     var cantidad by remember { mutableIntStateOf(1) }
     var nota by remember { mutableStateOf("") }

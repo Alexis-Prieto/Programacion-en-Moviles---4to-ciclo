@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -169,9 +169,14 @@ fun MisPedidosScreen(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(pedidosFiltrados) { pedConDetalle ->
+                    itemsIndexed(pedidosFiltrados) { index, pedConDetalle ->
+                        // Calcula el número correlativo personal basado en el total de pedidos del cliente
+                        val numeroPersonal = misPedidos.size - misPedidos.indexOf(pedConDetalle)
+                        val numeroFormateado = "Pedido #%04d".format(numeroPersonal)
+
                         TarjetaPedido(
                             pedConDetalle = pedConDetalle,
+                            numeroFormateado = numeroFormateado,
                             menuViewModel = menuViewModel,
                             onClick = { onPedidoClick(pedConDetalle.pedido.id) }
                         )
@@ -185,6 +190,7 @@ fun MisPedidosScreen(
 @Composable
 private fun TarjetaPedido(
     pedConDetalle: PedidoConDetalle,
+    numeroFormateado: String,
     menuViewModel: MenuViewModel,
     onClick: () -> Unit
 ) {
@@ -206,7 +212,7 @@ private fun TarjetaPedido(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Pedido #%04d".format(ped.id),
+                    text = numeroFormateado,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
