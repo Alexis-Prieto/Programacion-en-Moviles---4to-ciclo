@@ -199,7 +199,7 @@ private fun TarjetaPedidoAdmin(
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = null,
-                            tint = colorPurpuraAdmin,
+                            tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
