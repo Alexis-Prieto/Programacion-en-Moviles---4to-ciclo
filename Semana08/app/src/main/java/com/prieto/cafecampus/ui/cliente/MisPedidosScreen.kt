@@ -72,7 +72,6 @@ fun MisPedidosScreen(
         topBar = {
             AppTopBar(
                 titulo = "Mis pedidos",
-                onBack = onVolver
             )
         },
         bottomBar = {
