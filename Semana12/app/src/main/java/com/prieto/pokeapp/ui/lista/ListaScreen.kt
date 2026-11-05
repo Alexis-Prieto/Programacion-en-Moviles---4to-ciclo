@@ -43,7 +43,7 @@ fun ListaScreen(
         is UiState.Error -> {
             ErrorView(
                 mensaje = state.mensaje,
-                onReintentar = { viewModel.cargarDatosDePrueba() },
+                onReintentar = { viewModel.cargarListaPokemon() },
                 modifier = modifier
             )
         }

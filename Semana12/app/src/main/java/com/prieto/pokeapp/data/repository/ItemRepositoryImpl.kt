@@ -1,5 +1,6 @@
 package com.prieto.pokeapp.data.repository
 
+import com.prieto.pokeapp.data.local.ItemDao
 import com.prieto.pokeapp.data.mapper.toDomain
 import com.prieto.pokeapp.data.remote.ApiService
 import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
@@ -9,7 +10,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class ItemRepositoryImpl(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val itemDao: ItemDao
 ) : ItemRepository {
 
     override fun obtenerItems(): Flow<List<Item>> = flow {
