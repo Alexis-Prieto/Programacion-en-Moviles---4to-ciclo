@@ -50,6 +50,7 @@ fun ListaScreen(
         is UiState.Exito -> {
             ListaContenido(
                 items = state.datos,
+                onFavoritoToggle = { id, esFav -> viewModel.cambiarFavorito(id, esFav) },
                 modifier = modifier
             )
         }
@@ -59,6 +60,7 @@ fun ListaScreen(
 @Composable
 private fun ListaContenido(
     items: List<Item>,
+    onFavoritoToggle: (Int, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -67,7 +69,10 @@ private fun ListaContenido(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items, key = { it.id }) { item ->
-            ItemRow(item = item)
+            ItemRow(
+                item = item,
+                onFavoritoClick = { onFavoritoToggle(item.id, !item.esFavorito) }
+            )
         }
     }
 }
@@ -75,6 +80,7 @@ private fun ListaContenido(
 @Composable
 private fun ItemRow(
     item: Item,
+    onFavoritoClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -94,7 +100,7 @@ private fun ItemRow(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
-            IconButton(onClick = { /* Acción futura de favorito */ }) {
+            IconButton(onClick = onFavoritoClick) {
                 Icon(
                     imageVector = if (item.esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Favorito",
