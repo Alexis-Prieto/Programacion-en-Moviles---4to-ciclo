@@ -2,6 +2,7 @@ package com.prieto.pokeapp.data.repository
 
 import com.prieto.pokeapp.data.mapper.toDomain
 import com.prieto.pokeapp.data.remote.ApiService
+import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
 import com.prieto.pokeapp.domain.model.Item
 import com.prieto.pokeapp.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.Flow
@@ -17,15 +18,9 @@ class ItemRepositoryImpl(
         emit(listaDominio)
     }
 
-    override fun obtenerItemPorId(id: Int): Flow<Item?> = flow {
+    override fun obtenerDetallePokemon(id: Int): Flow<ItemDetailDto> = flow {
         val detalle = apiService.obtenerDetallePokemon(id)
-        val item = Item(
-            id = detalle.id,
-            nombre = detalle.nombre,
-            urlImagen = detalle.sprites?.urlImagen ?: "",
-            esFavorito = false
-        )
-        emit(item)
+        emit(detalle)
     }
 
     override suspend fun cambiarEstadoFavorito(id: Int, esFavorito: Boolean) {
