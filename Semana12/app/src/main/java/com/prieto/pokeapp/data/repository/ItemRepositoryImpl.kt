@@ -1,6 +1,7 @@
 package com.prieto.pokeapp.data.repository
 
 import com.prieto.pokeapp.data.local.ItemDao
+import com.prieto.pokeapp.data.local.ItemEntity
 import com.prieto.pokeapp.data.mapper.toDomain
 import com.prieto.pokeapp.data.mapper.toEntity
 import com.prieto.pokeapp.data.remote.ApiService
@@ -24,6 +25,7 @@ class ItemRepositoryImpl(
                 try {
                     val respuesta = apiService.obtenerListaPokemon()
                     val idsFavoritos = itemDao.idsFavoritos().toSet()
+
                     val entidades = respuesta.resultados.map { dto ->
                         val entity = dto.toEntity()
                         entity.copy(esFavorito = idsFavoritos.contains(entity.id))
@@ -33,11 +35,14 @@ class ItemRepositoryImpl(
                 }
             }
     }
+    override fun obtenerFavoritos(): Flow<List<Item>> {
+        return itemDao.favoritos()
+            .map { entidades -> entidades.map { it.toDomain() } }
+    }
     override fun obtenerDetallePokemon(id: Int): Flow<ItemDetailDto> = flow {
         val detalle = apiService.obtenerDetallePokemon(id)
         emit(detalle)
     }
-
     override suspend fun cambiarEstadoFavorito(id: Int, esFavorito: Boolean) {
         itemDao.alternarFavorito(id)
     }
