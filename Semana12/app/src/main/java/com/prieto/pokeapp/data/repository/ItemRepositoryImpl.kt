@@ -1,7 +1,6 @@
 package com.prieto.pokeapp.data.repository
 
 import com.prieto.pokeapp.data.local.ItemDao
-import com.prieto.pokeapp.data.local.ItemEntity
 import com.prieto.pokeapp.data.mapper.toDomain
 import com.prieto.pokeapp.data.mapper.toEntity
 import com.prieto.pokeapp.data.remote.ApiService
@@ -9,41 +8,51 @@ import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
 import com.prieto.pokeapp.domain.model.Item
 import com.prieto.pokeapp.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
+import retrofit2.HttpException
+import java.io.IOException
 
 class ItemRepositoryImpl(
     private val apiService: ApiService,
     private val itemDao: ItemDao
 ) : ItemRepository {
 
-    override fun obtenerItems(): Flow<List<Item>> {
-        return itemDao.todos()
-            .map { entidades -> entidades.map { it.toDomain() } }
-            .onStart {
-                try {
-                    val respuesta = apiService.obtenerListaPokemon()
-                    val idsFavoritos = itemDao.idsFavoritos().toSet()
+    override val items: Flow<List<Item>> = itemDao.todos().map { lista ->
+        lista.map { it.toDomain() }
+    }
 
-                    val entidades = respuesta.resultados.map { dto ->
-                        val entity = dto.toEntity()
-                        entity.copy(esFavorito = idsFavoritos.contains(entity.id))
-                    }
-                    itemDao.guardarTodos(entidades)
-                } catch (_: Exception) {
-                }
-            }
+    override val favoritos: Flow<List<Item>> = itemDao.favoritos().map { lista ->
+        lista.map { it.toDomain() }
     }
-    override fun obtenerFavoritos(): Flow<List<Item>> {
-        return itemDao.favoritos()
-            .map { entidades -> entidades.map { it.toDomain() } }
+
+    override suspend fun refrescar(): Result<Int> = try {
+        val respuesta = apiService.obtenerListaPokemon()
+        val idsFavoritos = itemDao.idsFavoritos().toSet()
+        val entidades = respuesta.resultados.map { dto ->
+            val entity = dto.toEntity()
+            entity.copy(esFavorito = idsFavoritos.contains(entity.id))
+        }
+        itemDao.guardarTodos(entidades)
+        Result.success(entidades.size)
+    } catch (e: IOException) {
+        Result.failure(e)
+    } catch (e: HttpException) {
+        Result.failure(e)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
-    override fun obtenerDetallePokemon(id: Int): Flow<ItemDetailDto> = flow {
-        val detalle = apiService.obtenerDetallePokemon(id)
-        emit(detalle)
-    }
-    override suspend fun cambiarEstadoFavorito(id: Int, esFavorito: Boolean) {
-        itemDao.alternarFavorito(id)
+
+    override suspend fun alternarFavorito(id: Int) = itemDao.alternarFavorito(id)
+
+    override suspend fun cantidadGuardada(): Int = itemDao.contar()
+
+    override suspend fun cantidadFavoritos(): Int = itemDao.contarFavoritos()
+
+    override suspend fun limpiarCache() = itemDao.borrarTodo()
+
+    override suspend fun obtenerDetalle(id: Int): Result<ItemDetailDto> = try {
+        Result.success(apiService.obtenerDetallePokemon(id))
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }

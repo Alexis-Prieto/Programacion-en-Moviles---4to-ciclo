@@ -5,8 +5,12 @@ import com.prieto.pokeapp.domain.model.Item
 import kotlinx.coroutines.flow.Flow
 
 interface ItemRepository {
-    fun obtenerItems(): Flow<List<Item>>
-    fun obtenerFavoritos(): Flow<List<Item>>
-    fun obtenerDetallePokemon(id: Int): Flow<ItemDetailDto>
-    suspend fun cambiarEstadoFavorito(id: Int, esFavorito: Boolean)
+    val items: Flow<List<Item>>
+    val favoritos: Flow<List<Item>>
+    suspend fun refrescar(): Result<Int>
+    suspend fun alternarFavorito(id: Int)
+    suspend fun cantidadGuardada(): Int
+    suspend fun cantidadFavoritos(): Int
+    suspend fun limpiarCache()
+    suspend fun obtenerDetalle(id: Int): Result<ItemDetailDto>
 }

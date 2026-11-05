@@ -1,6 +1,8 @@
 package com.prieto.pokeapp
 
 import android.content.Context
+import com.prieto.pokeapp.data.auth.AuthRepository
+import com.prieto.pokeapp.data.auth.FirebaseAuthRepository
 import com.prieto.pokeapp.data.local.AppDatabase
 import com.prieto.pokeapp.data.remote.RetrofitClient
 import com.prieto.pokeapp.data.repository.ItemRepositoryImpl
@@ -14,5 +16,9 @@ class AppContainer(context: Context) {
             apiService = RetrofitClient.apiService,
             itemDao = database.itemDao()
         )
+    }
+
+    val authRepository: AuthRepository by lazy {
+        FirebaseAuthRepository()
     }
 }
