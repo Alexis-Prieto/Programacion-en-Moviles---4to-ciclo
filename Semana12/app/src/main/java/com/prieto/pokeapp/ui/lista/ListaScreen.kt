@@ -37,13 +37,14 @@ fun ListaScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     when (val state = uiState) {
+        is UiState.Idle -> {}
         is UiState.Cargando -> {
             Cargando(modifier = modifier)
         }
         is UiState.Error -> {
             ErrorView(
                 mensaje = state.mensaje,
-                onReintentar = { viewModel.cargarListaPokemon() },
+                onReintentar = { viewModel.refrescar() },
                 modifier = modifier
             )
         }

@@ -30,6 +30,7 @@ fun FavoritosScreen(
         contentAlignment = Alignment.Center
     ) {
         when (val uiState = state) {
+            is UiState.Idle -> {}
             is UiState.Cargando -> CircularProgressIndicator()
             is UiState.Error -> Text(text = uiState.mensaje)
             is UiState.Exito -> {
@@ -43,7 +44,6 @@ fun FavoritosScreen(
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(favoritos, key = { it.id }) { item ->
-                            // Utiliza aquí tu composable de ítem (ejemplo: ItemRow / ItemCard)
                             Text(
                                 text = "${item.id}. ${item.nombre}",
                                 modifier = Modifier

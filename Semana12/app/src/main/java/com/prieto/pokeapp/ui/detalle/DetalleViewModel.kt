@@ -9,7 +9,6 @@ import com.prieto.pokeapp.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class DetalleViewModel(
@@ -27,12 +26,12 @@ class DetalleViewModel(
     fun cargarDetalle() {
         viewModelScope.launch {
             _uiState.value = UiState.Cargando
-            itemRepository.obtenerDetallePokemon(pokemonId)
-                .catch { e ->
-                    _uiState.value = UiState.Error(e.localizedMessage ?: "Error al cargar detalle")
-                }
-                .collect { detalle ->
+            itemRepository.obtenerDetalle(pokemonId)
+                .onSuccess { detalle ->
                     _uiState.value = UiState.Exito(detalle)
+                }
+                .onFailure { e ->
+                    _uiState.value = UiState.Error(e.localizedMessage ?: "Error al cargar detalle")
                 }
         }
     }

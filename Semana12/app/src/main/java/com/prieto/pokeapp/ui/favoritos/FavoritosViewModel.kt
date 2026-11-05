@@ -15,7 +15,7 @@ class FavoritosViewModel(
     private val repository: ItemRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<UiState<List<Item>>> = repository.obtenerFavoritos()
+    val uiState: StateFlow<UiState<List<Item>>> = repository.favoritos
         .map<List<Item>, UiState<List<Item>>> { items ->
             UiState.Exito(items)
         }
@@ -27,7 +27,7 @@ class FavoritosViewModel(
 
     fun removerDeFavoritos(id: Int) {
         viewModelScope.launch {
-            repository.cambiarEstadoFavorito(id, false)
+            repository.alternarFavorito(id)
         }
     }
 }
