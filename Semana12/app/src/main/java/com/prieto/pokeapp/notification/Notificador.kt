@@ -1,5 +1,5 @@
 package com.prieto.pokeapp.notification
 
 interface Notificador {
-    fun mostrar(titulo: String, texto: String)
+    fun mostrarNotificacion(titulo: String, mensaje: String)
 }
