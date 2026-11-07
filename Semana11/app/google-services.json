@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "9016863653",
+    "project_id": "authfirebaseapp-250d9",
+    "storage_bucket": "authfirebaseapp-250d9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:9016863653:android:6d29323fa6d06e2939564c",
+        "android_client_info": {
+          "package_name": "com.prieto.authfirebaseapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDsbhT3xwStx2MBegFU8NQhCxC7E_kNe8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
