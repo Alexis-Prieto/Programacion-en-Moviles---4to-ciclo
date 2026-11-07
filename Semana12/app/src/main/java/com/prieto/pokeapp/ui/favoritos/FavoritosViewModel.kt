@@ -2,8 +2,8 @@ package com.prieto.pokeapp.ui.favoritos
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.prieto.pokeapp.data.repository.ItemRepository
 import com.prieto.pokeapp.domain.model.Item
-import com.prieto.pokeapp.domain.repository.ItemRepository
 import com.prieto.pokeapp.ui.UiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
