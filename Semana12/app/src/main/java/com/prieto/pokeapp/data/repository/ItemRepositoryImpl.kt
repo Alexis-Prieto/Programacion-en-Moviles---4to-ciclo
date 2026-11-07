@@ -6,7 +6,6 @@ import com.prieto.pokeapp.data.mapper.toEntity
 import com.prieto.pokeapp.data.remote.ApiService
 import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
 import com.prieto.pokeapp.domain.model.Item
-import com.prieto.pokeapp.domain.repository.ItemRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import retrofit2.HttpException

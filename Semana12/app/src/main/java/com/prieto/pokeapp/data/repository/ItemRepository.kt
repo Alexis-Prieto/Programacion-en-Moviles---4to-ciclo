@@ -1,4 +1,4 @@
-package com.prieto.pokeapp.domain.repository
+package com.prieto.pokeapp.data.repository
 
 import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
 import com.prieto.pokeapp.domain.model.Item
@@ -12,5 +12,5 @@ interface ItemRepository {
     suspend fun cantidadGuardada(): Int
     suspend fun cantidadFavoritos(): Int
     suspend fun limpiarCache()
-    suspend fun obtenerDetalle(id: Int): Result<ItemDetailDto>
+    suspend fun obtenerDetalle(nombreOId: String): Result<ItemDetailDto>
 }

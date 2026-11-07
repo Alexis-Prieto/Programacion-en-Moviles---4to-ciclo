@@ -12,8 +12,10 @@ class FirebaseAuthRepository(
 ) : AuthRepository {
 
     override suspend fun iniciarSesion(correo: String, clave: String): Result<Sesion> = try {
-        val uid = auth.signInWithEmailAndPassword(correo, clave).await().user!!.uid
-        Result.success(leerSesion(uid, correo))
+        auth.signOut()
+        val authResult = auth.signInWithEmailAndPassword(correo, clave).await()
+        val user = authResult.user ?: throw Exception("Usuario no encontrado")
+        Result.success(leerSesion(user.uid, correo))
     } catch (e: Exception) {
         Result.failure(e)
     }
@@ -23,11 +25,21 @@ class FirebaseAuthRepository(
         return leerSesion(u.uid, u.email ?: "")
     }
 
-    override fun cerrarSesion() = auth.signOut()
+    override fun cerrarSesion() {
+        try {
+            auth.signOut()
+        } catch (e: Exception) {
+        }
+    }
 
     private suspend fun leerSesion(uid: String, correo: String): Sesion {
-        val doc = db.collection("usuarios").document(uid).get().await()
-        val rol = if (doc.getString("rol") == "admin") Rol.ADMIN else Rol.USUARIO
+        val rol = try {
+            val doc = db.collection("usuarios").document(uid).get().await()
+            val rolStr = doc.getString("rol")?.lowercase()
+            if (rolStr == "admin") Rol.ADMIN else Rol.USUARIO
+        } catch (e: Exception) {
+            Rol.USUARIO
+        }
         return Sesion(uid, correo, rol)
     }
 }

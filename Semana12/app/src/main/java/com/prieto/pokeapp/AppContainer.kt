@@ -5,8 +5,8 @@ import com.prieto.pokeapp.data.auth.AuthRepository
 import com.prieto.pokeapp.data.auth.FirebaseAuthRepository
 import com.prieto.pokeapp.data.local.AppDatabase
 import com.prieto.pokeapp.data.remote.RetrofitClient
+import com.prieto.pokeapp.data.repository.ItemRepository
 import com.prieto.pokeapp.data.repository.ItemRepositoryImpl
-import com.prieto.pokeapp.domain.repository.ItemRepository
 import com.prieto.pokeapp.notification.Notificador
 import com.prieto.pokeapp.notification.NotificadorAndroid
 
