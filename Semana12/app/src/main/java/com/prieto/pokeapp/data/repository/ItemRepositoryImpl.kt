@@ -26,7 +26,7 @@ class ItemRepositoryImpl(
     }
 
     override suspend fun refrescar(): Result<Int> = try {
-        val respuesta = apiService.obtenerListaPokemon()
+        val respuesta = apiService.obtenerListaPokemon(limite = 100)
         val idsFavoritos = itemDao.idsFavoritos().toSet()
         val entidades = respuesta.resultados.map { dto ->
             val entity = dto.toEntity()
@@ -50,8 +50,8 @@ class ItemRepositoryImpl(
 
     override suspend fun limpiarCache() = itemDao.borrarTodo()
 
-    override suspend fun obtenerDetalle(id: Int): Result<ItemDetailDto> = try {
-        Result.success(apiService.obtenerDetallePokemon(id))
+    override suspend fun obtenerDetalle(nombreOId: String): Result<ItemDetailDto> = try {
+        Result.success(apiService.obtenerDetallePokemon(nombreOId))
     } catch (e: Exception) {
         Result.failure(e)
     }
