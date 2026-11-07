@@ -3,16 +3,22 @@ package com.prieto.pokeapp.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Column
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.prieto.pokeapp.AppContainer
+import com.prieto.pokeapp.AppViewModelFactory
 import com.prieto.pokeapp.domain.model.Rol
+import com.prieto.pokeapp.ui.UiState
 import com.prieto.pokeapp.ui.admin.AdminScreen
 import com.prieto.pokeapp.ui.admin.AdminViewModel
 import com.prieto.pokeapp.ui.detalle.DetalleScreen
@@ -29,7 +35,26 @@ fun AppNav(
     appContainer: AppContainer,
     navController: NavHostController = rememberNavController()
 ) {
-    var userRole by remember { mutableStateOf(Rol.USUARIO) }
+    val factory = remember(appContainer) { AppViewModelFactory(appContainer) }
+    val sessionViewModel: LoginViewModel = viewModel(factory = factory)
+    val estadoSesion by sessionViewModel.sesion.collectAsStateWithLifecycle()
+    when (val state = estadoSesion) {
+        UiState.Cargando -> {
+            CircularProgressIndicator()
+            return
+        }
+        is UiState.Error -> {
+            Column {
+                Text(state.mensaje)
+                Button(onClick = sessionViewModel::reintentarSesion) { Text("Reintentar") }
+            }
+            return
+        }
+        is UiState.Exito -> Unit
+    }
+    val sesion = (estadoSesion as UiState.Exito).datos
+    val userRole = sesion?.rol ?: Rol.USUARIO
+    val destinoInicial = rememberSaveable { if (sesion == null) "login" else "lista" }
 
     val onNavigate: (String) -> Unit = { route ->
         if (route == "admin" && userRole != Rol.ADMIN) {
@@ -38,7 +63,7 @@ fun AppNav(
             }
         } else {
             navController.navigate(route) {
-                popUpTo(navController.graph.startDestinationId) {
+                popUpTo("lista") {
                     saveState = true
                 }
                 launchSingleTop = true
@@ -49,18 +74,14 @@ fun AppNav(
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = destinoInicial
     ) {
         composable("login") {
-            val loginViewModel: LoginViewModel = viewModel {
-                LoginViewModel(appContainer.authRepository)
-            }
             LoginScreen(
-                viewModel = loginViewModel,
+                viewModel = sessionViewModel,
                 onLoginExitoso = { sesion ->
-                    userRole = sesion.rol
-                    val destino = if (sesion.rol == Rol.ADMIN) "admin" else "lista"
-                    navController.navigate(destino) {
+                    sessionViewModel.aceptarSesion(sesion)
+                    navController.navigate("lista") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
@@ -70,7 +91,7 @@ fun AppNav(
         composable("admin") {
             if (userRole != Rol.ADMIN) {
                 LaunchedEffect(Unit) {
-                    val destino = if (appContainer.authRepository.sesionActual() == null) "login" else "lista"
+                    val destino = if (sesion == null) "login" else "lista"
                     navController.navigate(destino) {
                         popUpTo(0) { inclusive = true }
                     }
@@ -78,20 +99,17 @@ fun AppNav(
                 return@composable
             }
 
-            val adminViewModel: AdminViewModel = viewModel {
-                AdminViewModel(appContainer.itemRepository, appContainer.notificador)
-            }
+            val adminViewModel: AdminViewModel = viewModel(factory = factory)
             AdminScreen(
                 viewModel = adminViewModel,
                 onVolver = {
                     navController.popBackStack()
                 },
                 onIrAlCatalogo = {
-                    navController.navigate("lista")
+                    onNavigate("lista")
                 },
                 onCerrarSesion = {
-                    appContainer.authRepository.cerrarSesion()
-                    userRole = Rol.USUARIO
+                    sessionViewModel.cerrarSesion()
                     navController.navigate("login") {
                         popUpTo(0) { inclusive = true }
                     }
@@ -101,9 +119,7 @@ fun AppNav(
         }
 
         composable("lista") {
-            val listaViewModel: ListaViewModel = viewModel {
-                ListaViewModel(appContainer.itemRepository, appContainer.notificador)
-            }
+            val listaViewModel: ListaViewModel = viewModel(factory = factory)
             ListaScreen(
                 viewModel = listaViewModel,
                 onItemClick = { id ->
@@ -111,8 +127,7 @@ fun AppNav(
                 },
                 onNavigate = onNavigate,
                 onCerrarSesion = {
-                    appContainer.authRepository.cerrarSesion()
-                    userRole = Rol.USUARIO
+                    sessionViewModel.cerrarSesion()
                     navController.navigate("login") {
                         popUpTo(0) { inclusive = true }
                     }
@@ -122,9 +137,7 @@ fun AppNav(
         }
 
         composable("favoritos") {
-            val favoritosViewModel: FavoritosViewModel = viewModel {
-                FavoritosViewModel(appContainer.itemRepository)
-            }
+            val favoritosViewModel: FavoritosViewModel = viewModel(factory = factory)
             FavoritosScreen(
                 viewModel = favoritosViewModel,
                 onItemClick = { id ->
@@ -140,7 +153,7 @@ fun AppNav(
             val idStr = backStackEntry?.arguments?.getString("id") ?: "1"
             val id = idStr.toIntOrNull() ?: 1
             val detalleViewModel: DetalleViewModel = viewModel(
-                factory = DetalleViewModel.Factory(appContainer.itemRepository, id)
+                factory = AppViewModelFactory(appContainer, id)
             )
             DetalleScreen(
                 viewModel = detalleViewModel,

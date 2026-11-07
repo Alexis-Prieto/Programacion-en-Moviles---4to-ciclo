@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +50,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.prieto.pokeapp.ui.components.fuegoFondo
 import com.prieto.pokeapp.domain.model.Sesion
 import com.prieto.pokeapp.ui.UiState
 import com.prieto.pokeapp.ui.theme.PokedexRed
@@ -64,7 +69,7 @@ fun LoginScreen(
 
     LaunchedEffect(uiState) {
         val state = uiState
-        if (state is UiState.Exito) {
+        if (state is UiState.Exito && state.datos != null) {
             onLoginExitoso(state.datos)
             viewModel.resetearEstado()
         }
@@ -73,8 +78,9 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(24.dp),
+            .fuegoFondo()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -129,15 +135,34 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Iniciar sesión",
+            text = "PokeApp",
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E1E1E),
+            fontWeight = FontWeight.Black,
+            color = PokedexRed
+        )
+        Text(
+            text = "Explora el mundo Pokémon",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF735C52)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AsyncImage(
+            model = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png",
+            contentDescription = "Charmander",
+            modifier = Modifier.size(150.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Iniciar sesión",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Black,
+            color = Color(0xFF32181A),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = correoText,
@@ -152,6 +177,12 @@ fun LoginScreen(
                     contentDescription = "Correo"
                 )
             },
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFFFFFAF4),
+                unfocusedContainerColor = Color(0xFFFFFAF4),
+                unfocusedBorderColor = Color(0xFFE8CEB5)
+            ),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth()
@@ -180,6 +211,12 @@ fun LoginScreen(
                     Icon(imageVector = icon, contentDescription = description)
                 }
             },
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFFFFFAF4),
+                unfocusedContainerColor = Color(0xFFFFFAF4),
+                unfocusedBorderColor = Color(0xFFE8CEB5)
+            ),
             singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -192,7 +229,7 @@ fun LoginScreen(
             onClick = { viewModel.iniciarSesion() },
             enabled = uiState !is UiState.Cargando,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
+                containerColor = Color(0xFF0758C8),
                 contentColor = Color.White
             ),
             shape = RoundedCornerShape(12.dp),

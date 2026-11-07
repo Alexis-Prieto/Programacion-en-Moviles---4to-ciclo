@@ -1,12 +1,11 @@
 package com.prieto.pokeapp.ui.login
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.FirebaseNetworkException
 import com.prieto.pokeapp.data.auth.AuthRepository
+import com.prieto.pokeapp.data.auth.ErrorConexionAuthException
+import com.prieto.pokeapp.data.auth.ErrorRolException
+import com.prieto.pokeapp.data.auth.TiempoAgotadoAuthException
 import com.prieto.pokeapp.domain.model.Sesion
 import com.prieto.pokeapp.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,14 +18,47 @@ class LoginViewModel(
     private val authRepo: AuthRepository
 ) : ViewModel() {
 
-    var correo by mutableStateOf("")
+    var correo = ""
         private set
 
-    var clave by mutableStateOf("")
+    var clave = ""
         private set
 
-    private val _uiState = MutableStateFlow<UiState<Sesion>?>(null)
-    val uiState: StateFlow<UiState<Sesion>?> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<Sesion?>>(UiState.Exito(null))
+    val uiState: StateFlow<UiState<Sesion?>> = _uiState.asStateFlow()
+
+    private val _sesion = MutableStateFlow<UiState<Sesion?>>(UiState.Cargando)
+    val sesion: StateFlow<UiState<Sesion?>> = _sesion.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _sesion.value = try {
+                UiState.Exito(authRepo.sesionActual())
+            } catch (e: Exception) {
+                UiState.Error("No se pudo recuperar la sesión.")
+            }
+        }
+    }
+
+    fun aceptarSesion(sesion: Sesion) {
+        _sesion.value = UiState.Exito(sesion)
+    }
+
+    fun cerrarSesion() {
+        authRepo.cerrarSesion()
+        _sesion.value = UiState.Exito(null)
+    }
+
+    fun reintentarSesion() {
+        _sesion.value = UiState.Cargando
+        viewModelScope.launch {
+            _sesion.value = try {
+                UiState.Exito(authRepo.sesionActual())
+            } catch (e: Exception) {
+                UiState.Error("No se pudo recuperar la sesión.")
+            }
+        }
+    }
 
     fun onCorreoChanged(nuevoCorreo: String) {
         correo = nuevoCorreo
@@ -48,8 +80,6 @@ class LoginViewModel(
         viewModelScope.launch {
             _uiState.value = UiState.Cargando
 
-            authRepo.cerrarSesion()
-
             val resultado = authRepo.iniciarSesion(correoClean, claveClean)
             resultado
                 .onSuccess { sesion ->
@@ -57,7 +87,9 @@ class LoginViewModel(
                 }
                 .onFailure { error ->
                     val mensaje = when (error) {
-                        is FirebaseNetworkException, is IOException -> "Error de conexión. Revisa tu internet."
+                        is ErrorRolException -> "No se pudo verificar tu rol. Revisa tu conexión e inténtalo de nuevo."
+                        is TiempoAgotadoAuthException -> "El inicio de sesión tardó demasiado. Revisa tu conexión e inténtalo de nuevo."
+                        is ErrorConexionAuthException, is IOException -> "Error de conexión. Revisa tu internet."
                         else -> "Correo o contraseña incorrectos."
                     }
                     _uiState.value = UiState.Error(mensaje)
@@ -66,7 +98,7 @@ class LoginViewModel(
     }
 
     fun resetearEstado() {
-        _uiState.value = null
+        _uiState.value = UiState.Exito(null)
         correo = ""
         clave = ""
     }
