@@ -1,6 +1,6 @@
 package com.prieto.pokeapp.data.repository
 
-import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
+import com.prieto.pokeapp.domain.model.DetalleItem
 import com.prieto.pokeapp.domain.model.Item
 import kotlinx.coroutines.flow.Flow
 
@@ -12,5 +12,7 @@ interface ItemRepository {
     suspend fun cantidadGuardada(): Int
     suspend fun cantidadFavoritos(): Int
     suspend fun limpiarCache()
-    suspend fun obtenerDetalle(nombreOId: String): Result<ItemDetailDto>
+    suspend fun obtenerDetalle(nombreOId: String): Result<DetalleItem>
 }
+
+class ErrorServidorException(val codigo: Int) : Exception()

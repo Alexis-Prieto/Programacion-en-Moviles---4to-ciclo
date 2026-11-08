@@ -4,7 +4,7 @@ import com.prieto.pokeapp.data.local.ItemDao
 import com.prieto.pokeapp.data.mapper.toDomain
 import com.prieto.pokeapp.data.mapper.toEntity
 import com.prieto.pokeapp.data.remote.ApiService
-import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
+import com.prieto.pokeapp.domain.model.DetalleItem
 import com.prieto.pokeapp.domain.model.Item
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -25,18 +25,16 @@ class ItemRepositoryImpl(
     }
 
     override suspend fun refrescar(): Result<Int> = try {
-        val respuesta = apiService.obtenerListaPokemon(limite = 100)
-        val idsFavoritos = itemDao.idsFavoritos().toSet()
-        val entidades = respuesta.resultados.map { dto ->
-            val entity = dto.toEntity()
-            entity.copy(esFavorito = idsFavoritos.contains(entity.id))
+        val respuesta = apiService.obtenerPokemonPorTipo("fire")
+        val entidades = respuesta.pokemon.map { entrada ->
+            entrada.pokemon.toEntity()
         }
-        itemDao.guardarTodos(entidades)
+        itemDao.actualizarCatalogo(entidades)
         Result.success(entidades.size)
     } catch (e: IOException) {
         Result.failure(e)
     } catch (e: HttpException) {
-        Result.failure(e)
+        Result.failure(ErrorServidorException(e.code()))
     } catch (e: Exception) {
         Result.failure(e)
     }
@@ -49,8 +47,10 @@ class ItemRepositoryImpl(
 
     override suspend fun limpiarCache() = itemDao.borrarTodo()
 
-    override suspend fun obtenerDetalle(nombreOId: String): Result<ItemDetailDto> = try {
-        Result.success(apiService.obtenerDetallePokemon(nombreOId))
+    override suspend fun obtenerDetalle(nombreOId: String): Result<DetalleItem> = try {
+        Result.success(apiService.obtenerDetallePokemon(nombreOId).toDomain())
+    } catch (e: HttpException) {
+        Result.failure(ErrorServidorException(e.code()))
     } catch (e: Exception) {
         Result.failure(e)
     }
