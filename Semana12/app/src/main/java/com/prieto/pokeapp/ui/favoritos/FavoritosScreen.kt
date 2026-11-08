@@ -33,7 +33,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.prieto.pokeapp.domain.model.Item
+import com.prieto.pokeapp.ui.components.fuegoFondo
 import com.prieto.pokeapp.ui.UiState
 import com.prieto.pokeapp.ui.theme.PokedexDarkRed
 import com.prieto.pokeapp.ui.theme.PokedexRed
@@ -61,7 +63,7 @@ private fun MiBottomNavBar(
     esAdmin: Boolean
 ) {
     NavigationBar(
-        containerColor = Color.White
+        containerColor = Color(0xFFFFF5EA)
     ) {
         NavigationBarItem(
             selected = rutaActual == "lista",
@@ -96,23 +98,24 @@ fun FavoritosScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val topBarColor = if (esAdmin) Color(0xFF1976D2) else PokedexRed
+    val topBarColor = PokedexRed
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
+                modifier = Modifier.background(Brush.horizontalGradient(listOf(Color(0xFFAA1720), Color(0xFFE92B27), Color(0xFFF07825)))),
                 title = {
                     Text(
                         text = "Mis Pokémones favoritos",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = topBarColor,
+                    containerColor = Color.Transparent,
                     titleContentColor = Color.White
                 )
             )
@@ -124,7 +127,8 @@ fun FavoritosScreen(
                 esAdmin = esAdmin
             )
         },
-        modifier = modifier
+        containerColor = Color.Transparent,
+        modifier = modifier.fuegoFondo()
     ) { padding ->
         Box(
             modifier = Modifier
@@ -132,7 +136,7 @@ fun FavoritosScreen(
                 .padding(padding)
         ) {
             when (val state = uiState) {
-                is UiState.Idle, is UiState.Cargando -> {
+                is UiState.Cargando -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -178,8 +182,8 @@ fun FavoritosScreen(
                                     Icon(
                                         imageVector = Icons.Default.FavoriteBorder,
                                         contentDescription = "Sin favoritos",
-                                        tint = Color.Gray,
-                                        modifier = Modifier.size(48.dp)
+                                        tint = PokedexRed,
+                                        modifier = Modifier.size(56.dp)
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
@@ -191,7 +195,7 @@ fun FavoritosScreen(
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Marca los Pokémon en la Pokédex con el icono de corazón para guardarlos aquí.",
+                                        text = "Marca los Pokémon en la lista con el icono de corazón para guardarlos aquí.",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = Color.Gray,
                                         textAlign = TextAlign.Center
@@ -229,7 +233,9 @@ private fun FavoritoRow(
 ) {
     ElevatedCard(
         onClick = onCardClick,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = androidx.compose.material3.CardDefaults.elevatedCardColors(containerColor = Color(0xFFFFF9F1)),
+        elevation = androidx.compose.material3.CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
@@ -239,20 +245,20 @@ private fun FavoritoRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(76.dp)
                         .clip(CircleShape)
-                        .background(PokedexScreenBlue.copy(alpha = 0.15f))
-                        .border(1.5.dp, PokedexScreenBlue, CircleShape),
+                        .background(PokedexScreenBlue.copy(alpha = 0.10f))
+                        .border(1.dp, PokedexScreenBlue.copy(alpha = 0.25f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     if (item.urlImagen.isNotEmpty()) {
                         AsyncImage(
                             model = item.urlImagen,
                             contentDescription = item.nombre,
-                            modifier = Modifier.size(52.dp)
+                            modifier = Modifier.size(76.dp)
                         )
                     }
                 }
@@ -270,7 +276,8 @@ private fun FavoritoRow(
                         text = item.nombre.replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp
+                        fontSize = 17.sp,
+                        maxLines = 2
                     )
                 }
             }

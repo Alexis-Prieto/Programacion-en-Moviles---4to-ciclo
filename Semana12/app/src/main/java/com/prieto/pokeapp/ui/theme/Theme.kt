@@ -19,15 +19,15 @@ private val LightPokedexColorScheme = lightColorScheme(
     onPrimaryContainer = Color.White,
     secondary = PokedexScreenBlue,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFE0F2FE),
-    onSecondaryContainer = Color(0xFF0369A1),
+    secondaryContainer = Color(0xFFFFE0C2),
+    onSecondaryContainer = Color(0xFF783B15),
     tertiary = PokedexYellow,
     onTertiary = PokedexTextDark,
     background = PokedexBackground,
     onBackground = PokedexTextDark,
     surface = PokedexSurface,
     onSurface = PokedexTextDark,
-    surfaceVariant = Color(0xFFEDF1F5),
+    surfaceVariant = Color(0xFFFFEADF),
     onSurfaceVariant = PokedexTextSecondary,
     error = Color(0xFFBA1A1A),
     onError = Color.White
@@ -56,7 +56,7 @@ fun PokeAppTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkPokedexColorScheme else LightPokedexColorScheme
+    val colorScheme = LightPokedexColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode && view.context is Activity) {

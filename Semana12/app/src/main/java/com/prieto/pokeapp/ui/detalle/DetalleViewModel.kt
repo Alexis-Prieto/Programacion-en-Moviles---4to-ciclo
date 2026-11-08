@@ -1,9 +1,8 @@
 package com.prieto.pokeapp.ui.detalle
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
+import com.prieto.pokeapp.domain.model.DetalleItem
 import com.prieto.pokeapp.data.repository.ItemRepository
 import com.prieto.pokeapp.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
+import com.prieto.pokeapp.data.repository.ErrorServidorException
 import java.io.IOException
 
 class DetalleViewModel(
@@ -21,8 +20,8 @@ class DetalleViewModel(
     val pokemonId: Int
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<ItemDetailDto>>(UiState.Cargando)
-    val uiState: StateFlow<UiState<ItemDetailDto>> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<DetalleItem>>(UiState.Cargando)
+    val uiState: StateFlow<UiState<DetalleItem>> = _uiState.asStateFlow()
 
     val esFavorito: StateFlow<Boolean> = itemRepository.favoritos
         .map { listaFav ->
@@ -48,7 +47,7 @@ class DetalleViewModel(
                 .onFailure { e ->
                     val mensaje = when (e) {
                         is IOException -> "No hay conexión a internet."
-                        is HttpException -> if (e.code() == 404) "No se encontró la información del Pokémon." else "El servidor no responde. Intenta más tarde."
+                        is ErrorServidorException -> if (e.codigo == 404) "No se encontró la información del Pokémon." else "El servidor no responde. Intenta más tarde."
                         else -> "Ocurrió un error inesperado."
                     }
                     _uiState.value = UiState.Error(mensaje)
@@ -62,16 +61,4 @@ class DetalleViewModel(
         }
     }
 
-    class Factory(
-        private val repository: ItemRepository,
-        private val pokemonId: Int
-    ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(DetalleViewModel::class.java)) {
-                return DetalleViewModel(repository, pokemonId) as T
-            }
-            throw IllegalArgumentException("Clase ViewModel desconocida")
-        }
-    }
 }

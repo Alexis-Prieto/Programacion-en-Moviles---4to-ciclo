@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Height
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,22 +34,28 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
+import com.prieto.pokeapp.domain.model.DetalleItem
+import com.prieto.pokeapp.ui.components.fuegoFondo
 import com.prieto.pokeapp.ui.UiState
 import com.prieto.pokeapp.ui.theme.PokedexDarkRed
 import com.prieto.pokeapp.ui.theme.PokedexRed
@@ -66,12 +74,15 @@ fun DetalleScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
+                modifier = Modifier.background(Brush.horizontalGradient(listOf(Color(0xFFAA1720), Color(0xFFE93B22), Color(0xFFFF8D28)))),
                 title = {
                     Text(
                         text = "Detalle Pokémon",
                         color = Color.White,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 },
                 navigationIcon = {
@@ -84,12 +95,13 @@ fun DetalleScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PokedexRed,
+                    containerColor = Color.Transparent,
                     titleContentColor = Color.White
                 )
             )
         },
-        modifier = modifier
+        containerColor = Color.Transparent,
+        modifier = modifier.fuegoFondo()
     ) { padding ->
         Box(
             modifier = Modifier
@@ -97,7 +109,7 @@ fun DetalleScreen(
                 .padding(padding)
         ) {
             when (val state = uiState) {
-                is UiState.Idle, is UiState.Cargando -> {
+                is UiState.Cargando -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -169,146 +181,171 @@ fun DetalleScreen(
 
 @Composable
 fun DetalleContenido(
-    detalle: ItemDetailDto,
+    detalle: DetalleItem,
     esFavorito: Boolean,
     onFavoritoClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var movimientosExpandidos by rememberSaveable(detalle.id) { mutableStateOf(false) }
     val heartScale by animateFloatAsState(
         targetValue = if (esFavorito) 1.25f else 1.0f,
         label = "HeartScale"
     )
     val heartTint by animateColorAsState(
-        targetValue = if (esFavorito) PokedexRed else Color.Gray,
+        targetValue = PokedexRed,
         label = "HeartTint"
     )
 
-    val imagenUrl = detalle.sprites?.urlImagen
+    val imagenUrl = detalle.urlImagen
         ?: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${detalle.id}.png"
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ElevatedCard(
-            shape = RoundedCornerShape(24.dp),
-            modifier = Modifier.fillMaxWidth()
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .height(280.dp)
+                .background(Brush.verticalGradient(listOf(Color(0xFFC82520), Color(0xFFF16A2C), Color(0xFFFFC46B)))),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Box(
+                modifier = Modifier.size(230.dp).clip(CircleShape)
+                    .background(Color(0xFFFFE0A6).copy(alpha = 0.35f))
+                    .border(2.dp, Color.White.copy(alpha = 0.4f), CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "#${detalle.id.toString().padStart(3, '0')}",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Gray
-                    )
-
-                    IconButton(onClick = onFavoritoClick) {
-                        Icon(
-                            imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Agregar/Quitar Favoritos",
-                            tint = heartTint,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .scale(heartScale)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Box(
-                    modifier = Modifier
-                        .size(180.dp)
-                        .clip(CircleShape)
-                        .background(PokedexScreenBlue.copy(alpha = 0.15f))
-                        .border(3.dp, PokedexScreenBlue, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AsyncImage(
-                        model = imagenUrl,
-                        contentDescription = detalle.nombre,
-                        modifier = Modifier.size(160.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+                AsyncImage(
+                    model = imagenUrl,
+                    contentDescription = detalle.nombre,
+                    modifier = Modifier.size(215.dp)
+                )
+            }
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color(0xFFFFFAF3))
+                .border(1.dp, Color(0xFFF1D8C2), RoundedCornerShape(24.dp))
+                .padding(20.dp)
+        ) {
+            Text(
+                text = "#${detalle.id.toString().padStart(3, '0')}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF786A62)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = detalle.nombre.replaceFirstChar { it.uppercase() },
+                    modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = PokedexDarkRed
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFF32181A)
                 )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                IconButton(
+                    onClick = onFavoritoClick,
+                    modifier = Modifier.clip(CircleShape).background(Color(0xFFFFECE5))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(PokedexYellow.copy(alpha = 0.25f))
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "ALTURA",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Gray
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "${detalle.altura / 10.0} m",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = PokedexDarkRed
-                            )
-                        }
+                    Icon(
+                        imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (esFavorito) "Quitar de favoritos" else "Agregar a favoritos",
+                        tint = heartTint,
+                        modifier = Modifier.size(32.dp).scale(heartScale)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "Medidas",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF651C22)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                ElevatedCard(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = androidx.compose.material3.CardDefaults.elevatedCardColors(containerColor = Color(0xFFFFF9F1))
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.Height, contentDescription = null, tint = Color(0xFFD85C24), modifier = Modifier.size(26.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text("ALTURA", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color(0xFF786A62))
+                        Text("${detalle.altura / 10.0} m", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF32181A))
                     }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(PokedexScreenBlue.copy(alpha = 0.2f))
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "PESO",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Gray
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "${detalle.peso / 10.0} kg",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = PokedexScreenBlue
-                            )
-                        }
+                }
+                ElevatedCard(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = androidx.compose.material3.CardDefaults.elevatedCardColors(containerColor = Color(0xFFFFF9F1))
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.FitnessCenter, contentDescription = null, tint = Color(0xFFD85C24), modifier = Modifier.size(26.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text("PESO", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color(0xFF786A62))
+                        Text("${detalle.peso / 10.0} kg", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF32181A))
+                    }
+                }
+            }
+            if (detalle.tipos.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Tipos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = PokedexDarkRed)
+                Text(
+                    text = detalle.tipos.joinToString(" · ") { it.replace('-', ' ').replaceFirstChar { letra -> letra.uppercase() } },
+                    modifier = Modifier.padding(top = 6.dp),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            detalle.experienciaBase?.let { experiencia ->
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Experiencia base", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = PokedexDarkRed)
+                Text(text = experiencia.toString(), modifier = Modifier.padding(top = 6.dp), style = MaterialTheme.typography.bodyLarge)
+            }
+            if (detalle.habilidades.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Habilidades", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = PokedexDarkRed)
+                detalle.habilidades.forEach { habilidad ->
+                    Text(
+                        text = habilidad.nombre.replace('-', ' ').replaceFirstChar { it.uppercase() } + if (habilidad.oculta) " (oculta)" else "",
+                        modifier = Modifier.padding(top = 6.dp),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+            if (detalle.estadisticas.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Estadísticas base", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = PokedexDarkRed)
+                detalle.estadisticas.forEach { estadistica ->
+                    Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(estadistica.nombre.replace('-', ' ').replaceFirstChar { it.uppercase() }, modifier = Modifier.weight(1f))
+                        Text(estadistica.valor.toString(), fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+            if (detalle.movimientos.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Movimientos (${detalle.movimientos.size})", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = PokedexDarkRed)
+                TextButton(onClick = { movimientosExpandidos = !movimientosExpandidos }) {
+                    Text(if (movimientosExpandidos) "Ocultar movimientos" else "Ver movimientos")
+                }
+                if (movimientosExpandidos) {
+                    detalle.movimientos.forEach { movimiento ->
+                        Text(
+                            text = movimiento.replace('-', ' ').replaceFirstChar { it.uppercase() },
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }

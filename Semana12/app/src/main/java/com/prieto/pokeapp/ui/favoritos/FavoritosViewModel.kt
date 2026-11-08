@@ -7,6 +7,7 @@ import com.prieto.pokeapp.domain.model.Item
 import com.prieto.pokeapp.ui.UiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -19,6 +20,7 @@ class FavoritosViewModel(
         .map<List<Item>, UiState<List<Item>>> { items ->
             UiState.Exito(items)
         }
+        .catch { emit(UiState.Error("Ocurrió un error inesperado.")) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
