@@ -1,6 +1,8 @@
 package com.prieto.pokeapp.ui.admin
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,40 +15,48 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.prieto.pokeapp.ui.components.fuegoFondo
 import com.prieto.pokeapp.ui.UiState
+import kotlinx.coroutines.delay
 
 @Composable
 private fun MiBottomNavBar(
@@ -55,7 +65,7 @@ private fun MiBottomNavBar(
     esAdmin: Boolean
 ) {
     NavigationBar(
-        containerColor = Color.White
+        containerColor = Color(0xFFFFF5EA)
     ) {
         NavigationBarItem(
             selected = rutaActual == "lista",
@@ -93,28 +103,64 @@ fun AdminScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val totalGuardados by viewModel.totalGuardados.collectAsStateWithLifecycle()
     val totalFavoritos by viewModel.totalFavoritos.collectAsStateWithLifecycle()
+    var confirmarLimpieza by rememberSaveable { mutableStateOf(false) }
+    var avisoVisible by rememberSaveable { mutableStateOf(false) }
+    var ultimoExito by rememberSaveable { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(uiState) {
+        val estado = uiState
+        if (estado is UiState.Exito && estado.datos.isNotEmpty()) {
+            if (ultimoExito != estado.datos) {
+                ultimoExito = estado.datos
+                avisoVisible = true
+            }
+            if (avisoVisible) {
+                delay(2500)
+                avisoVisible = false
+            }
+        } else {
+            avisoVisible = false
+            ultimoExito = null
+        }
+    }
+
+    if (confirmarLimpieza) {
+        AlertDialog(
+            onDismissRequest = { confirmarLimpieza = false },
+            icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFDB6B00)) },
+            title = { Text("Limpiar caché", fontWeight = FontWeight.Bold) },
+            text = { Text("Se eliminarán los Pokémon guardados y sus favoritos. Puedes volver a sincronizar el catálogo después.") },
+            confirmButton = {
+                Button(onClick = {
+                    confirmarLimpieza = false
+                    viewModel.limpiar()
+                }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD51D25))) {
+                    Text("Limpiar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmarLimpieza = false }) { Text("Cancelar") }
+            },
+            containerColor = Color(0xFFFFF9F2),
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
+                modifier = Modifier.background(Brush.horizontalGradient(listOf(Color(0xFFAA1720), Color(0xFFD51D25), Color(0xFFF07825)))),
                 title = {
                     Text(
                         text = "Panel de Administración",
                         color = Color.White,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = onIrAlCatalogo) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver al Catálogo",
-                            tint = Color.White
-                        )
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1976D2),
+                    containerColor = Color.Transparent,
                     titleContentColor = Color.White
                 )
             )
@@ -126,12 +172,14 @@ fun AdminScreen(
                 esAdmin = true
             )
         },
-        modifier = modifier
+        containerColor = Color.Transparent,
+        modifier = modifier.fuegoFondo()
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
@@ -149,21 +197,21 @@ fun AdminScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color(0xFFE3F2FD))
+                            .background(Color(0xFFFFF1D6))
                             .padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
                             imageVector = Icons.Default.Storage,
                             contentDescription = "Guardados",
-                            tint = Color(0xFF1976D2),
+                            tint = Color(0xFFD51D25),
                             modifier = Modifier.size(36.dp)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         if (uiState is UiState.Cargando) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(28.dp),
-                                color = Color(0xFF1976D2),
+                                color = Color(0xFFD51D25),
                                 strokeWidth = 3.dp
                             )
                         } else {
@@ -171,7 +219,7 @@ fun AdminScreen(
                                 text = "$totalGuardados",
                                 fontSize = 32.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1976D2)
+                                color = Color(0xFFD51D25)
                             )
                         }
                         Spacer(modifier = Modifier.height(4.dp))
@@ -191,7 +239,7 @@ fun AdminScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color(0xFFFFEBEE))
+                            .background(Color(0xFFFFEAE6))
                             .padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -233,7 +281,7 @@ fun AdminScreen(
                 onClick = { viewModel.sincronizar() },
                 enabled = uiState !is UiState.Cargando,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1976D2),
+                    containerColor = Color(0xFFD51D25),
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp),
@@ -266,10 +314,10 @@ fun AdminScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { viewModel.limpiar() },
+                onClick = { confirmarLimpieza = true },
                 enabled = uiState !is UiState.Cargando,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFD32F2F),
+                    containerColor = Color(0xFFED8500),
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp),
@@ -286,7 +334,7 @@ fun AdminScreen(
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.Warning,
+                            imageVector = Icons.Default.Delete,
                             contentDescription = "Limpiar Caché"
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -325,12 +373,18 @@ fun AdminScreen(
 
             when (val state = uiState) {
                 is UiState.Exito -> {
-                    Text(
-                        text = state.datos,
-                        color = Color(0xFF2E7D32),
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
+                    if (state.datos.isNotEmpty() && avisoVisible) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                                .background(Color(0xFFE8F5E7), RoundedCornerShape(16.dp))
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF2E7D32))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = state.datos, color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
                 is UiState.Error -> {
                     Text(

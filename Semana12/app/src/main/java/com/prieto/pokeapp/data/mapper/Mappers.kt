@@ -2,7 +2,20 @@ package com.prieto.pokeapp.data.mapper
 
 import com.prieto.pokeapp.data.local.ItemEntity
 import com.prieto.pokeapp.data.remote.dto.ItemDto
+import com.prieto.pokeapp.data.remote.dto.ItemDetailDto
+import com.prieto.pokeapp.domain.model.DetalleItem
 import com.prieto.pokeapp.domain.model.Item
+import com.prieto.pokeapp.domain.model.HabilidadPokemon
+import com.prieto.pokeapp.domain.model.EstadisticaPokemon
+
+fun ItemDetailDto.toDomain(): DetalleItem = DetalleItem(
+    id = id, nombre = nombre, altura = altura, peso = peso, urlImagen = sprites?.urlImagen,
+    experienciaBase = experienciaBase,
+    tipos = tipos.map { it.tipo.nombre },
+    habilidades = habilidades.map { HabilidadPokemon(it.habilidad.nombre, it.oculta) },
+    estadisticas = estadisticas.map { EstadisticaPokemon(it.estadistica.nombre, it.valor) },
+    movimientos = movimientos.map { it.movimiento.nombre }
+)
 
 fun ItemDto.toEntity(): ItemEntity {
     val id = this.idExtraido
