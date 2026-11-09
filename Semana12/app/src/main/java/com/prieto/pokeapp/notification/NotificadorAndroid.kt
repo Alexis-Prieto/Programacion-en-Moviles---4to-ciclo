@@ -65,7 +65,6 @@ class NotificadorAndroid(
         try {
             notificationManager.notify(System.currentTimeMillis().toInt(), notification)
         } catch (_: SecurityException) {
-            // El permiso puede cambiar entre la comprobación y la publicación.
         }
     }
 }
