@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.prieto.campusgps.model.LugarConDistancia
@@ -33,6 +34,12 @@ fun ListaLugares(
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val azulCampus = Color(0xFF1976A3)
+    val fondoNormal = Color(0xFFF0F3F6)
+    val fondoSeleccionado = Color(0xFFD8EAFB)
+    val colorNombre = Color(0xFF263849)
+    val colorCategoria = Color(0xFF657584)
+
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(8.dp),
@@ -53,15 +60,15 @@ fun ListaLugares(
                     },
                 colors = CardDefaults.cardColors(
                     containerColor = if (estaSeleccionado) {
-                        MaterialTheme.colorScheme.primaryContainer
+                        fondoSeleccionado
                     } else {
-                        MaterialTheme.colorScheme.surfaceVariant
+                        fondoNormal
                     }
                 ),
                 border = if (estaSeleccionado) {
                     BorderStroke(
                         2.dp,
-                        MaterialTheme.colorScheme.primary
+                        azulCampus
                     )
                 } else {
                     null
@@ -78,7 +85,7 @@ fun ListaLugares(
                         modifier = Modifier
                             .size(10.dp)
                             .background(
-                                MaterialTheme.colorScheme.primary,
+                                azulCampus,
                                 CircleShape
                             )
                     )
@@ -87,18 +94,26 @@ fun ListaLugares(
                     ) {
                         Text(
                             text = item.lugar.nombre,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = colorNombre
                         )
 
                         Text(
                             text = item.lugar.categoria,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorCategoria
                         )
                     }
                     Text(
                         text = item.metros?.let {
                             formatearDistancia(it)
-                        } ?: "Sin calcular"
+                        } ?: "Sin calcular",
+                        color = if (item.metros != null) {
+                            azulCampus
+                        } else {
+                            colorCategoria
+                        },
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
