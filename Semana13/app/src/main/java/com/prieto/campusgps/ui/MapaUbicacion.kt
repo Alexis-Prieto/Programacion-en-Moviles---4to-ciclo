@@ -1,11 +1,15 @@
 package com.prieto.campusgps.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.prieto.campusgps.model.LugarConDistancia
 import com.prieto.campusgps.model.UbicacionUi
 
@@ -22,15 +26,36 @@ fun MapaUbicacion(
             12f
         )
     }
+    LaunchedEffect(estado) {
+        if (estado is UbicacionUi.Lista) {
+            val posicion = LatLng(
+                estado.posicion.latitud,
+                estado.posicion.longitud
+            )
 
-    // TODO Paso 3: LaunchedEffect(estado), animar la cámara
-
+            camara.animate(
+                CameraUpdateFactory.newLatLngZoom(
+                    posicion,
+                    16f
+                )
+            )
+        }
+    }
     GoogleMap(
         modifier = modifier,
         cameraPositionState = camara
     ) {
-        // TODO Paso 3: marcador de ubicación actual
-
+        if (estado is UbicacionUi.Lista) {
+            Marker(
+                state = rememberUpdatedMarkerState(
+                    position = LatLng(
+                        estado.posicion.latitud,
+                        estado.posicion.longitud
+                    )
+                ),
+                title = "Estás aquí"
+            )
+        }
         // TODO Paso 4: marcadores de los lugares
     }
 }

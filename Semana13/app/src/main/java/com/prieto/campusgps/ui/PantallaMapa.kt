@@ -1,13 +1,14 @@
-
 package com.prieto.campusgps.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -26,6 +27,9 @@ import com.prieto.campusgps.viewmodel.MapaViewModel
 fun PantallaMapa(vm: MapaViewModel) {
 
     val estado by vm.estado.collectAsState()
+    val lugares by vm.lugares.collectAsState()
+    val seleccionado by vm.seleccionado.collectAsState()
+
     val contexto = LocalContext.current
 
     val lanzador = rememberLauncherForActivityResult(
@@ -64,9 +68,19 @@ fun PantallaMapa(vm: MapaViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        MapaUbicacion(
+            estado = estado,
+            lugares = lugares,
+            seleccionado = seleccionado,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = { alPulsar() },
             enabled = estado !is UbicacionUi.Buscando
