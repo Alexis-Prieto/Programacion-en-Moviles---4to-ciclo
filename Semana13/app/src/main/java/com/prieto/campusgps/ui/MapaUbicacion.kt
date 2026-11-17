@@ -2,8 +2,10 @@ package com.prieto.campusgps.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -56,6 +58,24 @@ fun MapaUbicacion(
                 title = "Estás aquí"
             )
         }
-        // TODO Paso 4: marcadores de los lugares
+        lugares.forEach { lugarConDistancia ->
+            val lugar = lugarConDistancia.lugar
+
+            key(lugar.id) {
+                Marker(
+                    state = rememberUpdatedMarkerState(
+                        position = LatLng(
+                            lugar.latitud,
+                            lugar.longitud
+                        )
+                    ),
+                    title = lugar.nombre,
+                    snippet = lugar.categoria,
+                    icon = BitmapDescriptorFactory.defaultMarker(
+                        BitmapDescriptorFactory.HUE_AZURE
+                    )
+                )
+            }
+        }
     }
 }
