@@ -1,11 +1,14 @@
 package com.prieto.campusgps.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prieto.campusgps.data.LugaresRepository
 import com.prieto.campusgps.data.UbicacionRepository
 import com.prieto.campusgps.model.LugarConDistancia
+import com.prieto.campusgps.model.Posicion
 import com.prieto.campusgps.model.UbicacionUi
+import com.prieto.campusgps.util.distanciaMetros
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +16,8 @@ import kotlinx.coroutines.launch
 
 class MapaViewModel(
     private val ubicacionRepo: UbicacionRepository,
-    private val lugaresRepo: LugaresRepository) : ViewModel() {
+    private val lugaresRepo: LugaresRepository
+) : ViewModel() {
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
     val estado: StateFlow<UbicacionUi> = _estado.asStateFlow()
     private val _lugares = MutableStateFlow(
@@ -28,13 +32,37 @@ class MapaViewModel(
             ubicacionRepo.obtenerPosicion()
                 .onSuccess {
                     _estado.value = UbicacionUi.Lista(it)
-                // TODO Paso 5: actualizarDistancias(it)
+                    actualizarDistancias(it)
                 }
-                .onFailure { _estado.value = UbicacionUi.Error(mensajeDe(it)) }
+                .onFailure {
+                    _estado.value = UbicacionUi.Error(mensajeDe(it))
+                }
+        }
+    }
+
+    private fun actualizarDistancias(pos: Posicion) {
+        val lista = lugaresRepo.obtenerLugares()
+            .map { lugar ->
+                LugarConDistancia(
+                    lugar,
+                    distanciaMetros(pos, lugar)
+                )
+            }
+            .sortedBy { it.metros }
+
+        _lugares.value = lista
+
+        lista.forEach {
+            Log.d(
+                "CampusGPS",
+                "${it.lugar.nombre}: ${it.metros} m"
+            )
         }
     }
     fun permisoDenegado() {
-        _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+        _estado.value = UbicacionUi.Error(
+            "Sin permiso de ubicación no puedo mostrar dónde estás"
+        )
     }
     // TODO Paso 6: fun seleccionar(id: Int?)
     // TODO Paso 7: val masCercano: StateFlow<Lugar?>
