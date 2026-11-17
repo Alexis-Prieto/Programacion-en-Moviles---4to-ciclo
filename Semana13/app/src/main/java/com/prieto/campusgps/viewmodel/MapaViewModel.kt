@@ -39,7 +39,6 @@ class MapaViewModel(
                 }
         }
     }
-
     private fun actualizarDistancias(pos: Posicion) {
         val lista = lugaresRepo.obtenerLugares()
             .map { lugar ->
@@ -64,7 +63,9 @@ class MapaViewModel(
             "Sin permiso de ubicación no puedo mostrar dónde estás"
         )
     }
-    // TODO Paso 6: fun seleccionar(id: Int?)
+    fun seleccionar(id: Int?) {
+        _seleccionado.value = id
+    }
     // TODO Paso 7: val masCercano: StateFlow<Lugar?>
     private fun mensajeDe(e: Throwable): String = when (e) {
         is SecurityException -> "Falta el permiso de ubicación"

@@ -6,10 +6,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -67,6 +70,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -79,7 +83,8 @@ fun PantallaMapa(vm: MapaViewModel) {
                 .weight(1f)
                 .fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = { alPulsar() },
@@ -106,5 +111,17 @@ fun PantallaMapa(vm: MapaViewModel) {
                 Text(actual.mensaje)
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        ListaLugares(
+            lugares = lugares,
+            seleccionado = seleccionado,
+            onClick = { id ->
+                vm.seleccionar(id)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+        )
     }
 }
