@@ -112,7 +112,11 @@ fun PantallaMapa(vm: MapaViewModel) {
             }
 
             is UbicacionUi.Error -> {
-                Text(actual.mensaje)
+                MensajeError(
+                    error = actual,
+                    onReintentar = { alPulsar() },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
         OutlinedButton(

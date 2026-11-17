@@ -8,6 +8,7 @@ import com.prieto.campusgps.data.UbicacionRepository
 import com.prieto.campusgps.model.Lugar
 import com.prieto.campusgps.model.LugarConDistancia
 import com.prieto.campusgps.model.Posicion
+import com.prieto.campusgps.model.TipoError
 import com.prieto.campusgps.model.UbicacionUi
 import com.prieto.campusgps.util.distanciaMetros
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,13 @@ class MapaViewModel(
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
     fun buscar() {
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
         _estado.value = UbicacionUi.Buscando
         viewModelScope.launch {
             ubicacionRepo.obtenerPosicion()
@@ -39,7 +47,7 @@ class MapaViewModel(
                     actualizarDistancias(it)
                 }
                 .onFailure {
-                    _estado.value = UbicacionUi.Error(mensajeDe(it))
+                    _estado.value = errorDe(it)
                 }
         }
     }
@@ -64,7 +72,8 @@ class MapaViewModel(
     }
     fun permisoDenegado() {
         _estado.value = UbicacionUi.Error(
-            "Sin permiso de ubicación no puedo mostrar dónde estás"
+            "Sin permiso de ubicación no puedo mostrar dónde estás",
+            TipoError.SIN_PERMISO
         )
     }
     fun seleccionar(id: Int?) {
@@ -79,8 +88,20 @@ class MapaViewModel(
             SharingStarted.WhileSubscribed(5000),
             null
         )
-    private fun mensajeDe(e: Throwable): String = when (e) {
-        is SecurityException -> "Falta el permiso de ubicación"
-        else -> e.message ?: "No se pudo obtener la ubicación"
+    private fun errorDe(e: Throwable): UbicacionUi.Error = when (e) {
+        is SecurityException -> UbicacionUi.Error(
+            "Sin permiso de ubicación no puedo mostrar dónde estás",
+            TipoError.SIN_PERMISO
+        )
+
+        is IllegalStateException -> UbicacionUi.Error(
+            "Activa el GPS e intenta de nuevo",
+            TipoError.GPS_APAGADO
+        )
+
+        else -> UbicacionUi.Error(
+            e.message ?: "No se pudo obtener la ubicación",
+            TipoError.OTRO
+        )
     }
 }

@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.prieto.campusgps.model.Posicion
@@ -15,6 +17,10 @@ class UbicacionRepositoryGoogle(context: Context) : UbicacionRepository {
     private val contexto = context.applicationContext
     private val cliente = LocationServices.getFusedLocationProviderClient(contexto)
 
+    override fun playServicesDisponible(): Boolean {
+        return GoogleApiAvailability.getInstance()
+            .isGooglePlayServicesAvailable(contexto) == ConnectionResult.SUCCESS
+    }
     override suspend fun obtenerPosicion(): Result<Posicion> {
         val permisoFino = ContextCompat.checkSelfPermission(
             contexto, Manifest.permission.ACCESS_FINE_LOCATION
