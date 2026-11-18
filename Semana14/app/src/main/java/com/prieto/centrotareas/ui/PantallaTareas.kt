@@ -96,6 +96,7 @@ fun PantallaTareas(viewModel: TareasViewModel) {
 
     val carga by viewModel.carga.collectAsState()
     val simularError by viewModel.simularError.collectAsState()
+    val comparacionTiempos by viewModel.comparacionTiempos.collectAsState()
 
     MaterialTheme(colorScheme = ColoresCentroTareas) {
 
@@ -375,6 +376,52 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                                         Text("Reintentar")
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    if (comparacionTiempos.completa) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = VerdeFondo,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "Comparación de tiempos",
+                                    color = VerdeTexto,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = "Últimos resultados exitosos",
+                                    color = VerdeTexto,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    text = "Una por una: ${comparacionTiempos.unaPorUnaMs} ms",
+                                    color = VerdeTexto
+                                )
+                                Text(
+                                    text = "A la vez: ${comparacionTiempos.aLaVezMs} ms",
+                                    color = VerdeTexto
+                                )
+                                Text(
+                                    text = "Diferencia: ${comparacionTiempos.diferenciaMs} ms",
+                                    color = VerdeTexto
+                                )
+                                Text(
+                                    text = if (comparacionTiempos.modalidadMasRapida == "Empate") {
+                                        "Empate"
+                                    } else {
+                                        "Más rápida: ${comparacionTiempos.modalidadMasRapida}"
+                                    },
+                                    color = VerdeTexto,
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                         }
                     }

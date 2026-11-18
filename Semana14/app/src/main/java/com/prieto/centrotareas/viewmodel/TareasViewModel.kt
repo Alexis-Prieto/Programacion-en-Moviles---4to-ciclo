@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prieto.centrotareas.data.TareasRepository
 import com.prieto.centrotareas.model.CargaUi
+import com.prieto.centrotareas.model.ComparacionTiemposUi
 import com.prieto.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -96,6 +98,10 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     private val _carga = MutableStateFlow<CargaUi>(CargaUi.Inicial)
     val carga: StateFlow<CargaUi> = _carga.asStateFlow()
 
+    private val _comparacionTiempos = MutableStateFlow(ComparacionTiemposUi())
+    val comparacionTiempos: StateFlow<ComparacionTiemposUi> =
+        _comparacionTiempos.asStateFlow()
+
     private val _simularError = MutableStateFlow(false)
     val simularError: StateFlow<Boolean> = _simularError.asStateFlow()
 
@@ -117,6 +123,11 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 val pedidos = repo.cargarPedidos(errorActual)
 
                 val tiempo = System.currentTimeMillis() - inicio
+
+                coroutineContext.ensureActive()
+                _comparacionTiempos.value = _comparacionTiempos.value.copy(
+                    unaPorUnaMs = tiempo
+                )
 
                 _carga.value = CargaUi.Exito(
                     "Una por una",
@@ -157,6 +168,11 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 }
 
                 val tiempo = System.currentTimeMillis() - inicio
+
+                coroutineContext.ensureActive()
+                _comparacionTiempos.value = _comparacionTiempos.value.copy(
+                    aLaVezMs = tiempo
+                )
 
                 _carga.value = CargaUi.Exito(
                     "A la vez",
