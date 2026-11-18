@@ -7,6 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -17,6 +20,7 @@ import com.prieto.centrotareas.viewmodel.TareasViewModel
 fun PantallaTareas(viewModel: TareasViewModel) {
 
     val mensaje by viewModel.mensaje.collectAsState()
+    var toques by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -50,15 +54,20 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                     )
 
                     Button(
-                        onClick = {},
-                        enabled = false
+                        onClick = { toques++ }
                     ) {
-                        Text("Iniciar")
+                        Text("Tócame: $toques")
+                    }
+
+                    Button(
+                        onClick = { viewModel.tareaLargaMala() }
+                    ) {
+                        Text("Tarea larga (MAL)")
                     }
 
                     Text(mensaje)
 
-                    // TODO Pasos 1 a 4
+                    // TODO Pasos 2 a 4
                 }
             }
 
