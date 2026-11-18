@@ -3,16 +3,21 @@ package com.prieto.centrotareas.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.prieto.centrotareas.model.PrimosUi
 import com.prieto.centrotareas.viewmodel.TareasViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,6 +29,9 @@ fun PantallaTareas(viewModel: TareasViewModel) {
     val corriendo by viewModel.corriendo.collectAsState()
 
     var toques by rememberSaveable { mutableIntStateOf(0) }
+
+    val primos by viewModel.primos.collectAsState()
+    var numero by rememberSaveable { mutableStateOf("500000") }
 
     Scaffold(
         topBar = {
@@ -100,13 +108,73 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                         color = Color(0xFF1C6EA4)
                     )
 
-                    Button(
-                        onClick = {},
-                        enabled = false
+                    OutlinedTextField(
+                        value = numero,
+                        onValueChange = { numero = it },
+                        label = { Text("Hasta N") },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("Contar")
+                        Button(
+                            onClick = {
+                                numero.toIntOrNull()?.let { n ->
+                                    if (n >= 2) {
+                                        viewModel.contar(n)
+                                    }
+                                }
+                            },
+                            enabled = primos !is PrimosUi.Calculando
+                        ) {
+                            Text("Contar")
+                        }
+
+                        OutlinedButton(
+                            onClick = { viewModel.cancelarPrimos() },
+                            enabled = primos is PrimosUi.Calculando
+                        ) {
+                            Text("Cancelar")
+                        }
                     }
-                    // TODO Paso 5
+
+                    when (val estado = primos) {
+                        PrimosUi.Inicial -> Unit
+
+                        PrimosUi.Calculando -> {
+                            Text("Calculando...")
+                        }
+
+                        is PrimosUi.Listo -> {
+                            Surface(
+                                color = Color(0xFFE0F2E3),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp)
+                                ) {
+                                    Text(
+                                        text = "Primos encontrados: ${estado.cantidad}",
+                                        color = Color(0xFF205C32)
+                                    )
+
+                                    Text(
+                                        text = "Tiempo: ${estado.milisegundos} ms",
+                                        color = Color(0xFF205C32)
+                                    )
+                                }
+                            }
+                        }
+
+                        PrimosUi.Cancelado -> {
+                            Text("Cancelado")
+                        }
+                    }
                 }
             }
             Card(modifier = Modifier.fillMaxWidth()) {
