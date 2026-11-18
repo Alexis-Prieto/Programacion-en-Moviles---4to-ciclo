@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.prieto.centrotareas.model.PrimosUi
+import com.prieto.centrotareas.model.CargaUi
 import com.prieto.centrotareas.viewmodel.TareasViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +33,8 @@ fun PantallaTareas(viewModel: TareasViewModel) {
 
     val primos by viewModel.primos.collectAsState()
     var numero by rememberSaveable { mutableStateOf("500000") }
+
+    val carga by viewModel.carga.collectAsState()
 
     Scaffold(
         topBar = {
@@ -190,19 +193,63 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(
-                            onClick = {},
-                            enabled = false
+                            onClick = { viewModel.cargarUnaPorUna() },
+                            enabled = carga !is CargaUi.Cargando
                         ) {
                             Text("Una por una")
                         }
                         Button(
-                            onClick = {},
-                            enabled = false
+                            onClick = { viewModel.cargarALaVez() },
+                            enabled = carga !is CargaUi.Cargando
                         ) {
                             Text("A la vez")
                         }
                     }
-                    // TODO Pasos 6 y 7
+
+                    when (val estado = carga) {
+                        CargaUi.Inicial -> Unit
+
+                        CargaUi.Cargando -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+
+                        is CargaUi.Exito -> {
+                            Surface(
+                                color = Color(0xFFE0F2E3),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        text = "Modo: ${estado.modo}",
+                                        color = Color(0xFF205C32)
+                                    )
+
+                                    Text(
+                                        text = "Perfil: ${estado.perfil}",
+                                        color = Color(0xFF205C32)
+                                    )
+
+                                    Text(
+                                        text = "Pedidos: ${estado.pedidos}",
+                                        color = Color(0xFF205C32)
+                                    )
+
+                                    Text(
+                                        text = "Tiempo: ${estado.milisegundos} ms",
+                                        color = Color(0xFF205C32)
+                                    )
+                                }
+                            }
+                        }
+
+                        is CargaUi.Error -> Unit
+                        // TODO Paso 7: mostrar errores y reintento
+                    }
                 }
             }
         }
