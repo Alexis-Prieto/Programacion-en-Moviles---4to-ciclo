@@ -1,5 +1,6 @@
 package com.prieto.centrotareas.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,12 +17,69 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.prieto.centrotareas.model.PrimosUi
 import com.prieto.centrotareas.model.CargaUi
+import com.prieto.centrotareas.model.PrimosUi
 import com.prieto.centrotareas.viewmodel.TareasViewModel
 
+private val Azul = Color(0xFF1976B5)
+private val Fondo = Color(0xFFF8F7FB)
+private val Borde = Color(0xFFE0E5EC)
+private val Texto = Color(0xFF252B33)
+private val VerdeFondo = Color(0xFFE3F4E5)
+private val VerdeTexto = Color(0xFF205C32)
+private val RojoFondo = Color(0xFFFDE7E7)
+private val RojoTexto = Color(0xFFB3261E)
+
+private val ColoresCentroTareas = lightColorScheme(
+    primary = Azul,
+    onPrimary = Color.White,
+    background = Fondo,
+    onBackground = Texto,
+    surface = Color.White,
+    onSurface = Texto,
+    surfaceVariant = Color.White,
+    onSurfaceVariant = Texto
+)
+
+@Composable
+private fun Tarjeta(
+    titulo: String,
+    contenido: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(15.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        ),
+        border = BorderStroke(1.dp, Borde)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(9.dp)
+        ) {
+            Text(
+                text = titulo,
+                modifier = Modifier.fillMaxWidth(),
+                color = Azul,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            contenido()
+        }
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaTareas(viewModel: TareasViewModel) {
@@ -34,40 +92,41 @@ fun PantallaTareas(viewModel: TareasViewModel) {
 
     val primos by viewModel.primos.collectAsState()
     var numero by rememberSaveable { mutableStateOf("500000") }
+    var numeroCalculado by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val carga by viewModel.carga.collectAsState()
     val simularError by viewModel.simularError.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("CentroTareas") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1C6EA4),
-                    titleContentColor = Color.White
-                )
-            )
-        }
-    ) { padding ->
+    MaterialTheme(colorScheme = ColoresCentroTareas) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Tarea con progreso",
-                        color = Color(0xFF1C6EA4)
+        Scaffold(
+            containerColor = Fondo,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "CentroTareas",
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Azul,
+                        titleContentColor = Color.White
                     )
+                )
+            }
+        ) { padding ->
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+
+                Tarjeta(titulo = "Tarea con progreso") {
 
                     Button(
                         onClick = { toques++ }
@@ -76,7 +135,11 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                     }
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.CenterHorizontally
+                        )
                     ) {
                         Button(
                             onClick = { viewModel.tareaLarga() },
@@ -92,31 +155,33 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                             Text("Cancelar")
                         }
                     }
+
                     LinearProgressIndicator(
                         progress = { progreso },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Azul,
+                        trackColor = Borde
                     )
 
-                    Text("${(progreso * 100).toInt()} %")
-
-                    Text(mensaje)
-                }
-            }
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
                     Text(
-                        text = "Contar números primos",
-                        color = Color(0xFF1C6EA4)
+                        text = "${(progreso * 100).toInt()} %",
+                        color = Texto,
+                        textAlign = TextAlign.Center
                     )
+
+                    Text(
+                        text = mensaje,
+                        color = Texto,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Tarjeta(titulo = "Contar números primos") {
 
                     OutlinedTextField(
                         value = numero,
                         onValueChange = { numero = it },
-                        label = { Text("Hasta N") },
+                        label = { Text("Hasta el número") },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number
                         ),
@@ -125,12 +190,17 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                     )
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.CenterHorizontally
+                        )
                     ) {
                         Button(
                             onClick = {
                                 numero.toIntOrNull()?.let { n ->
                                     if (n >= 2) {
+                                        numeroCalculado = n
                                         viewModel.contar(n)
                                     }
                                 }
@@ -151,47 +221,75 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                         PrimosUi.Inicial -> Unit
 
                         PrimosUi.Calculando -> {
-                            Text("Calculando...")
+                            Text(
+                                text = "Calculando...",
+                                color = Texto
+                            )
                         }
 
                         is PrimosUi.Listo -> {
                             Surface(
-                                color = Color(0xFFE0F2E3),
+                                modifier = Modifier.fillMaxWidth(),
+                                color = VerdeFondo,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(12.dp)
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Text(
-                                        text = "Primos encontrados: ${estado.cantidad}",
-                                        color = Color(0xFF205C32)
+                                        text = numeroCalculado?.let { n ->
+                                            "Primos hasta $n: ${estado.cantidad}"
+                                        } ?: "Primos encontrados: ${estado.cantidad}",
+                                        color = VerdeTexto,
+                                        fontWeight = FontWeight.SemiBold
                                     )
 
                                     Text(
                                         text = "Tiempo: ${estado.milisegundos} ms",
-                                        color = Color(0xFF205C32)
+                                        color = VerdeTexto
                                     )
                                 }
                             }
                         }
 
                         PrimosUi.Cancelado -> {
-                            Text("Cancelado")
+                            Text(
+                                text = "Cancelado",
+                                color = Texto
+                            )
                         }
                     }
                 }
-            }
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Dos cargas",
-                        color = Color(0xFF1C6EA4)
-                    )
+
+                Tarjeta(titulo = "Dos cargas") {
+
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Switch(
+                            checked = simularError,
+                            onCheckedChange = {
+                                viewModel.cambiarSimularError(it)
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = "Simular error",
+                            color = Texto
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.CenterHorizontally
+                        )
                     ) {
                         OutlinedButton(
                             onClick = { viewModel.cargarUnaPorUna() },
@@ -207,55 +305,46 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                         }
                     }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Switch(
-                            checked = simularError,
-                            onCheckedChange = {
-                                viewModel.cambiarSimularError(it)
-                            }
-                        )
-
-                        Text("Simular error")
-                    }
                     when (val estado = carga) {
                         CargaUi.Inicial -> Unit
 
                         CargaUi.Cargando -> {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(32.dp),
+                                color = Azul
                             )
                         }
 
                         is CargaUi.Exito -> {
                             Surface(
-                                color = Color(0xFFE0F2E3),
+                                modifier = Modifier.fillMaxWidth(),
+                                color = VerdeFondo,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Text(
                                         text = "Modo: ${estado.modo}",
-                                        color = Color(0xFF205C32)
+                                        color = VerdeTexto,
+                                        fontWeight = FontWeight.SemiBold
                                     )
 
                                     Text(
                                         text = "Perfil: ${estado.perfil}",
-                                        color = Color(0xFF205C32)
+                                        color = VerdeTexto
                                     )
 
                                     Text(
                                         text = "Pedidos: ${estado.pedidos}",
-                                        color = Color(0xFF205C32)
+                                        color = VerdeTexto
                                     )
 
                                     Text(
                                         text = "Tiempo: ${estado.milisegundos} ms",
-                                        color = Color(0xFF205C32)
+                                        color = VerdeTexto
                                     )
                                 }
                             }
@@ -263,16 +352,19 @@ fun PantallaTareas(viewModel: TareasViewModel) {
 
                         is CargaUi.Error -> {
                             Surface(
-                                color = Color(0xFFFDE7E7),
+                                modifier = Modifier.fillMaxWidth(),
+                                color = RojoFondo,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(
                                         text = estado.mensaje,
-                                        color = Color(0xFFB3261E)
+                                        color = RojoTexto,
+                                        textAlign = TextAlign.Center
                                     )
 
                                     OutlinedButton(
