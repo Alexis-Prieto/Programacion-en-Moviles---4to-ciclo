@@ -91,7 +91,29 @@ fun MensajeError(
                     Text("Reintentar")
                 }
             }
-            TipoError.SIN_PLAY_SERVICES -> Unit
+            TipoError.SIN_PLAY_SERVICES -> {
+                OutlinedButton(
+                    onClick = {
+                        val intent = Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        ).apply {
+                            data = Uri.fromParts(
+                                "package",
+                                "com.google.android.gms",
+                                null
+                            )
+                        }
+                        contexto.startActivity(intent)
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = azulCampus
+                    ),
+                    border = BorderStroke(1.dp, azulCampus)
+                ) {
+                    Text("Revisar Play Services")
+                }
+            }
         }
     }
 }
