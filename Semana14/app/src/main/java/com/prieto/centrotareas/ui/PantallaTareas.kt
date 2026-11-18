@@ -91,6 +91,7 @@ fun PantallaTareas(viewModel: TareasViewModel) {
     var toques by rememberSaveable { mutableIntStateOf(0) }
 
     val primos by viewModel.primos.collectAsState()
+    val progresoPrimos by viewModel.progresoPrimos.collectAsState()
     var numero by rememberSaveable { mutableStateOf("500000") }
     var numeroCalculado by rememberSaveable { mutableStateOf<Int?>(null) }
 
@@ -218,6 +219,21 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                             Text("Cancelar")
                         }
                     }
+                    if (primos !is PrimosUi.Inicial) {
+                        LinearProgressIndicator(
+                            progress = { progresoPrimos / 100f },
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Azul,
+                            trackColor = Borde
+                        )
+
+                        Text(
+                            text = "$progresoPrimos %",
+                            color = Texto,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
                     when (val estado = primos) {
                         PrimosUi.Inicial -> Unit
 

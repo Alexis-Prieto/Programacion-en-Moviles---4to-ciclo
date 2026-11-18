@@ -17,9 +17,17 @@ class TareasRepositoryLocal : TareasRepository {
         if (simularError) throw IOException("Sin conexión")
         return listOf("Pedido 101", "Pedido 102", "Pedido 103")
     }
-    override suspend fun contarPrimos(hasta: Int): Int =
+    override suspend fun contarPrimos(
+        hasta: Int,
+        onProgreso: suspend (Int) -> Unit
+    ): Int =
         withContext(Dispatchers.Default) {
             var cantidad = 0
+            var ultimoPorcentaje = 0
+            val totalCandidatos = hasta - 1L
+
+            ensureActive()
+            onProgreso(0)
 
             for (n in 2..hasta) {
                 ensureActive()
@@ -27,7 +35,15 @@ class TareasRepositoryLocal : TareasRepository {
                 if (esPrimo(n)) {
                     cantidad++
                 }
+
+                val porcentaje = ((n - 1L) * 100 / totalCandidatos).toInt()
+                if (porcentaje != ultimoPorcentaje) {
+                    ensureActive()
+                    onProgreso(porcentaje)
+                    ultimoPorcentaje = porcentaje
+                }
             }
+            ensureActive()
             cantidad
         }
     private fun esPrimo(n: Int): Boolean {
