@@ -71,10 +71,10 @@ fun PantallaMapa(vm: MapaViewModel) {
             contexto,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(
-                contexto,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(
+                    contexto,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
 
     var permisoUbicacionConcedido by remember(contexto) {
         mutableStateOf(tienePermisoUbicacion())
@@ -84,9 +84,9 @@ fun PantallaMapa(vm: MapaViewModel) {
         val permisoRevocado = permisoUbicacionConcedido && !permisoActual
         permisoUbicacionConcedido = permisoActual
         if (!permisoActual && (
-                permisoRevocado || vm.estado.value is UbicacionUi.Lista ||
-                    vm.estado.value is UbicacionUi.Buscando
-                )) {
+                    permisoRevocado || vm.estado.value is UbicacionUi.Lista ||
+                            vm.estado.value is UbicacionUi.Buscando
+                    )) {
             vm.permisoDenegado()
         }
     }
@@ -149,149 +149,164 @@ fun PantallaMapa(vm: MapaViewModel) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val errorActual = estado as? UbicacionUi.Error
 
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(listOf("Todos", "Estudio", "Comida", "Eventos", "Servicios")) { categoria ->
-                    FilterChip(
-                        selected = categoriaSeleccionada == categoria,
-                        onClick = { vm.seleccionarCategoria(categoria) },
-                        label = { Text(categoria) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = Color.White,
-                            labelColor = azulCampus,
-                            selectedContainerColor = azulCampus,
-                            selectedLabelColor = Color.White
-                        )
+            if (errorActual != null) {
+                Button(
+                    onClick = { alPulsar() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = azulCampus,
+                        contentColor = Color.White
                     )
+                ) {
+                    Text("Obtener mi ubicación")
                 }
-            }
 
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                item { Text("Radio:") }
-                items(listOf(100, 200, 500)) { radio ->
-                    FilterChip(
-                        selected = radioSeleccionado == radio,
-                        onClick = { vm.seleccionarRadio(radio) },
-                        label = { Text("$radio m") },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = Color.White,
-                            labelColor = azulCampus,
-                            selectedContainerColor = azulCampus,
-                            selectedLabelColor = Color.White
-                        )
-                    )
-                }
-            }
+                Spacer(modifier = Modifier.height(16.dp))
 
-            MapaUbicacion(
-                estado = if (permisoUbicacionConcedido) estado else UbicacionUi.Inicial,
-                permisoUbicacionConcedido = permisoUbicacionConcedido,
-                radioMetros = radioSeleccionado,
-                lugares = lugares,
-                seleccionado = seleccionado,
-                masCercanoId = masCercano?.id,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = { alPulsar() },
-                enabled = estado !is UbicacionUi.Buscando,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = azulCampus,
-                    contentColor = Color.White
+                MensajeError(
+                    error = errorActual,
+                    onReintentar = { alPulsar() },
+                    modifier = Modifier.fillMaxWidth()
                 )
-            ) {
-                Text("Obtener mi ubicación")
-            }
+            } else {
 
-            when (val actual = estado) {
-                UbicacionUi.Inicial -> {
-                    Text("Pulsa el botón para obtener tu ubicación")
-                }
-
-                UbicacionUi.Buscando -> {
-                    Text("Buscando ubicación...")
-                }
-
-                is UbicacionUi.Lista -> {
-                    if (permisoUbicacionConcedido) {
-                        Text("Latitud: ${actual.posicion.latitud}")
-                        Text("Longitud: ${actual.posicion.longitud}")
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(listOf("Todos", "Estudio", "Comida", "Eventos", "Servicios")) { categoria ->
+                        FilterChip(
+                            selected = categoriaSeleccionada == categoria,
+                            onClick = { vm.seleccionarCategoria(categoria) },
+                            label = { Text(categoria) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = Color.White,
+                                labelColor = azulCampus,
+                                selectedContainerColor = azulCampus,
+                                selectedLabelColor = Color.White
+                            )
+                        )
                     }
                 }
 
-                is UbicacionUi.Error -> {
-                    MensajeError(
-                        error = actual,
-                        onReintentar = { alPulsar() },
-                        modifier = Modifier.fillMaxWidth()
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    item { Text("Radio:") }
+                    items(listOf(100, 200, 500)) { radio ->
+                        FilterChip(
+                            selected = radioSeleccionado == radio,
+                            onClick = { vm.seleccionarRadio(radio) },
+                            label = { Text("$radio m") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = Color.White,
+                                labelColor = azulCampus,
+                                selectedContainerColor = azulCampus,
+                                selectedLabelColor = Color.White
+                            )
+                        )
+                    }
+                }
+
+                MapaUbicacion(
+                    estado = if (permisoUbicacionConcedido) estado else UbicacionUi.Inicial,
+                    permisoUbicacionConcedido = permisoUbicacionConcedido,
+                    radioMetros = radioSeleccionado,
+                    lugares = lugares,
+                    seleccionado = seleccionado,
+                    masCercanoId = masCercano?.id,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = { alPulsar() },
+                    enabled = estado !is UbicacionUi.Buscando,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = azulCampus,
+                        contentColor = Color.White
                     )
+                ) {
+                    Text("Obtener mi ubicación")
                 }
-            }
-            OutlinedButton(
-                onClick = {
-                    vm.seleccionarMasCercano()
-                    val indice = vm.lugaresFiltrados.value.indexOfFirst {
-                        it.lugar.id == vm.seleccionado.value
+
+                when (val actual = estado) {
+                    UbicacionUi.Inicial -> {
+                        Text("Pulsa el botón para obtener tu ubicación")
                     }
-                    if (indice >= 0) {
-                        alcance.launch {
-                            estadoLista.animateScrollToItem(indice)
+
+                    UbicacionUi.Buscando -> {
+                        Text("Buscando ubicación...")
+                    }
+
+                    is UbicacionUi.Lista -> {
+                        if (permisoUbicacionConcedido) {
+                            Text("Latitud: ${actual.posicion.latitud}")
+                            Text("Longitud: ${actual.posicion.longitud}")
                         }
                     }
-                },
-                enabled = masCercano != null,
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = azulCampus
-                ),
-                border = BorderStroke(
-                    1.dp,
-                    if (masCercano != null) {
-                        azulCampus
-                    } else {
-                        Color.LightGray
-                    }
-                )
-            ) {
-                Text("Ir al más cercano")
-            }
-
-            masCercano?.let { lugar ->
-                val metros = lugares.firstOrNull {
-                    it.lugar.id == lugar.id
-                }?.metros
-
-                if (metros != null) {
-                    Text(
-                        text = "Más cercano: ${lugar.nombre} (${formatearDistancia(metros)})"
-                    )
+                    is UbicacionUi.Error -> Unit
                 }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        vm.seleccionarMasCercano()
+                        val indice = vm.lugaresFiltrados.value.indexOfFirst {
+                            it.lugar.id == vm.seleccionado.value
+                        }
+                        if (indice >= 0) {
+                            alcance.launch {
+                                estadoLista.animateScrollToItem(indice)
+                            }
+                        }
+                    },
+                    enabled = masCercano != null,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = azulCampus
+                    ),
+                    border = BorderStroke(
+                        1.dp,
+                        if (masCercano != null) {
+                            azulCampus
+                        } else {
+                            Color.LightGray
+                        }
+                    )
+                ) {
+                    Text("Ir al más cercano")
+                }
 
-            ListaLugares(
-                lugares = lugares,
-                lugaresDentroDelRadio = if (permisoUbicacionConcedido) lugaresDentroDelRadio else emptySet(),
-                estadoLista = estadoLista,
-                seleccionado = seleccionado,
-                onClick = { id ->
-                    vm.seleccionar(id)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-            )
+                masCercano?.let { lugar ->
+                    val metros = lugares.firstOrNull {
+                        it.lugar.id == lugar.id
+                    }?.metros
+
+                    if (metros != null) {
+                        Text(
+                            text = "Más cercano: ${lugar.nombre} (${formatearDistancia(metros)})"
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                ListaLugares(
+                    lugares = lugares,
+                    lugaresDentroDelRadio = if (permisoUbicacionConcedido) lugaresDentroDelRadio else emptySet(),
+                    estadoLista = estadoLista,
+                    seleccionado = seleccionado,
+                    onClick = { id ->
+                        vm.seleccionar(id)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                )
+            }
         }
     }
 }

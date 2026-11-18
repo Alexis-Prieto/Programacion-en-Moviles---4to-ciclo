@@ -113,6 +113,11 @@ class MapaViewModel(
         }
     }
     fun permisoDenegado() {
+        _lugares.value = lugaresRepo.obtenerLugares().map {
+            LugarConDistancia(it, null)
+        }
+        _seleccionado.value = null
+        actualizarFiltro()
         _estado.value = UbicacionUi.Error(
             "Sin permiso de ubicación no puedo mostrar dónde estás",
             TipoError.SIN_PERMISO

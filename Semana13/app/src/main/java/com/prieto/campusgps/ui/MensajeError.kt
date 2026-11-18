@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,77 +31,67 @@ fun MensajeError(
 ) {
     val contexto = LocalContext.current
     val azulCampus = Color(0xFF1976A3)
+    val fondoError = Color(0xFFFBE4E4)
+    val textoError = Color(0xFFAA3535)
 
-    Card(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        )
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = fondoError
+            )
         ) {
             Text(
                 text = error.mensaje,
-                color = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                color = textoError,
                 textAlign = TextAlign.Center
             )
-            when (error.tipo) {
-                TipoError.SIN_PERMISO -> {
-                    OutlinedButton(
-                        onClick = {
-                            val intent = Intent(
-                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                            ).apply {
-                                data = Uri.fromParts(
-                                    "package",
-                                    contexto.packageName,
-                                    null
-                                )
-                            }
-
-                            contexto.startActivity(intent)
-                        },
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.White,
-                            contentColor = azulCampus
-                        ),
-                        border = BorderStroke(1.dp, azulCampus)
-                    ) {
-                        Text("Abrir ajustes")
-                    }
-                }
-                TipoError.GPS_APAGADO -> {
-                    OutlinedButton(
-                        onClick = onReintentar,
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.White,
-                            contentColor = azulCampus
-                        ),
-                        border = BorderStroke(1.dp, azulCampus)
-                    ) {
-                        Text("Reintentar")
-                    }
-                }
-                TipoError.SIN_PLAY_SERVICES -> {
-                }
-                TipoError.OTRO -> {
-                    OutlinedButton(
-                        onClick = onReintentar,
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.White,
-                            contentColor = azulCampus
-                        ),
-                        border = BorderStroke(1.dp, azulCampus)
-                    ) {
-                        Text("Reintentar")
-                    }
+        }
+        when (error.tipo) {
+            TipoError.SIN_PERMISO -> {
+                OutlinedButton(
+                    onClick = {
+                        val intent = Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        ).apply {
+                            data = Uri.fromParts(
+                                "package",
+                                contexto.packageName,
+                                null
+                            )
+                        }
+                        contexto.startActivity(intent)
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = azulCampus
+                    ),
+                    border = BorderStroke(1.dp, azulCampus)
+                ) {
+                    Text("Abrir ajustes")
                 }
             }
+            TipoError.GPS_APAGADO,
+            TipoError.OTRO -> {
+                OutlinedButton(
+                    onClick = onReintentar,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = azulCampus
+                    ),
+                    border = BorderStroke(1.dp, azulCampus)
+                ) {
+                    Text("Reintentar")
+                }
+            }
+            TipoError.SIN_PLAY_SERVICES -> Unit
         }
     }
 }
