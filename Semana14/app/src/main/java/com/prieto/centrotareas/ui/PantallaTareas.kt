@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,6 +36,7 @@ fun PantallaTareas(viewModel: TareasViewModel) {
     var numero by rememberSaveable { mutableStateOf("500000") }
 
     val carga by viewModel.carga.collectAsState()
+    val simularError by viewModel.simularError.collectAsState()
 
     Scaffold(
         topBar = {
@@ -145,7 +147,6 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                             Text("Cancelar")
                         }
                     }
-
                     when (val estado = primos) {
                         PrimosUi.Inicial -> Unit
 
@@ -206,6 +207,19 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                         }
                     }
 
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Switch(
+                            checked = simularError,
+                            onCheckedChange = {
+                                viewModel.cambiarSimularError(it)
+                            }
+                        )
+
+                        Text("Simular error")
+                    }
                     when (val estado = carga) {
                         CargaUi.Inicial -> Unit
 
@@ -247,8 +261,30 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                             }
                         }
 
-                        is CargaUi.Error -> Unit
-                        // TODO Paso 7: mostrar errores y reintento
+                        is CargaUi.Error -> {
+                            Surface(
+                                color = Color(0xFFFDE7E7),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = estado.mensaje,
+                                        color = Color(0xFFB3261E)
+                                    )
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            viewModel.cargarALaVez()
+                                        }
+                                    ) {
+                                        Text("Reintentar")
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
