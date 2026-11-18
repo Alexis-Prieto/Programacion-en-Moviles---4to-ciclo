@@ -20,6 +20,7 @@ import com.prieto.centrotareas.viewmodel.TareasViewModel
 fun PantallaTareas(viewModel: TareasViewModel) {
 
     val mensaje by viewModel.mensaje.collectAsState()
+    val progreso by viewModel.progreso.collectAsState()
     var toques by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
@@ -62,12 +63,18 @@ fun PantallaTareas(viewModel: TareasViewModel) {
                     Button(
                         onClick = { viewModel.tareaLarga() }
                     ) {
-                        Text("Tarea larga")
+                        Text("Iniciar")
                     }
+                    LinearProgressIndicator(
+                        progress = { progreso },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Text("${(progreso * 100).toInt()} %")
 
                     Text(mensaje)
 
-                    // TODO Pasos 2 a 4
+                    // TODO Paso 4
                 }
             }
 
