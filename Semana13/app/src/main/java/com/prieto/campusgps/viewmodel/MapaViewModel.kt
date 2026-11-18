@@ -29,8 +29,26 @@ class MapaViewModel(
         lugaresRepo.obtenerLugares().map { LugarConDistancia(it, null) }
     )
     val lugares: StateFlow<List<LugarConDistancia>> = _lugares.asStateFlow()
+    private val _categoriaSeleccionada = MutableStateFlow("Todos")
+    val categoriaSeleccionada: StateFlow<String> = _categoriaSeleccionada.asStateFlow()
+    private val _lugaresFiltrados = MutableStateFlow(_lugares.value)
+    val lugaresFiltrados: StateFlow<List<LugarConDistancia>> = _lugaresFiltrados.asStateFlow()
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
+    fun seleccionarCategoria(categoria: String) {
+        _categoriaSeleccionada.value = categoria
+        actualizarFiltro()
+    }
+    private fun actualizarFiltro() {
+        val categoria = _categoriaSeleccionada.value
+        val visibles = _lugares.value.filter {
+            categoria == "Todos" || it.lugar.categoria == categoria
+        }
+        if (visibles.none { it.lugar.id == _seleccionado.value }) {
+            _seleccionado.value = null
+        }
+        _lugaresFiltrados.value = visibles
+    }
     fun buscar() {
         if (!ubicacionRepo.playServicesDisponible()) {
             _estado.value = UbicacionUi.Error(
@@ -62,6 +80,7 @@ class MapaViewModel(
             .sortedBy { it.metros }
 
         _lugares.value = lista
+        actualizarFiltro()
 
         lista.forEach {
             Log.d(
@@ -77,9 +96,14 @@ class MapaViewModel(
         )
     }
     fun seleccionar(id: Int?) {
-        _seleccionado.value = id
+        _seleccionado.value = id?.takeIf { candidato ->
+            _lugaresFiltrados.value.any { it.lugar.id == candidato }
+        }
     }
-    val masCercano: StateFlow<Lugar?> = lugares
+    fun seleccionarMasCercano() {
+        seleccionar(_lugaresFiltrados.value.firstOrNull { it.metros != null }?.lugar?.id)
+    }
+    val masCercano: StateFlow<Lugar?> = lugaresFiltrados
         .map { lista ->
             lista.firstOrNull { it.metros != null }?.lugar
         }
