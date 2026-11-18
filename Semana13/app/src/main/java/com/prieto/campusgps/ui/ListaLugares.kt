@@ -35,7 +35,8 @@ fun ListaLugares(
     seleccionado: Int?,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    estadoLista: LazyListState = rememberLazyListState()
+    estadoLista: LazyListState = rememberLazyListState(),
+    lugaresDentroDelRadio: Set<Int> = emptySet()
 ) {
     val azulCampus = Color(0xFF1976A3)
     val fondoNormal = Color(0xFFF0F3F6)
@@ -107,6 +108,14 @@ fun ListaLugares(
                             style = MaterialTheme.typography.bodySmall,
                             color = colorCategoria
                         )
+                        if (item.lugar.id in lugaresDentroDelRadio) {
+                            Text(
+                                text = "Dentro del radio",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = azulCampus
+                            )
+                        }
                     }
                     Text(
                         text = item.metros?.let {

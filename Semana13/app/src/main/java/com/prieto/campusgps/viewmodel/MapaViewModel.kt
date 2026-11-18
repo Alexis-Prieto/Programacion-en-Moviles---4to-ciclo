@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -35,6 +36,28 @@ class MapaViewModel(
     val lugaresFiltrados: StateFlow<List<LugarConDistancia>> = _lugaresFiltrados.asStateFlow()
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
+    private val _radioSeleccionado = MutableStateFlow(100)
+    val radioSeleccionado: StateFlow<Int> = _radioSeleccionado.asStateFlow()
+    val lugaresDentroDelRadio: StateFlow<Set<Int>> = combine(
+        lugares, radioSeleccionado, estado
+    ) { lista, radio, ubicacion ->
+        if (ubicacion is UbicacionUi.Lista) {
+            lista.filter { it.metros?.let { metros -> metros <= radio } == true }
+                .map { it.lugar.id }
+                .toSet()
+        } else {
+            emptySet()
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptySet()
+    )
+    fun seleccionarRadio(radio: Int) {
+        if (radio == 100 || radio == 200 || radio == 500) {
+            _radioSeleccionado.value = radio
+        }
+    }
     fun seleccionarCategoria(categoria: String) {
         _categoriaSeleccionada.value = categoria
         actualizarFiltro()

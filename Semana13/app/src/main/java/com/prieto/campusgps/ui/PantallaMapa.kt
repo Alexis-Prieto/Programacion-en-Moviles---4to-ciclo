@@ -52,6 +52,8 @@ fun PantallaMapa(vm: MapaViewModel) {
     val categoriaSeleccionada by vm.categoriaSeleccionada.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
+    val radioSeleccionado by vm.radioSeleccionado.collectAsState()
+    val lugaresDentroDelRadio by vm.lugaresDentroDelRadio.collectAsState()
     val estadoLista = rememberLazyListState()
     val alcance = rememberCoroutineScope()
 
@@ -132,8 +134,30 @@ fun PantallaMapa(vm: MapaViewModel) {
                 }
             }
 
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                item { Text("Radio:") }
+                items(listOf(100, 200, 500)) { radio ->
+                    FilterChip(
+                        selected = radioSeleccionado == radio,
+                        onClick = { vm.seleccionarRadio(radio) },
+                        label = { Text("$radio m") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = Color.White,
+                            labelColor = azulCampus,
+                            selectedContainerColor = azulCampus,
+                            selectedLabelColor = Color.White
+                        )
+                    )
+                }
+            }
+
             MapaUbicacion(
                 estado = estado,
+                radioMetros = radioSeleccionado,
                 lugares = lugares,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
@@ -220,6 +244,7 @@ fun PantallaMapa(vm: MapaViewModel) {
 
             ListaLugares(
                 lugares = lugares,
+                lugaresDentroDelRadio = lugaresDentroDelRadio,
                 estadoLista = estadoLista,
                 seleccionado = seleccionado,
                 onClick = { id ->
