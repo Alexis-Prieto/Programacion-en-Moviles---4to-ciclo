@@ -28,15 +28,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.prieto.campusgps.model.UbicacionUi
 import com.prieto.campusgps.util.formatearDistancia
 import com.prieto.campusgps.viewmodel.MapaViewModel
@@ -59,28 +66,56 @@ fun PantallaMapa(vm: MapaViewModel) {
 
     val contexto = LocalContext.current
 
+    fun tienePermisoUbicacion(): Boolean =
+        ContextCompat.checkSelfPermission(
+            contexto,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                contexto,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+    var permisoUbicacionConcedido by remember(contexto) {
+        mutableStateOf(tienePermisoUbicacion())
+    }
+    fun actualizarPermisoUbicacion() {
+        val permisoActual = tienePermisoUbicacion()
+        val permisoRevocado = permisoUbicacionConcedido && !permisoActual
+        permisoUbicacionConcedido = permisoActual
+        if (!permisoActual && (
+                permisoRevocado || vm.estado.value is UbicacionUi.Lista ||
+                    vm.estado.value is UbicacionUi.Buscando
+                )) {
+            vm.permisoDenegado()
+        }
+    }
+    val propietarioCicloVida = LocalLifecycleOwner.current
+    DisposableEffect(propietarioCicloVida, contexto, vm) {
+        val observador = LifecycleEventObserver { _, evento ->
+            if (evento == Lifecycle.Event.ON_RESUME) {
+                actualizarPermisoUbicacion()
+            }
+        }
+        propietarioCicloVida.lifecycle.addObserver(observador)
+        onDispose {
+            propietarioCicloVida.lifecycle.removeObserver(observador)
+        }
+    }
+
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { resultado ->
-        if (resultado.values.any { it }) {
+    ) {
+        actualizarPermisoUbicacion()
+        if (permisoUbicacionConcedido) {
             vm.buscar()
         } else {
             vm.permisoDenegado()
         }
     }
     fun alPulsar() {
-        val permisoFino = ContextCompat.checkSelfPermission(
-            contexto,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-        val permisoAproximado = ContextCompat.checkSelfPermission(
-            contexto,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-        if (
-            permisoFino == PackageManager.PERMISSION_GRANTED ||
-            permisoAproximado == PackageManager.PERMISSION_GRANTED
-        ) {
+        actualizarPermisoUbicacion()
+        if (permisoUbicacionConcedido) {
             vm.buscar()
         } else {
             lanzador.launch(
@@ -156,7 +191,8 @@ fun PantallaMapa(vm: MapaViewModel) {
             }
 
             MapaUbicacion(
-                estado = estado,
+                estado = if (permisoUbicacionConcedido) estado else UbicacionUi.Inicial,
+                permisoUbicacionConcedido = permisoUbicacionConcedido,
                 radioMetros = radioSeleccionado,
                 lugares = lugares,
                 seleccionado = seleccionado,
@@ -189,8 +225,10 @@ fun PantallaMapa(vm: MapaViewModel) {
                 }
 
                 is UbicacionUi.Lista -> {
-                    Text("Latitud: ${actual.posicion.latitud}")
-                    Text("Longitud: ${actual.posicion.longitud}")
+                    if (permisoUbicacionConcedido) {
+                        Text("Latitud: ${actual.posicion.latitud}")
+                        Text("Longitud: ${actual.posicion.longitud}")
+                    }
                 }
 
                 is UbicacionUi.Error -> {
@@ -244,7 +282,7 @@ fun PantallaMapa(vm: MapaViewModel) {
 
             ListaLugares(
                 lugares = lugares,
-                lugaresDentroDelRadio = lugaresDentroDelRadio,
+                lugaresDentroDelRadio = if (permisoUbicacionConcedido) lugaresDentroDelRadio else emptySet(),
                 estadoLista = estadoLista,
                 seleccionado = seleccionado,
                 onClick = { id ->

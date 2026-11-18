@@ -12,6 +12,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.prieto.campusgps.model.LugarConDistancia
@@ -24,6 +26,7 @@ fun MapaUbicacion(
     seleccionado: Int?,
     masCercanoId: Int?,
     radioMetros: Int,
+    permisoUbicacionConcedido: Boolean,
     modifier: Modifier = Modifier
 ) {
     val camara = rememberCameraPositionState {
@@ -66,9 +69,11 @@ fun MapaUbicacion(
     }
     GoogleMap(
         modifier = modifier,
-        cameraPositionState = camara
+        cameraPositionState = camara,
+        properties = MapProperties(isMyLocationEnabled = permisoUbicacionConcedido),
+        uiSettings = MapUiSettings(myLocationButtonEnabled = permisoUbicacionConcedido)
     ) {
-        if (estado is UbicacionUi.Lista) {
+        if (permisoUbicacionConcedido && estado is UbicacionUi.Lista) {
             Circle(
                 center = LatLng(
                     estado.posicion.latitud,
@@ -78,15 +83,6 @@ fun MapaUbicacion(
                 strokeColor = Color(0xFF1976A3),
                 fillColor = Color(0xFF1976A3).copy(alpha = 0.15f),
                 strokeWidth = 3f
-            )
-            Marker(
-                state = rememberUpdatedMarkerState(
-                    position = LatLng(
-                        estado.posicion.latitud,
-                        estado.posicion.longitud
-                    )
-                ),
-                title = "Estás aquí"
             )
         }
         lugares.forEach { lugarConDistancia ->
