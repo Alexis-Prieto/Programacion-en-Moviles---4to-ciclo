@@ -1,6 +1,5 @@
 package com.prieto.centrotareas.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prieto.centrotareas.data.TareasRepository
@@ -12,11 +11,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -32,7 +31,7 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     val corriendo: StateFlow<Boolean> = _corriendo.asStateFlow()
 
     fun tareaLarga() {
-        if (_corriendo.value) return
+        if (_corriendo.value || trabajo?.isCompleted == false) return
 
         _corriendo.value = true
 
@@ -41,21 +40,17 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             _progreso.value = 0f
 
             try {
-                Log.d("HILO", "Antes: ${Thread.currentThread().name}")
-
-                withContext(Dispatchers.Default) {
-                    Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
-
-                    for (i in 1..100) {
-                        delay(40)
-                        _progreso.value = i / 100f
-                    }
+                repo.ejecutarTareaConProgreso().collect { porcentaje ->
+                    coroutineContext.ensureActive()
+                    _progreso.value = porcentaje / 100f
                 }
 
-                Log.d("HILO", "Despues: ${Thread.currentThread().name}")
-
+                coroutineContext.ensureActive()
                 _mensaje.value = "Terminó"
 
+            } catch (e: CancellationException) {
+                _mensaje.value = "Cancelado"
+                throw e
             } finally {
                 _corriendo.value = false
             }

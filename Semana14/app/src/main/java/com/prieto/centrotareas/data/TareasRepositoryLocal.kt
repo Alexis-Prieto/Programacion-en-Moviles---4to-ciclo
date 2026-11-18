@@ -3,10 +3,22 @@ package com.prieto.centrotareas.data
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class TareasRepositoryLocal : TareasRepository {
+
+    override fun ejecutarTareaConProgreso(): Flow<Int> = flow {
+        emit(0)
+
+        for (porcentaje in 1..100) {
+            delay(40)
+            emit(porcentaje)
+        }
+    }.flowOn(Dispatchers.Default)
 
     override suspend fun cargarPerfil(): String {
         delay(2000)
