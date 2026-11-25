@@ -35,6 +35,12 @@ class PostsViewModel(
 
     val usuarioFiltro = _usuarioFiltro.asStateFlow()
 
+    private val _busqueda = MutableStateFlow("")
+
+    val busqueda = _busqueda.asStateFlow()
+
+    private var publicacionesOriginales: List<Post> = emptyList()
+
     private val _publicacion =
         MutableStateFlow<UiState<Post>?>(null)
 
@@ -66,7 +72,8 @@ class PostsViewModel(
 
             resultado
                 .onSuccess {
-                    _lista.value = UiState.Exito(it)
+                    publicacionesOriginales = it
+                    aplicarBusqueda()
                 }
                 .onFailure {
                     _lista.value = UiState.Error(mensajeDe(it))
@@ -77,6 +84,21 @@ class PostsViewModel(
     fun filtrar(userId: Int?) {
         _usuarioFiltro.value = userId
         cargar()
+    }
+
+    fun actualizarBusqueda(texto: String) {
+        _busqueda.value = texto
+        if (_lista.value is UiState.Exito) {
+            aplicarBusqueda()
+        }
+    }
+
+    private fun aplicarBusqueda() {
+        val texto = _busqueda.value
+        val publicaciones = publicacionesOriginales.filter {
+            it.title.contains(texto, ignoreCase = true)
+        }
+        _lista.value = UiState.Exito(publicaciones)
     }
 
     fun abrir(id: Int) {
