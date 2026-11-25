@@ -66,34 +66,36 @@ fun ErrorConReintento(
     mensaje: String,
     onReintentar: () -> Unit
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 16.dp)
+            .padding(top = 64.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Card(
+            modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer
             )
         ) {
-            Column(
+            Text(
+                text = mensaje,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = mensaje,
-                    textAlign = TextAlign.Center
-                )
+                    .padding(12.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
-                Button(onClick = onReintentar) {
-                    Text("Reintentar")
-                }
-            }
+        Button(onClick = onReintentar) {
+            Text(
+                text = "Reintentar",
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

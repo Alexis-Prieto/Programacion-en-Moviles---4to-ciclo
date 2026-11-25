@@ -29,27 +29,28 @@ fun PantallaLista(
     Column(
         modifier = modifier.fillMaxSize()
     ) {
+        if (estado is UiState.Exito) {
 
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                FilterChip(
-                    selected = usuarioFiltro == null,
-                    onClick = { vm.filtrar(null) },
-                    label = { Text("Todos") }
-                )
-            }
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    FilterChip(
+                        selected = usuarioFiltro == null,
+                        onClick = { vm.filtrar(null) },
+                        label = { Text("Todos") }
+                    )
+                }
 
-            items((1..10).toList()) { userId ->
-
-                FilterChip(
-                    selected = usuarioFiltro == userId,
-                    onClick = { vm.filtrar(userId) },
-                    label = { Text("Usuario $userId") }
-                )
+                items((1..10).toList()) { userId ->
+                    FilterChip(
+                        selected = usuarioFiltro == userId,
+                        onClick = { vm.filtrar(userId) },
+                        label = { Text("Usuario $userId") }
+                    )
+                }
             }
         }
         Box(
