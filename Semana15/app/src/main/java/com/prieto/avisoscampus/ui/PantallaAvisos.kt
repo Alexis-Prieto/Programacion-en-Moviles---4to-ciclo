@@ -33,6 +33,8 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     val permiso by vm.permiso.collectAsState()
 
+    val faltan by vm.faltan.collectAsState()
+
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
@@ -170,23 +172,32 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
                     Button(
                         onClick = {
-                            // TODO Paso 5
-                        }
+                            vm.recordarEn()
+                        },
+                        enabled = faltan == null
                     ) {
                         Text("Recordar en 10 s")
                     }
 
                     OutlinedButton(
                         onClick = {
-                            // TODO Paso 5
+                            vm.cancelarRecordatorio()
                         },
-                        enabled = false
+                        enabled = faltan != null
                     ) {
                         Text("Cancelar")
                     }
                 }
 
-                // TODO Paso 5: mostrar cuenta regresiva
+                if (faltan != null) {
+
+                    Text(
+                        text = "Faltan $faltan s",
+                        color = AzulPrincipal,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
             }
 
             Tarjeta("Receptor de anuncios") {
