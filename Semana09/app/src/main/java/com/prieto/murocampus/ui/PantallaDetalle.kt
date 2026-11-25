@@ -21,6 +21,7 @@ import com.prieto.murocampus.viewmodel.UiState
 fun PantallaDetalle(
     vm: PostsViewModel,
     id: Int,
+    onEditar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val estado by vm.detalle.collectAsStateWithLifecycle()
@@ -93,6 +94,14 @@ fun PantallaDetalle(
                                 text = post.body,
                                 style = MaterialTheme.typography.bodyLarge
                             )
+
+                            Button(
+                                onClick = onEditar,
+                                enabled = !eliminando && eliminacion !is UiState.Exito,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Editar publicación")
+                            }
 
                             Button(
                                 onClick = { confirmarEliminacion = true },

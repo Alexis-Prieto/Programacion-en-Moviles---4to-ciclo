@@ -7,6 +7,7 @@ import com.prieto.murocampus.data.mensajeDe
 import com.prieto.murocampus.model.Post
 import com.prieto.murocampus.model.Comentario
 import com.prieto.murocampus.model.NuevoPost
+import com.prieto.murocampus.model.EditarPost
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,9 +47,15 @@ class PostsViewModel(
 
     val publicacion = _publicacion.asStateFlow()
 
-    private val _eliminacion = MutableStateFlow<UiState<Unit>?>(null)
+    private val _eliminacion =
+        MutableStateFlow<UiState<Unit>?>(null)
 
     val eliminacion = _eliminacion.asStateFlow()
+
+    private val _edicion =
+        MutableStateFlow<UiState<Post>?>(null)
+
+    val edicion = _edicion.asStateFlow()
 
     private var trabajoLista: Job? = null
 
@@ -57,6 +64,8 @@ class PostsViewModel(
     private var trabajoPublicacion: Job? = null
 
     private var trabajoEliminacion: Job? = null
+
+    private var trabajoEdicion: Job? = null
 
     init {
         cargar()
@@ -94,6 +103,7 @@ class PostsViewModel(
 
     fun actualizarBusqueda(texto: String) {
         _busqueda.value = texto
+
         if (_lista.value is UiState.Exito) {
             aplicarBusqueda()
         }
@@ -101,9 +111,11 @@ class PostsViewModel(
 
     private fun aplicarBusqueda() {
         val texto = _busqueda.value
+
         val publicaciones = publicacionesOriginales.filter {
             it.title.contains(texto, ignoreCase = true)
         }
+
         _lista.value = UiState.Exito(publicaciones)
     }
 
@@ -113,7 +125,7 @@ class PostsViewModel(
         trabajoDetalle = viewModelScope.launch {
             _detalle.value = UiState.Cargando
 
-            val post = repo.detalle(id).getOrElse {
+            val postServidor = repo.detalle(id).getOrElse {
                 _detalle.value = UiState.Error(mensajeDe(it))
                 return@launch
             }
@@ -122,6 +134,14 @@ class PostsViewModel(
                 _detalle.value = UiState.Error(mensajeDe(it))
                 return@launch
             }
+
+            val tituloLocal = publicacionesOriginales
+                .firstOrNull { it.id == id }
+                ?.title
+
+            val post = postServidor.copy(
+                title = tituloLocal ?: postServidor.title
+            )
 
             _detalle.value = UiState.Exito(
                 DetalleUi(post, comentarios)
@@ -133,17 +153,72 @@ class PostsViewModel(
         trabajoDetalle?.cancel()
         trabajoEliminacion?.cancel()
         _eliminacion.value = null
+        limpiarEdicion()
+    }
+
+    fun editar(id: Int, titulo: String) {
+
+        if (titulo.isBlank() || _edicion.value == UiState.Cargando) return
+
+        _edicion.value = UiState.Cargando
+
+        trabajoEdicion = viewModelScope.launch {
+            repo.editar(id, EditarPost(title = titulo))
+                .onSuccess { post ->
+
+                    publicacionesOriginales = publicacionesOriginales.map {
+                        if (it.id == id) post else it
+                    }
+
+                    if (_lista.value is UiState.Exito) {
+                        aplicarBusqueda()
+                    }
+
+                    val detalleActual = _detalle.value
+
+                    if (
+                        detalleActual is UiState.Exito &&
+                        detalleActual.datos.post.id == id
+                    ) {
+                        _detalle.value = UiState.Exito(
+                            detalleActual.datos.copy(post = post)
+                        )
+                    }
+
+                    _edicion.value = UiState.Exito(post)
+                }
+                .onFailure {
+                    _edicion.value = UiState.Error(mensajeDe(it))
+                }
+        }
+    }
+
+    fun limpiarEdicion() {
+        trabajoEdicion?.cancel()
+        _edicion.value = null
     }
 
     fun eliminar(id: Int) {
-        if (_eliminacion.value == UiState.Cargando || _eliminacion.value is UiState.Exito) return
+
+        if (
+            _eliminacion.value == UiState.Cargando ||
+            _eliminacion.value is UiState.Exito
+        ) return
 
         _eliminacion.value = UiState.Cargando
+
         trabajoEliminacion = viewModelScope.launch {
             repo.eliminar(id)
                 .onSuccess {
-                    publicacionesOriginales = publicacionesOriginales.filterNot { it.id == id }
-                    if (_lista.value is UiState.Exito) aplicarBusqueda()
+
+                    publicacionesOriginales = publicacionesOriginales.filterNot {
+                        it.id == id
+                    }
+
+                    if (_lista.value is UiState.Exito) {
+                        aplicarBusqueda()
+                    }
+
                     _eliminacion.value = UiState.Exito(Unit)
                 }
                 .onFailure {

@@ -13,6 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.prieto.murocampus.ui.PantallaLista
 import com.prieto.murocampus.ui.PantallaDetalle
 import com.prieto.murocampus.ui.PantallaCrear
+import com.prieto.murocampus.ui.PantallaEditar
 import com.prieto.murocampus.viewmodel.PostsViewModel
 import com.prieto.murocampus.viewmodel.UiState
 import kotlinx.coroutines.launch
@@ -23,6 +24,8 @@ fun AppNav(vm: PostsViewModel) {
 
     val estadoLista by vm.lista.collectAsStateWithLifecycle()
     val estadoEliminacion by vm.eliminacion.collectAsStateWithLifecycle()
+    val estadoEdicion by vm.edicion.collectAsStateWithLifecycle()
+    val estadoDetalle by vm.detalle.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -30,6 +33,9 @@ fun AppNav(vm: PostsViewModel) {
         mutableStateOf<Int?>(null)
     }
     var mostrarCrear by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var mostrarEditar by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -42,7 +48,10 @@ fun AppNav(vm: PostsViewModel) {
     }
 
     val volver: () -> Unit = {
-        if (mostrarCrear) {
+        if (mostrarEditar) {
+            vm.limpiarEdicion()
+            mostrarEditar = false
+        } else if (mostrarCrear) {
             vm.limpiarPublicacion()
             mostrarCrear = false
         } else {
@@ -53,7 +62,7 @@ fun AppNav(vm: PostsViewModel) {
     BackHandler(
         enabled = idSeleccionado != null || mostrarCrear
     ) {
-        if (estadoEliminacion != UiState.Cargando) volver()
+        if (estadoEliminacion != UiState.Cargando && estadoEdicion != UiState.Cargando) volver()
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -72,7 +81,8 @@ fun AppNav(vm: PostsViewModel) {
                     if (idSeleccionado != null || mostrarCrear) {
                         TextButton(
                             onClick = volver,
-                            enabled = estadoEliminacion != UiState.Cargando
+                            enabled = estadoEliminacion != UiState.Cargando &&
+                                    estadoEdicion != UiState.Cargando
                         ) {
                             Text(
                                 text = "Atrás",
@@ -119,10 +129,31 @@ fun AppNav(vm: PostsViewModel) {
                     modifier = Modifier.padding(innerPadding)
                 )
             }
+            mostrarEditar && id != null -> {
+                val detalle = estadoDetalle
+                if (detalle is UiState.Exito && detalle.datos.post.id == id) {
+                    PantallaEditar(
+                        vm = vm,
+                        post = detalle.datos.post,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                } else {
+                    PantallaDetalle(
+                        vm = vm,
+                        id = id,
+                        onEditar = {},
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
             id != null -> {
                 PantallaDetalle(
                     vm = vm,
                     id = id,
+                    onEditar = {
+                        vm.limpiarEdicion()
+                        mostrarEditar = true
+                    },
                     modifier = Modifier.padding(innerPadding)
                 )
             }

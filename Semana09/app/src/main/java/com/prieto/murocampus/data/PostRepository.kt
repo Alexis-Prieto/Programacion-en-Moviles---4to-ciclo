@@ -4,6 +4,7 @@ import com.prieto.murocampus.data.remote.PostApi
 import com.prieto.murocampus.model.Post
 import com.prieto.murocampus.model.Comentario
 import com.prieto.murocampus.model.NuevoPost
+import com.prieto.murocampus.model.EditarPost
 import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 
@@ -20,6 +21,8 @@ interface PostRepository {
     suspend fun crear(nuevo: NuevoPost): Result<Post>
 
     suspend fun eliminar(id: Int): Result<Unit>
+
+    suspend fun editar(id: Int, cambios: EditarPost): Result<Post>
 }
 
 class PostRepositoryRemote(
@@ -47,6 +50,9 @@ class PostRepositoryRemote(
             if (!respuesta.isSuccessful) throw HttpException(respuesta)
             Unit
         }
+
+    override suspend fun editar(id: Int, cambios: EditarPost): Result<Post> =
+        llamar { api.editar(id, cambios) }
 
     private suspend fun <T> llamar(bloque: suspend () -> T): Result<T> {
         return try {
