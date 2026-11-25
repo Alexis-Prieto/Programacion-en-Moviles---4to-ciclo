@@ -1,5 +1,6 @@
 package com.prieto.murocampus.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +15,7 @@ import com.prieto.murocampus.viewmodel.UiState
 @Composable
 fun PantallaLista(
     vm: PostsViewModel,
+    onAbrir: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val estado by vm.lista.collectAsStateWithLifecycle()
@@ -42,7 +44,15 @@ fun PantallaLista(
                         items = actual.datos,
                         key = { it.id }
                     ) { post ->
-                        TarjetaPost(post)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onAbrir(post.id)
+                                }
+                        ) {
+                            TarjetaPost(post)
+                        }
                     }
                 }
             }
