@@ -1,12 +1,16 @@
 package com.prieto.avisoscampus.notificacion
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.prieto.avisoscampus.R
 import com.prieto.avisoscampus.model.Aviso
 
 object Notificador {
@@ -36,8 +40,25 @@ object Notificador {
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
     }
+    @SuppressLint("MissingPermission")
     fun mostrar(context: Context, aviso: Aviso): Boolean {
-        // TODO Paso 3
-        return false
+
+        if (!tienePermiso(context)) {
+            return false
+        }
+        val notificacion = NotificationCompat.Builder(
+            context,
+            CANAL
+        )
+            .setSmallIcon(R.drawable.ic_notificacion)
+            .setContentTitle(aviso.titulo)
+            .setContentText(aviso.texto)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        NotificationManagerCompat.from(context)
+            .notify(aviso.id, notificacion)
+        return true
     }
 }

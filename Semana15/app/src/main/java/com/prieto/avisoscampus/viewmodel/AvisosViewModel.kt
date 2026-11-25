@@ -1,10 +1,13 @@
 package com.prieto.avisoscampus.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.prieto.avisoscampus.data.AvisosRepository
 import com.prieto.avisoscampus.model.Aviso
+import com.prieto.avisoscampus.model.Origen
 import com.prieto.avisoscampus.model.PermisoUi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class AvisosViewModel(
     private val repo: AvisosRepository
@@ -32,8 +35,17 @@ class AvisosViewModel(
             PermisoUi.Denegado
         }
     }
-    // TODO Paso 3: avisarAhora()
 
+    fun avisarAhora() {
+        viewModelScope.launch {
+            val aviso = repo.registrar(
+                titulo = "Tarea lista",
+                texto = "Tu entrega fue registrada",
+                origen = Origen.BOTON
+            )
+            _eventos.emit(aviso)
+        }
+    }
     // TODO Paso 5: faltan, recordarEn()
     // y cancelarRecordatorio()
 

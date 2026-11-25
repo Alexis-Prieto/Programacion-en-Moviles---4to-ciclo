@@ -154,7 +154,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
                 Button(
                     onClick = {
-                        // TODO Paso 3
+                        vm.avisarAhora()
                     }
                 ) {
                     Text("Mostrar aviso")
