@@ -41,6 +41,8 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     val escuchando by vm.escuchandoAvion.collectAsState()
 
+    val avisos by vm.avisos.collectAsState()
+
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
@@ -253,20 +255,15 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     textAlign = TextAlign.Center
                 )
             }
-            Tarjeta("Historial") {
 
-                Text(
-                    text = "Sin avisos todavía",
-                    color = TextoSecundario
-                )
-                // TODO Paso 7: mostrar historial
-            }
+            HistorialAvisos(avisos = avisos)
+
             // TODO Paso 8: mensaje de error y ajustes
         }
     }
 }
 @Composable
-private fun Tarjeta(
+internal fun Tarjeta(
     titulo: String,
     contenido: @Composable ColumnScope.() -> Unit
 ) {
