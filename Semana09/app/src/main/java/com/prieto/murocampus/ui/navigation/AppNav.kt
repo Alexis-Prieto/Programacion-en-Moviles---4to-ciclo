@@ -15,18 +15,30 @@ import com.prieto.murocampus.ui.PantallaDetalle
 import com.prieto.murocampus.ui.PantallaCrear
 import com.prieto.murocampus.viewmodel.PostsViewModel
 import com.prieto.murocampus.viewmodel.UiState
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNav(vm: PostsViewModel) {
 
     val estadoLista by vm.lista.collectAsStateWithLifecycle()
+    val estadoEliminacion by vm.eliminacion.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     var idSeleccionado by rememberSaveable {
         mutableStateOf<Int?>(null)
     }
     var mostrarCrear by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(estadoEliminacion) {
+        if (estadoEliminacion is UiState.Exito && idSeleccionado != null) {
+            vm.cerrarDetalle()
+            idSeleccionado = null
+            scope.launch { snackbarHostState.showSnackbar("Publicación eliminada") }
+        }
     }
 
     val volver: () -> Unit = {
@@ -41,10 +53,12 @@ fun AppNav(vm: PostsViewModel) {
     BackHandler(
         enabled = idSeleccionado != null || mostrarCrear
     ) {
-        volver()
+        if (estadoEliminacion != UiState.Cargando) volver()
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+
+        snackbarHost = { SnackbarHost(snackbarHostState) },
 
         topBar = {
             TopAppBar(
@@ -56,7 +70,10 @@ fun AppNav(vm: PostsViewModel) {
                 },
                 navigationIcon = {
                     if (idSeleccionado != null || mostrarCrear) {
-                        TextButton(onClick = volver) {
+                        TextButton(
+                            onClick = volver,
+                            enabled = estadoEliminacion != UiState.Cargando
+                        ) {
                             Text(
                                 text = "Atrás",
                                 color = Color.White
