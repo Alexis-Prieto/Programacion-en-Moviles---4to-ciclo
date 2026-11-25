@@ -45,6 +45,9 @@ class AvisosViewModel(
         } else {
             PermisoUi.Denegado
         }
+        if (concedido) {
+            _mensaje.value = null
+        }
     }
 
     fun avisarAhora() {
@@ -85,7 +88,6 @@ class AvisosViewModel(
     fun cancelarRecordatorio() {
         trabajo?.cancel()
     }
-
     fun cambiarEscucha(valor: Boolean) {
         _escuchandoAvion.value = valor
     }
@@ -103,9 +105,14 @@ class AvisosViewModel(
                 },
                 origen = Origen.MODO_AVION
             )
-
             _eventos.emit(aviso)
         }
     }
-    // TODO Paso 8: noSePudoMostrar()
+    fun noSePudoMostrar() {
+
+        _permiso.value = PermisoUi.Denegado
+
+        _mensaje.value =
+            "Sin permiso: el aviso se guardó en el historial, pero no se mostró"
+    }
 }

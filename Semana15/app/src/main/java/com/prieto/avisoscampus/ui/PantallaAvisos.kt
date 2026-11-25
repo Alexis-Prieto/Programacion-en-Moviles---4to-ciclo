@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -43,6 +44,8 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     val avisos by vm.avisos.collectAsState()
 
+    val mensaje by vm.mensaje.collectAsState()
+
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
@@ -56,9 +59,15 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     }
     LaunchedEffect(Unit) {
         vm.eventos.collect { aviso ->
-            Notificador.mostrar(contexto, aviso)
 
-            // TODO Paso 8: manejar permiso denegado
+            val mostrado = Notificador.mostrar(
+                contexto,
+                aviso
+            )
+
+            if (!mostrado) {
+                vm.noSePudoMostrar()
+            }
         }
     }
 
@@ -180,6 +189,42 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 ) {
                     Text("Permitir notificaciones")
                 }
+                if (permiso == PermisoUi.Denegado) {
+
+                    OutlinedButton(
+                        onClick = {
+                            val intent = Intent(
+                                Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                            ).apply {
+
+                                putExtra(
+                                    Settings.EXTRA_APP_PACKAGE,
+                                    contexto.packageName
+                                )
+                            }
+
+                            contexto.startActivity(intent)
+                        }
+                    ) {
+                        Text("Abrir ajustes")
+                    }
+                }
+                mensaje?.let { textoMensaje ->
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color(0xFFFBE4E4),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+
+                        Text(
+                            text = textoMensaje,
+                            color = Color(0xFFC62828),
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                }
             }
 
             Tarjeta("Avisos") {
@@ -257,8 +302,6 @@ fun PantallaAvisos(vm: AvisosViewModel) {
             }
 
             HistorialAvisos(avisos = avisos)
-
-            // TODO Paso 8: mensaje de error y ajustes
         }
     }
 }
