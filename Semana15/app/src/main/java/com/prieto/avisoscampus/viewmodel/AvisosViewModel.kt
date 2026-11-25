@@ -6,6 +6,7 @@ import com.prieto.avisoscampus.data.AvisosRepository
 import com.prieto.avisoscampus.model.Aviso
 import com.prieto.avisoscampus.model.Origen
 import com.prieto.avisoscampus.model.PermisoUi
+import com.prieto.avisoscampus.model.Prioridad
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
@@ -39,6 +40,7 @@ class AvisosViewModel(
 
     val escuchandoAvion: StateFlow<Boolean> =
         _escuchandoAvion.asStateFlow()
+
     fun permisoRespondido(concedido: Boolean) {
         _permiso.value = if (concedido) {
             PermisoUi.Concedido
@@ -55,7 +57,8 @@ class AvisosViewModel(
             val aviso = repo.registrar(
                 titulo = "Tarea lista",
                 texto = "Tu entrega fue registrada",
-                origen = Origen.BOTON
+                origen = Origen.BOTON,
+                prioridad = Prioridad.NORMAL
             )
 
             _eventos.emit(aviso)
@@ -76,7 +79,8 @@ class AvisosViewModel(
                 val aviso = repo.registrar(
                     titulo = "Recordatorio",
                     texto = "Revisa tu laboratorio pendiente",
-                    origen = Origen.RECORDATORIO
+                    origen = Origen.RECORDATORIO,
+                    prioridad = Prioridad.URGENTE
                 )
                 _eventos.emit(aviso)
 
@@ -103,7 +107,8 @@ class AvisosViewModel(
                 } else {
                     "Desactivado"
                 },
-                origen = Origen.MODO_AVION
+                origen = Origen.MODO_AVION,
+                prioridad = Prioridad.NORMAL
             )
             _eventos.emit(aviso)
         }

@@ -2,6 +2,7 @@ package com.prieto.avisoscampus.data
 
 import com.prieto.avisoscampus.model.Aviso
 import com.prieto.avisoscampus.model.Origen
+import com.prieto.avisoscampus.model.Prioridad
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +16,8 @@ interface AvisosRepository {
     fun registrar(
         titulo: String,
         texto: String,
-        origen: Origen
+        origen: Origen,
+        prioridad: Prioridad
     ): Aviso
 }
 
@@ -31,7 +33,8 @@ class AvisosRepositoryMemoria : AvisosRepository {
     override fun registrar(
         titulo: String,
         texto: String,
-        origen: Origen
+        origen: Origen,
+        prioridad: Prioridad
     ): Aviso {
         val hora = SimpleDateFormat(
             "HH:mm:ss",
@@ -43,7 +46,8 @@ class AvisosRepositoryMemoria : AvisosRepository {
             titulo,
             texto,
             origen,
-            hora
+            hora,
+            prioridad
         )
         _avisos.value = listOf(aviso) + _avisos.value
         return aviso

@@ -15,9 +15,11 @@ import androidx.core.content.ContextCompat
 import com.prieto.avisoscampus.MainActivity
 import com.prieto.avisoscampus.R
 import com.prieto.avisoscampus.model.Aviso
+import com.prieto.avisoscampus.model.Prioridad
 
 object Notificador {
     const val CANAL = "avisos"
+    const val CANAL_URGENTES = "urgentes"
 
     fun crearCanal(context: Context) {
 
@@ -31,6 +33,12 @@ object Notificador {
                 NotificationManager::class.java
             )
             manager.createNotificationChannel(canal)
+            val canalUrgentes = NotificationChannel(
+                CANAL_URGENTES,
+                "Urgentes",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            manager.createNotificationChannel(canalUrgentes)
         }
     }
     fun tienePermiso(context: Context): Boolean {
@@ -59,14 +67,18 @@ object Notificador {
             intent,
             PendingIntent.FLAG_IMMUTABLE
         )
+        val urgente = aviso.prioridad == Prioridad.URGENTE
         val notificacion = NotificationCompat.Builder(
             context,
-            CANAL
+            if (urgente) CANAL_URGENTES else CANAL
         )
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(
+                if (urgente) NotificationCompat.PRIORITY_HIGH
+                else NotificationCompat.PRIORITY_DEFAULT
+            )
             .setContentIntent(pendiente)
             .setAutoCancel(true)
             .build()
