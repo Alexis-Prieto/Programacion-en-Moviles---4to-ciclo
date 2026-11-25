@@ -17,6 +17,7 @@ import com.prieto.murocampus.data.PostRepositoryRemote
 import com.prieto.murocampus.data.remote.RetrofitClient
 import com.prieto.murocampus.ui.PantallaLista
 import com.prieto.murocampus.ui.PantallaDetalle
+import com.prieto.murocampus.ui.PantallaCrear
 import com.prieto.murocampus.ui.theme.MuroCampusTheme
 import com.prieto.murocampus.viewmodel.PostsViewModel
 import com.prieto.murocampus.viewmodel.PostsViewModelFactory
@@ -41,11 +42,23 @@ class MainActivity : ComponentActivity() {
                 var idSeleccionado by rememberSaveable {
                     mutableStateOf<Int?>(null)
                 }
-                val volver: () -> Unit = {
-                    vm.cerrarDetalle()
-                    idSeleccionado = null
+                var mostrarCrear by rememberSaveable {
+                    mutableStateOf(false)
                 }
-                BackHandler(enabled = idSeleccionado != null) {
+
+                val volver: () -> Unit = {
+                    if (mostrarCrear) {
+                        vm.limpiarPublicacion()
+                        mostrarCrear = false
+                    } else {
+                        vm.cerrarDetalle()
+                        idSeleccionado = null
+                    }
+                }
+
+                BackHandler(
+                    enabled = idSeleccionado != null || mostrarCrear
+                ) {
                     volver()
                 }
                 Scaffold(
@@ -56,7 +69,7 @@ class MainActivity : ComponentActivity() {
                                 Text("MuroCampus")
                             },
                             navigationIcon = {
-                                if (idSeleccionado != null) {
+                                if (idSeleccionado != null || mostrarCrear) {
                                     TextButton(onClick = volver) {
                                         Text(
                                             text = "Atrás",
@@ -70,25 +83,51 @@ class MainActivity : ComponentActivity() {
                                 titleContentColor = Color.White
                             )
                         )
+                    },
+                    floatingActionButton = {
+                        if (idSeleccionado == null && !mostrarCrear) {
+                            FloatingActionButton(
+                                onClick = {
+                                    vm.limpiarPublicacion()
+                                    mostrarCrear = true
+                                },
+                                containerColor = Color(0xFF17649B),
+                                contentColor = Color.White
+                            ) {
+                                Text(
+                                    text = "+",
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
+                            }
+                        }
                     }
                 ) { innerPadding ->
                     val id = idSeleccionado
 
-                    if (id == null) {
-                        PantallaLista(
-                            vm = vm,
-                            onAbrir = { postId ->
-                                vm.abrir(postId)
-                                idSeleccionado = postId
-                            },
-                            modifier = Modifier.padding(innerPadding)
-                        )
-                    } else {
-                        PantallaDetalle(
-                            vm = vm,
-                            id = id,
-                            modifier = Modifier.padding(innerPadding)
-                        )
+                    when {
+                        mostrarCrear -> {
+                            PantallaCrear(
+                                vm = vm,
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
+                        id != null -> {
+                            PantallaDetalle(
+                                vm = vm,
+                                id = id,
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
+                        else -> {
+                            PantallaLista(
+                                vm = vm,
+                                onAbrir = { postId ->
+                                    vm.abrir(postId)
+                                    idSeleccionado = postId
+                                },
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
                     }
                 }
             }

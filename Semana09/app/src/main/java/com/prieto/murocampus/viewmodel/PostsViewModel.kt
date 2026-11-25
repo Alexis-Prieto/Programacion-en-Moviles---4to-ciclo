@@ -6,6 +6,7 @@ import com.prieto.murocampus.data.PostRepository
 import com.prieto.murocampus.data.mensajeDe
 import com.prieto.murocampus.model.Post
 import com.prieto.murocampus.model.Comentario
+import com.prieto.murocampus.model.NuevoPost
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +16,7 @@ data class DetalleUi(
     val post: Post,
     val comentarios: List<Comentario>
 )
+
 class PostsViewModel(
     private val repo: PostRepository
 ) : ViewModel() {
@@ -33,15 +35,24 @@ class PostsViewModel(
 
     val usuarioFiltro = _usuarioFiltro.asStateFlow()
 
+    private val _publicacion =
+        MutableStateFlow<UiState<Post>?>(null)
+
+    val publicacion = _publicacion.asStateFlow()
+
     private var trabajoLista: Job? = null
 
     private var trabajoDetalle: Job? = null
 
+    private var trabajoPublicacion: Job? = null
+
     init {
         cargar()
     }
+
     fun cargar() {
         trabajoLista?.cancel()
+
         trabajoLista = viewModelScope.launch {
             _lista.value = UiState.Cargando
 
@@ -52,6 +63,7 @@ class PostsViewModel(
             } else {
                 repo.porUsuario(userId)
             }
+
             resultado
                 .onSuccess {
                     _lista.value = UiState.Exito(it)
@@ -61,10 +73,12 @@ class PostsViewModel(
                 }
         }
     }
+
     fun filtrar(userId: Int?) {
         _usuarioFiltro.value = userId
         cargar()
     }
+
     fun abrir(id: Int) {
         trabajoDetalle?.cancel()
 
@@ -86,7 +100,38 @@ class PostsViewModel(
             )
         }
     }
+
     fun cerrarDetalle() {
         trabajoDetalle?.cancel()
+    }
+
+    fun publicar(titulo: String, texto: String) {
+
+        if (titulo.isBlank() || texto.isBlank()) return
+
+        if (_publicacion.value == UiState.Cargando) return
+
+        trabajoPublicacion = viewModelScope.launch {
+            _publicacion.value = UiState.Cargando
+
+            val nuevo = NuevoPost(
+                userId = 1,
+                title = titulo,
+                body = texto
+            )
+
+            repo.crear(nuevo)
+                .onSuccess {
+                    _publicacion.value = UiState.Exito(it)
+                }
+                .onFailure {
+                    _publicacion.value = UiState.Error(mensajeDe(it))
+                }
+        }
+    }
+
+    fun limpiarPublicacion() {
+        trabajoPublicacion?.cancel()
+        _publicacion.value = null
     }
 }
