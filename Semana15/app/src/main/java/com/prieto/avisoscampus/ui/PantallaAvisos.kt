@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.prieto.avisoscampus.model.PermisoUi
 import com.prieto.avisoscampus.notificacion.Notificador
+import com.prieto.avisoscampus.receiver.CargadorReceiver
 import com.prieto.avisoscampus.receiver.ModoAvionReceiver
 import com.prieto.avisoscampus.ui.theme.*
 import com.prieto.avisoscampus.viewmodel.AvisosViewModel
@@ -41,6 +42,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val faltan by vm.faltan.collectAsState()
 
     val escuchando by vm.escuchandoAvion.collectAsState()
+    val escuchandoCargador by vm.escuchandoCargador.collectAsState()
 
     val avisos by vm.avisos.collectAsState()
 
@@ -90,6 +92,23 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
         } else {
 
+            onDispose { }
+        }
+    }
+    DisposableEffect(contexto, escuchandoCargador) {
+        if (escuchandoCargador) {
+            val receptor = CargadorReceiver { conectado ->
+                vm.alCambiarCargador(conectado)
+            }
+            val filtro = IntentFilter().apply {
+                addAction(Intent.ACTION_POWER_CONNECTED)
+                addAction(Intent.ACTION_POWER_DISCONNECTED)
+            }
+            ContextCompat.registerReceiver(
+                contexto, receptor, filtro, ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+            onDispose { contexto.unregisterReceiver(receptor) }
+        } else {
             onDispose { }
         }
     }
@@ -295,6 +314,28 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
                 Text(
                     text = "Activa o desactiva el modo avión del celular",
+                    color = TextoSecundario,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Escuchar el cargador",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = escuchandoCargador,
+                        onCheckedChange = { valor ->
+                            vm.cambiarEscuchaCargador(valor)
+                        }
+                    )
+                }
+                Text(
+                    text = "Conecta o desconecta el cargador del celular",
                     color = TextoSecundario,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center
