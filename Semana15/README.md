@@ -81,31 +81,31 @@ La arquitectura MVVM permite separar la interfaz de la lógica de la aplicación
 
 Al pulsar el botón Mostrar aviso, se genera una notificación local con el título Tarea lista.
 
-<img src="capturas/01-notificacion.png" width="300">
+<img src="capturas/01-notificacion.png" width="600">
 
 ### 2. Recordatorio
 
 La aplicación realiza una cuenta regresiva de 10 segundos y permite cancelar el recordatorio antes de finalizar.
 
-<img src="capturas/02-recordatorio.png" width="300">
+<img src="capturas/02-recordatorio.png" width="600">
 
 ### 3. Receptor del modo avión
 
 Al activar el receptor, la aplicación detecta los cambios del modo avión y genera las notificaciones correspondientes.
 
-<img src="capturas/03-modo-avion.png" width="300">
+<img src="capturas/03-modo-avion.png" width="600">
 
 ### 4. Historial de avisos
 
 Se muestran los últimos avisos generados, incluyendo su origen, título, descripción y hora.
 
-<img src="capturas/04-historial.png" width="300">
+<img src="capturas/04-historial.png" width="600">
 
 ### 5. Permiso denegado
 
 Cuando el permiso está denegado, la aplicación muestra un mensaje de error y conserva el aviso en el historial. También permite acceder a los ajustes para habilitar las notificaciones.
 
-<img src="capturas/05-permiso-denegado.png" width="300">
+<img src="capturas/05-permiso-denegado.png" width="600">
 
 ## Para pensar
 
