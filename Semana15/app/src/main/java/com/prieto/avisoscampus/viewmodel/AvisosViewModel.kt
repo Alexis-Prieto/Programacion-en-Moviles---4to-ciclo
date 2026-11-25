@@ -78,7 +78,7 @@ class AvisosViewModel(
                 }
                 val aviso = repo.registrar(
                     titulo = "Recordatorio",
-                    texto = "Revisa tu laboratorio pendiente",
+                    texto = "Revisa tu laboratorio pendiente. Recuerda completar las actividades, verificar el funcionamiento de la aplicación y preparar las evidencias necesarias antes de realizar tu entrega.",
                     origen = Origen.RECORDATORIO,
                     prioridad = Prioridad.URGENTE
                 )
