@@ -1,6 +1,8 @@
 package com.prieto.avisoscampus.ui
 
 import android.Manifest
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,8 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.prieto.avisoscampus.model.PermisoUi
 import com.prieto.avisoscampus.notificacion.Notificador
+import com.prieto.avisoscampus.receiver.ModoAvionReceiver
 import com.prieto.avisoscampus.ui.theme.*
 import com.prieto.avisoscampus.viewmodel.AvisosViewModel
 import kotlinx.coroutines.flow.collect
@@ -34,6 +38,8 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val permiso by vm.permiso.collectAsState()
 
     val faltan by vm.faltan.collectAsState()
+
+    val escuchando by vm.escuchandoAvion.collectAsState()
 
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -54,6 +60,28 @@ fun PantallaAvisos(vm: AvisosViewModel) {
         }
     }
 
+    DisposableEffect(escuchando) {
+        if (escuchando) {
+            val receptor = ModoAvionReceiver { activo ->
+                vm.alCambiarModoAvion(activo)
+            }
+            ContextCompat.registerReceiver(
+                contexto,
+                receptor,
+                IntentFilter(
+                    Intent.ACTION_AIRPLANE_MODE_CHANGED
+                ),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+            onDispose {
+                contexto.unregisterReceiver(receptor)
+            }
+
+        } else {
+
+            onDispose { }
+        }
+    }
     Scaffold(
         containerColor = FondoPantalla,
         topBar = {
@@ -212,9 +240,9 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                         modifier = Modifier.weight(1f)
                     )
                     Switch(
-                        checked = false,
-                        onCheckedChange = {
-                            // TODO Paso 6
+                        checked = escuchando,
+                        onCheckedChange = { valor ->
+                            vm.cambiarEscucha(valor)
                         }
                     )
                 }
