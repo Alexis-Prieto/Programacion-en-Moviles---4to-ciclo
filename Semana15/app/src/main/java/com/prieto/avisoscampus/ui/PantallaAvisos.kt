@@ -1,5 +1,9 @@
 package com.prieto.avisoscampus.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,11 +13,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.prieto.avisoscampus.model.PermisoUi
 import com.prieto.avisoscampus.notificacion.Notificador
 import com.prieto.avisoscampus.ui.theme.*
 import com.prieto.avisoscampus.viewmodel.AvisosViewModel
@@ -25,6 +31,19 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     val contexto = LocalContext.current
 
+    val permiso by vm.permiso.collectAsState()
+
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        vm.permisoRespondido(concedido)
+    }
+
+    LaunchedEffect(Unit) {
+        if (Notificador.tienePermiso(contexto)) {
+            vm.permisoRespondido(true)
+        }
+    }
     LaunchedEffect(Unit) {
         vm.eventos.collect { aviso ->
             Notificador.mostrar(contexto, aviso)
@@ -63,6 +82,27 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
             Tarjeta("Permiso de notificaciones") {
 
+                val (textoEstado, fondoEstado, colorEstado) =
+                    when (permiso) {
+
+                        PermisoUi.SinPedir -> Triple(
+                            "Sin pedir",
+                            GrisEtiqueta,
+                            TextoSecundario
+                        )
+
+                        PermisoUi.Concedido -> Triple(
+                            "Permitido",
+                            Color(0xFFE1F3E2),
+                            Color(0xFF2E7D32)
+                        )
+
+                        PermisoUi.Denegado -> Triple(
+                            "Denegado",
+                            Color(0xFFFBE4E4),
+                            Color(0xFFC62828)
+                        )
+                    }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -70,12 +110,12 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     Text("Estado:")
 
                     Surface(
-                        color = GrisEtiqueta,
+                        color = fondoEstado,
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "Sin pedir",
-                            color = TextoSecundario,
+                            text = textoEstado,
+                            color = colorEstado,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(
@@ -87,7 +127,23 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
                 Button(
                     onClick = {
-                        // TODO Paso 2
+                        if (Notificador.tienePermiso(contexto)) {
+
+                            vm.permisoRespondido(true)
+
+                        } else if (
+                            Build.VERSION.SDK_INT >=
+                            Build.VERSION_CODES.TIRAMISU
+                        ) {
+
+                            lanzador.launch(
+                                Manifest.permission.POST_NOTIFICATIONS
+                            )
+
+                        } else {
+
+                            vm.permisoRespondido(true)
+                        }
                     }
                 ) {
                     Text("Permitir notificaciones")
